@@ -13,6 +13,7 @@ export async function saveSoalUji(ujiDasar: SoalUjiDBStructureInsert[]) {
 
   try {
     await db.insert(kode).values(ujiDasar);
+    revalidatePath("/dashboard/list-soal");
   } catch (e) {
     if (e instanceof Error) {
       throw e;
