@@ -1,0 +1,1 @@
+ALTER TABLE `kode` ADD `nilai` text NOT NULL;
