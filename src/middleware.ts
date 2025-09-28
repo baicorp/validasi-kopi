@@ -6,12 +6,15 @@ export async function middleware(request: NextRequest) {
   // This is the recommended approach to optimistically redirect users
   // We recommend handling auth checks in each page/route
   // fix me : tambahkan validasi session untuk setiap route yang diproteksi
-  if (!sessionCookie) {
+  const { pathname } = request.nextUrl;
+  if (!sessionCookie && pathname !== "/sign-in") {
     return NextResponse.redirect(new URL("/sign-in", request.url));
+  } else if (sessionCookie && pathname === "/sign-in") {
+    return NextResponse.redirect(new URL("/dashboard/produk", request.url));
   }
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*"], // Specify the routes the middleware applies to
+  matcher: ["/dashboard/:path*", "/sign-in"], // Specify the routes the middleware applies to
 };

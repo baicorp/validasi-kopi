@@ -1,30 +1,17 @@
 "use client";
 
-import useSWR from "swr";
 import { toast } from "sonner";
+import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LoaderCircle } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/authClient";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { FormEvent, useState, useEffect } from "react"; // Import useEffect
-
-async function getSession() {
-  return await authClient.getSession();
-}
 
 export default function Page() {
   const [isLoad, setIsLoad] = useState(false);
   const router = useRouter();
-
-  const { data: session } = useSWR("session", getSession);
-
-  useEffect(() => {
-    if (session) {
-      router.replace("/dashboard/produk");
-    }
-  }, [session, router]);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -60,16 +47,6 @@ export default function Page() {
     } finally {
       setIsLoad(false);
     }
-  }
-
-  // Add a loading state for the session check to prevent the form from flashing
-  if (session === undefined) {
-    return (
-      <div className="flex justify-center items-center gap-2 text-muted-foreground h-dvh">
-        <p>Loading</p>
-        <LoaderCircle className="w-5 animate-spin" />
-      </div>
-    );
   }
 
   return (
