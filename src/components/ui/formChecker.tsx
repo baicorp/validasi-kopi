@@ -32,7 +32,15 @@ export default function FormChecker({
       }
     }
 
-    const listKode = Object.values(entries).flat();
+    const listKode = Object.values(entries)
+      .flat()
+      .filter((kode) => (kode as string).trim().length !== 0);
+
+    if (listKode.length === 0) {
+      toast.error("Masukkan setidaknya 1 kode.");
+      return;
+    }
+
     if (new Set(listKode).size !== listKode.length) {
       toast.error("Setiap kode yang dimasukkan harus berbeda.");
       return;
@@ -182,8 +190,7 @@ function DynamicInput({
       onChange={(e) => setValue(e.target.value)}
       className={`px-2 py-1 w-full border rounded-md
         ${wrongCodes.includes(value) && !halfWrongCodes.includes(value) ? "ring-2 ring-red-600" : ""}
-        ${halfWrongCodes.includes(value) && !wrongCodes.includes(value) ? "ring-2 ring-amber-600" : ""}
-        ${wrongCodes.includes(value) && halfWrongCodes.includes(value) ? "ring-2 ring-green-600" : ""}
+        ${halfWrongCodes.includes(value) && !wrongCodes.includes(value) ? "ring-2 ring-yellow-400" : ""}
       `}
     />
   );

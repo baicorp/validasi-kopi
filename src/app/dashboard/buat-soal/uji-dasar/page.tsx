@@ -72,7 +72,7 @@ export default function Page() {
               placeholder="Minimal 1 peserta"
             />
           </div>
-          <Button type="submit">Button</Button>
+          <Button type="submit">Buat Soal Uji Dasar</Button>
         </form>
       </section>
       {soalUjiDasar.length !== 0 && (

@@ -21,18 +21,13 @@ import { getAllCategory } from "@/actions/kategory";
 import { getProductByCategory } from "@/actions/produk";
 import { Card, CardContent } from "@/components/ui/card";
 import DataViewer from "@/components/ui/dataViewer";
-import { LoaderCircle } from "lucide-react";
-
-type SoalUjiProduk = {
-  tipeUjian: string;
-  soal: Record<string, string[][]>[];
-  totalKode: number;
-}[];
+import { SoalUjiClientStructure } from "@/lib/types";
 
 export default function Page() {
-  const [isLoad, setIsLoad] = useState(false);
   const [idKategoriProduk, setIdKategoriProduk] = useState("");
-  const [soalUjiProduk, setSoalUjiProduk] = useState<SoalUjiProduk>([]);
+  const [soalUjiProduk, setSoalUjiProduk] = useState<SoalUjiClientStructure[]>(
+    [],
+  );
 
   function handleGenerateUjiProduk(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -55,11 +50,9 @@ export default function Page() {
       return;
     }
 
-    setIsLoad(true);
     const kodeSoal = new UjiProduk(listProduk, jumlah);
     const soalUjiProduk = kodeSoal.buatKodeUjiProduk();
     setSoalUjiProduk(soalUjiProduk);
-    setIsLoad(false);
   }
 
   return (
@@ -91,10 +84,7 @@ export default function Page() {
               placeholder="Minimal 1 orang peserta"
             />
           </div>
-          <Button type="submit" disabled={isLoad}>
-            Buat Kode UJi Produk
-            {isLoad && <LoaderCircle className="animate-spin" />}
-          </Button>
+          <Button type="submit">Buat Soal Uji Produk</Button>
         </form>
       </section>
       {soalUjiProduk.length !== 0 && (

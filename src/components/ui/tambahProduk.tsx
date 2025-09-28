@@ -28,10 +28,12 @@ export default function TambahProduk() {
       await addProduct(formData);
     } catch (e) {
       if (e instanceof Error) {
-        toast.error(e.message);
-        return;
+        // toast.error(e.message);
+        // return;
       }
-      toast.error("Ada yang salah.");
+      toast.error(
+        "Gagal menambahkan produk, pastikan produk belum pernah ditambahkan sebelumnya.",
+      );
     } finally {
       setOpen(false);
       setIsLoad(false);
