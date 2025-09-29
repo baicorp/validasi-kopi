@@ -189,12 +189,6 @@ export function codeCheck(
   const jenis = kunci.namaUjian.toLowerCase();
   const nilaiBenar = kunci.nilai;
 
-  if (jenis === "2 out of 5") {
-    return inputNilai === nilaiBenar ? "benar" : "salah";
-  }
-
-  console.log(jenis);
-
   if (jenis === "treshold single") {
     const { rasa: rasaInput, intensitas: intenInput } = parseSingle(inputNilai);
     const { rasa: rasaBenar, intensitas: intenBenar } = parseSingle(nilaiBenar);
@@ -215,5 +209,5 @@ export function codeCheck(
     return "salah";
   }
 
-  return "salah"; // default
+  return inputNilai === nilaiBenar ? "benar" : "salah";
 }
