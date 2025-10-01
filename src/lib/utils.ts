@@ -123,50 +123,6 @@ export function toTitleCase(str: string) {
     .join(" ");
 }
 
-export function listNilaiDistinc(soal: SoalUjiClientStructure[]) {
-  const listNilai = soal.map((soal) => ({
-    tipeUjian: soal.tipeUjian,
-    nilaiKode: soal.soal.map((nilai) => Object.keys(nilai)[0]),
-  }));
-
-  const listNilaiDistinc: {
-    tipeUjian: string;
-    nilaiKode: string[];
-  }[] = [];
-
-  listNilai.forEach((obj) => {
-    const nilaiUji: string[] = [];
-    obj.nilaiKode.forEach((nilai) => {
-      if (obj.tipeUjian === "treshold single") {
-        const dt = nilai.split(" ")[0];
-        if (nilaiUji.includes(dt)) return;
-        nilaiUji.push(dt);
-      } else if (obj.tipeUjian === "treshold mix") {
-        const dt = nilai.split("+").map((dt) => dt.trim());
-        if (nilaiUji.includes(dt[0])) return;
-        nilaiUji.push(dt[0]);
-        if (nilaiUji.includes(dt[1])) return;
-        nilaiUji.push(dt[1]);
-      } else {
-        nilaiUji.push(nilai);
-      }
-    });
-    listNilaiDistinc.push({ tipeUjian: obj.tipeUjian, nilaiKode: nilaiUji });
-  });
-
-  return listNilaiDistinc;
-}
-
-export function getKodeNilaiObjects(
-  listKode: string[],
-  dataSoalUji: SoalUjiDBStructureRead[],
-): Record<string, string>[] {
-  return listKode.map((kode) => {
-    const found = dataSoalUji.find((d) => d.kode === kode);
-    return { [kode]: found ? found.nilai : "" }; // kosong kalau tidak ketemu
-  });
-}
-
 // helper untuk pisah rasa + intensitas
 function parseSingle(val: string) {
   const [rasa, intensitas] = val.split(" ");
