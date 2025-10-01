@@ -53,7 +53,6 @@ export class UjiDasar {
 
   // implementasi 2 out of 5
   private buatKodeTwoOutOfFive(listKodeRandom: string[]) {
-    console.log(listKodeRandom.length);
     if (listKodeRandom.length % this.jumlahGelasTwoOutOfFive !== 0) {
       throw Error("Error 2 out of 5 : jumlah list kode random tidak valid");
     }

@@ -71,7 +71,6 @@ function ListProdukSkeleton() {
 
 async function ListProduk() {
   const listProduk = await getAllProduct();
-  console.log(listProduk.length);
 
   if (listProduk.length === 0) {
     return (
