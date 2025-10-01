@@ -11,6 +11,18 @@ export function lower(email: AnySQLiteColumn): SQL {
   return sql`lower(${email})`;
 }
 
+export const rasaTresholdMix = sqliteTable(
+  "rasa_treshold_mix",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    rasaMix: text("rasa_mix").notNull(),
+    createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    uniqueIndex("rasaTresholdMixUniqueIndex").on(lower(table.rasaMix)),
+  ],
+);
+
 // Tabel Kategori Produk
 export const kategoriProduk = sqliteTable(
   "kategori_produk",

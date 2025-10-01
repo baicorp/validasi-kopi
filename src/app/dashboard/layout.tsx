@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import {
   FileText,
   FilePlus,
@@ -9,6 +8,7 @@ import {
   ChevronRight,
   LoaderCircle,
   HeartHandshake,
+  TestTubes,
 } from "lucide-react";
 import {
   Sidebar,
@@ -23,16 +23,18 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { authClient } from "@/lib/authClient";
+import Link from "next/link";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils"; // shadcn helper
+import { useState } from "react";
+import { authClient } from "@/lib/authClient";
+import { Button } from "@/components/ui/button";
+import { usePathname, useRouter } from "next/navigation";
 import { Breadcrumbs } from "@/components/ui/breadcrumbList";
 
 const sidebarMenu = [
   { url: "/dashboard/produk", menu: "Produk", icon: Coffee },
+  { url: "/dashboard/rasa-mix", menu: "Rasa Mix", icon: TestTubes },
   { url: "/dashboard/list-soal", menu: "List Soal", icon: FileText },
 ];
 
