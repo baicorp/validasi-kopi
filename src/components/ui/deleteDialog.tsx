@@ -10,10 +10,10 @@ import {
 } from "./dialog";
 import { toast } from "sonner";
 import { Button } from "./button";
+import { toTitleCase } from "@/lib/utils";
 import { FormEvent, useState } from "react";
 import { LoaderCircle } from "lucide-react";
 import { DropdownMenuItem } from "./dropdown-menu";
-import { toTitleCase } from "@/lib/utils";
 
 export default function DeleteDialog({
   variant = "default",
@@ -64,7 +64,9 @@ export default function DeleteDialog({
           <DialogTitle>Hapus {toTitleCase(dialogTitle)}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleDelete} className="flex flex-col gap-4">
-          <p>Yakin Hapus {namaProduk}</p>
+          <p>
+            Yakin Hapus <span className="font-bold">{namaProduk}</span>
+          </p>
           <div className="flex gap-2 mt-4">
             <DialogClose asChild>
               <Button variant={"outline"}>Tidak</Button>
