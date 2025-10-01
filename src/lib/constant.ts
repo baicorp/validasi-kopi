@@ -36,6 +36,7 @@ const kategoriProduk = [
   "3 in 1 Instant",
   "Kopi Pure Reguler",
   "Kopi Pure Premium",
+  "RTG",
 ];
 
 export { listNilaiTresholdSingle, listNilaiTresholdMix, kategoriProduk };
