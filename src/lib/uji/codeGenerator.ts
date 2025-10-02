@@ -1,4 +1,3 @@
-import { off } from "node:process";
 import { formatArrKeTJ } from "../utils";
 
 type UjiDasarConstructorType = {
@@ -19,6 +18,11 @@ type UjiDasarConstructorType = {
   // Manis + Pahit
   nilaiTresholdMix: string[];
   //  isIncludeTwoOutOfFivePure: boolean,
+  jumlahPesertaUjian: number;
+};
+
+type UjiProdukConstructorType = {
+  nilaiIdentifikasi: string[];
   jumlahPesertaUjian: number;
 };
 
@@ -109,8 +113,6 @@ export class UjiDasar {
     );
 
     const hasil: Record<string, string[][]>[] = [
-      // { sama: formatArrKeTJ(listKodeBernilaiSama) },
-      // { beda: formatArrKeTJ(listKodeBernilaiBeda) },
       ...listObjSama,
       ...listObjBeda,
     ];
@@ -264,15 +266,21 @@ export class UjiDasar {
 }
 
 export class UjiProduk {
+  private nilaiIdentifikasi: string[];
+  private jumlahPesertaUjian: number;
+
+  private jumlahGelasIdentifikasi = 5;
+  private jumlahGelasTriangle = 3;
+  private jumlahGelasSkoring = 5;
+
   constructor(
     // masukkan list produk untuk uji identifikasi
     // harus 5 produk yang dimasukkan untuk uji identifikasi
-    private nilaiIdentifikasi: string[],
-    private jumlahPesertaUjian: number,
-    private jumlahGelasIdentifikasi = 5,
-    private jumlahGelasTriangle = 3,
-    private jumlahGelasSkoring = 5,
-  ) {}
+    { nilaiIdentifikasi, jumlahPesertaUjian }: UjiProdukConstructorType,
+  ) {
+    this.nilaiIdentifikasi = nilaiIdentifikasi;
+    this.jumlahPesertaUjian = jumlahPesertaUjian;
+  }
 
   private buatKodeRandomEmpatDigit(): string {
     // buat kode random 4 digit, range 1000 - 9999

@@ -18,10 +18,10 @@ import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { UjiProduk } from "@/lib/uji/codeGenerator";
 import { getAllCategory } from "@/actions/kategory";
-import { getProductByCategory } from "@/actions/produk";
-import { Card, CardContent } from "@/components/ui/card";
 import DataViewer from "@/components/ui/dataViewer";
 import { SoalUjiClientStructure } from "@/lib/types";
+import { getProductByCategory } from "@/actions/produk";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function Page() {
   const [idKategoriProduk, setIdKategoriProduk] = useState("");
@@ -50,7 +50,10 @@ export default function Page() {
       return;
     }
 
-    const kodeSoal = new UjiProduk(listProduk, jumlah);
+    const kodeSoal = new UjiProduk({
+      nilaiIdentifikasi: listProduk,
+      jumlahPesertaUjian: jumlah,
+    });
     const soalUjiProduk = kodeSoal.buatKodeUjiProduk();
     setSoalUjiProduk(soalUjiProduk);
   }
