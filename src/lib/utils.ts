@@ -52,8 +52,10 @@ export function formatToDB(
 // IMPORTANT!!: cocokkan di database
 function getIdJenisUjianFromUjianName(namaUjian: string): number {
   switch (namaUjian.toLowerCase()) {
-    case "2 out of 5":
-      return 1; // id 2 out of 5
+    case "2 out of 5 campuran kopi":
+      return 1; // id 2 out of 5 campuran kopi
+    case "2 out of 5 kopi pure":
+      return 7; // id 2 out of 5 kopi pure
     case "treshold single":
       return 3; // id treshold single
     case "treshold mix":
@@ -134,6 +136,10 @@ function parseMix(val: string) {
   return val.split("+").map((v) => v.trim());
 }
 
+// HARDENING: tambahkan arg "inputNamaUjian" untuk memastika
+// pengecekan reliable ketika ada nilai kode sama pada
+// nama ujian yang berbeda. Kode akan terikat dengan inputNamaUjian
+// yang diberikan.
 export function codeCheck(
   inputKode: string,
   inputNilai: string,

@@ -127,32 +127,13 @@ function DynamicComponent({
                   nilaiKode={nilaiKode}
                   wrongCodes={wrongCodes}
                 />
-                {nilaiKode === "beda" &&
-                  obj.tipeUjian.toLowerCase() === "2 out of 5" && (
-                    <>
-                      <DynamicInput
-                        halfWrongCodes={halfWrongCodes}
-                        triggerReset={triggerReset}
-                        nilaiKode={nilaiKode}
-                        wrongCodes={wrongCodes}
-                      />
-                      <DynamicInput
-                        halfWrongCodes={halfWrongCodes}
-                        triggerReset={triggerReset}
-                        nilaiKode={nilaiKode}
-                        wrongCodes={wrongCodes}
-                      />
-                    </>
-                  )}
-                {nilaiKode === "sama" && (
-                  <>
-                    <DynamicInput
-                      halfWrongCodes={halfWrongCodes}
-                      triggerReset={triggerReset}
-                      nilaiKode={nilaiKode}
-                      wrongCodes={wrongCodes}
-                    />
-                  </>
+                {nilaiKode.toLowerCase().includes("sama") && (
+                  <DynamicInput
+                    halfWrongCodes={halfWrongCodes}
+                    triggerReset={triggerReset}
+                    nilaiKode={nilaiKode}
+                    wrongCodes={wrongCodes}
+                  />
                 )}
               </div>
             </div>

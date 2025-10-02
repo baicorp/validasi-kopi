@@ -1,27 +1,51 @@
+import { off } from "node:process";
 import { formatArrKeTJ } from "../utils";
 
+type UjiDasarConstructorType = {
+  nilaiTwoOutOfFiveCampuranKopi: string[];
+  nilaiTwoOutOfFiveKopiPure?: string[];
+  // pilihan treshold single (pilih 12).
+  // "hambar", "asam 1", "asam 2", "asam 3",
+  // "asin 1", "asin 2", "asin 3",
+  // "manis 1", "manis 2", "manis 3",
+  // "pahit 1", "pahit 2", "pahit 3"
+  nilaiTresholdSingle: string[];
+  // pilihan treshold mix (pilih 5).
+  // Asam + Asin
+  // Asam + Manis
+  // Asam + Pahit
+  // Asin + Manis
+  // Asin + Pahit
+  // Manis + Pahit
+  nilaiTresholdMix: string[];
+  //  isIncludeTwoOutOfFivePure: boolean,
+  jumlahPesertaUjian: number;
+};
+
 export class UjiDasar {
-  constructor(
-    // pilihan treshold single (pilih 12).
-    // "hambar", "asam 1", "asam 2", "asam 3",
-    // "asin 1", "asin 2", "asin 3",
-    // "manis 1", "manis 2", "manis 3",
-    // "pahit 1", "pahit 2", "pahit 3"
-    private nilaiTresholdSingle: string[],
-    // pilihan treshold mix (pilih 5).
-    // Asam + Asin
-    // Asam + Manis
-    // Asam + Pahit
-    // Asin + Manis
-    // Asin + Pahit
-    // Manis + Pahit
-    private nilaiTresholdMix: string[],
-    private isIncludeTwoOutOfFivePure: boolean,
-    private jumlahPesertaUjian: number,
-    private jumlahGelasTwoOutOfFive = 5,
-    private jumlahGelasTresholdSingle = 12,
-    private jumlahGelasTresholdMix = 5,
-  ) {}
+  private jumlahGelasTwoOutOfFive = 5;
+  private jumlahGelasTresholdSingle = 12;
+  private jumlahGelasTresholdMix = 5;
+
+  private nilaiTwoOutOfFiveCampuranKopi: string[];
+  private nilaiTwoOutOfFiveKopiPure?: string[];
+  private nilaiTresholdSingle: string[];
+  private nilaiTresholdMix: string[];
+  private jumlahPesertaUjian: number;
+
+  constructor({
+    nilaiTwoOutOfFiveCampuranKopi,
+    nilaiTwoOutOfFiveKopiPure,
+    nilaiTresholdSingle,
+    nilaiTresholdMix,
+    jumlahPesertaUjian,
+  }: UjiDasarConstructorType) {
+    this.nilaiTwoOutOfFiveCampuranKopi = nilaiTwoOutOfFiveCampuranKopi;
+    this.nilaiTwoOutOfFiveKopiPure = nilaiTwoOutOfFiveKopiPure;
+    this.nilaiTresholdSingle = nilaiTresholdSingle;
+    this.nilaiTresholdMix = nilaiTresholdMix;
+    this.jumlahPesertaUjian = jumlahPesertaUjian;
+  }
 
   private buatKodeRandomEmpatDigit(): string {
     // buat kode random 4 digit, range 1000 - 9999
@@ -52,16 +76,14 @@ export class UjiDasar {
   }
 
   // implementasi 2 out of 5
-  private buatKodeTwoOutOfFive(listKodeRandom: string[]) {
+  private buatKodeTwoOutOfFive(listKodeRandom: string[], listNilai: string[]) {
     if (listKodeRandom.length % this.jumlahGelasTwoOutOfFive !== 0) {
       throw Error("Error 2 out of 5 : jumlah list kode random tidak valid");
     }
 
     // terdapat 2 kode bernilai "sama" dan 3 kode bernilai "beda"
-    // jika isIncludeTwoOutOfFivePure bernilai true maka samax2 dan bedax2
-    const multiplier = this.isIncludeTwoOutOfFivePure ? 2 : 1;
-    const jumlahKodeBernilaiSama = this.jumlahPesertaUjian * 2 * multiplier;
-    const jumlahKodeBernilaiBeda = this.jumlahPesertaUjian * 3 * multiplier;
+    const jumlahKodeBernilaiSama = this.jumlahPesertaUjian * 2;
+    const jumlahKodeBernilaiBeda = this.jumlahPesertaUjian * 3;
 
     const listKodeBernilaiSama = listKodeRandom.slice(
       0,
@@ -72,9 +94,25 @@ export class UjiDasar {
       jumlahKodeBernilaiSama + jumlahKodeBernilaiBeda,
     );
 
+    // produk untuk kode nilai sama selalu berada di index 0,
+    // produk untuk kode nilai beda berasa di index 1 - 3
+    const produkBernilaiSama = [listNilai[0]];
+    const produkBernilaiBeda = listNilai.slice(1);
+
+    const listObjSama = this.pasangkanKodeDenganNilaiSamaRata(
+      listKodeBernilaiSama,
+      produkBernilaiSama.map((nilai) => `Sama (${nilai})`),
+    );
+    const listObjBeda = this.pasangkanKodeDenganNilaiSamaRata(
+      listKodeBernilaiBeda,
+      produkBernilaiBeda.map((nilai) => `Beda (${nilai})`),
+    );
+
     const hasil: Record<string, string[][]>[] = [
-      { sama: formatArrKeTJ(listKodeBernilaiSama) },
-      { beda: formatArrKeTJ(listKodeBernilaiBeda) },
+      // { sama: formatArrKeTJ(listKodeBernilaiSama) },
+      // { beda: formatArrKeTJ(listKodeBernilaiBeda) },
+      ...listObjSama,
+      ...listObjBeda,
     ];
 
     return hasil;
@@ -111,25 +149,39 @@ export class UjiDasar {
     // verifikasi total list nilai tresholdSingle 12
     // dan total list nilai tresholdMix 5
     if (
+      this.nilaiTwoOutOfFiveCampuranKopi.length < 4 ||
       this.nilaiTresholdSingle.length !== 12 ||
       this.nilaiTresholdMix.length !== 5 ||
-      this.jumlahPesertaUjian <= 0
+      this.jumlahPesertaUjian <= 0 ||
+      this.jumlahPesertaUjian > 200
     ) {
-      throw Error("kombinasi list treshold single / mix tidak sesuai");
+      throw Error("Data yang dimasukkan tidak sesuai.");
     }
 
     const kodeRandom = new Set<string>();
 
-    // jika include 2 out of 5 pure maka jumlahKodeTwoOutOfFive x2
-    const multiplier = this.isIncludeTwoOutOfFivePure ? 2 : 1;
-    const jumlahKodeTwoOutOfFive =
-      this.jumlahPesertaUjian * this.jumlahGelasTwoOutOfFive * multiplier;
+    const jumlahKodeTwoOutOfFiveCampuranKopi =
+      this.jumlahPesertaUjian * this.jumlahGelasTwoOutOfFive;
     const jumlahKodeTresholdSingle =
       this.jumlahPesertaUjian * this.jumlahGelasTresholdSingle;
     const jumlahKodeTresholdMix =
       this.jumlahPesertaUjian * this.jumlahGelasTresholdMix;
-    const totalKodeDibutuhkan =
-      jumlahKodeTwoOutOfFive + jumlahKodeTresholdSingle + jumlahKodeTresholdMix;
+    let totalKodeDibutuhkan =
+      jumlahKodeTwoOutOfFiveCampuranKopi +
+      jumlahKodeTresholdSingle +
+      jumlahKodeTresholdMix;
+
+    let jumlahKodeTwoOutOfFivePure = 0;
+    // cek apakah include 2 out of 5 pure
+    // jika include maka tambahkan "totalKodeDibutuhkan"
+    if (
+      this.nilaiTwoOutOfFiveKopiPure !== undefined &&
+      this.nilaiTwoOutOfFiveKopiPure.length !== 0
+    ) {
+      jumlahKodeTwoOutOfFivePure =
+        this.jumlahGelasTwoOutOfFive * this.jumlahPesertaUjian;
+      totalKodeDibutuhkan += jumlahKodeTwoOutOfFivePure;
+    }
 
     // pastikan kode tidak melebihi maksimal kode unik yand dapat
     // dibuat untuk 4 digit (maksimal 9000 total kode unik 4 digit)
@@ -144,11 +196,19 @@ export class UjiDasar {
     const listKodeRandom = Array.from(kodeRandom);
     let offset = 0;
 
-    const listKodeTwoOutOfFive = listKodeRandom.slice(
+    const listKodeTwoOutOfFiveCampuranKopi = listKodeRandom.slice(
       offset,
-      jumlahKodeTwoOutOfFive,
+      jumlahKodeTwoOutOfFiveCampuranKopi,
     );
-    offset += jumlahKodeTwoOutOfFive;
+    offset += jumlahKodeTwoOutOfFiveCampuranKopi;
+
+    console.log(offset, jumlahKodeTwoOutOfFivePure);
+    // akan berisi empty arr jika 2 out of 5 pure tidak include
+    const listKodeTwoOutOfFivePure = listKodeRandom.slice(
+      offset,
+      jumlahKodeTwoOutOfFivePure + offset,
+    );
+    offset += jumlahKodeTwoOutOfFivePure;
 
     const listKodeTresholdSingle = listKodeRandom.slice(
       offset,
@@ -161,11 +221,14 @@ export class UjiDasar {
       jumlahKodeTresholdMix + offset,
     );
 
-    return [
+    const soalUjiDasar = [
       {
-        tipeUjian: "2 Out Of 5",
-        soal: this.buatKodeTwoOutOfFive(listKodeTwoOutOfFive),
-        totalKode: listKodeTwoOutOfFive.length,
+        tipeUjian: "2 Out Of 5 Campuran Kopi",
+        soal: this.buatKodeTwoOutOfFive(
+          listKodeTwoOutOfFiveCampuranKopi,
+          this.nilaiTwoOutOfFiveCampuranKopi,
+        ),
+        totalKode: listKodeTwoOutOfFiveCampuranKopi.length,
       },
       {
         tipeUjian: "Treshold Single",
@@ -178,6 +241,25 @@ export class UjiDasar {
         totalKode: listKodeTresholdMix.length,
       },
     ];
+
+    // tambahkan soal uji dasar 2 out of 5 pure di index 1
+    // jika 2 out of 5 include
+    if (
+      this.nilaiTwoOutOfFiveKopiPure !== undefined &&
+      this.nilaiTwoOutOfFiveKopiPure.length !== 0 &&
+      this.nilaiTwoOutOfFiveKopiPure.length === 4
+    ) {
+      soalUjiDasar.splice(1, 0, {
+        tipeUjian: "2 Out Of 5 Kopi Pure",
+        soal: this.buatKodeTwoOutOfFive(
+          listKodeTwoOutOfFivePure,
+          this.nilaiTwoOutOfFiveKopiPure,
+        ),
+        totalKode: listKodeTwoOutOfFivePure.length,
+      });
+    }
+
+    return soalUjiDasar;
   }
 }
 
