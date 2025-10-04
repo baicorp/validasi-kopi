@@ -21,21 +21,27 @@ CREATE TABLE `jenis_ujian` (
 	`created_at` text DEFAULT CURRENT_TIMESTAMP
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX `jenisUjianUniqueIndex` ON `jenis_ujian` (lower("jenis_ujian"));--> statement-breakpoint
 CREATE TABLE `kategori_produk` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`kategori` text NOT NULL
+	`kategori` text NOT NULL,
+	`created_at` text DEFAULT CURRENT_TIMESTAMP
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX `kategoriUniqueIndex` ON `kategori_produk` (lower("kategori"));--> statement-breakpoint
 CREATE TABLE `kode` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`kode` text NOT NULL,
+	`nilai` text NOT NULL,
 	`session_uuid` text NOT NULL,
 	`session_name` text NOT NULL,
 	`nama_ujian_id` integer NOT NULL,
 	`created_at` text DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` text DEFAULT CURRENT_TIMESTAMP,
 	FOREIGN KEY (`nama_ujian_id`) REFERENCES `nama_ujian`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX `kodeUniquePerUjian` ON `kode` (`kode`,`session_uuid`);--> statement-breakpoint
 CREATE TABLE `nama_ujian` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`nama_ujian` text NOT NULL,
@@ -44,13 +50,24 @@ CREATE TABLE `nama_ujian` (
 	FOREIGN KEY (`jenis_ujian_id`) REFERENCES `jenis_ujian`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX `namUjianUniqueIndex` ON `nama_ujian` (lower("nama_ujian"));--> statement-breakpoint
 CREATE TABLE `produk` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`nama_produk` text NOT NULL,
 	`kategori_id` integer NOT NULL,
+	`created_at` text DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` text DEFAULT CURRENT_TIMESTAMP,
 	FOREIGN KEY (`kategori_id`) REFERENCES `kategori_produk`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX `produkUniquePerKategori` ON `produk` (lower("nama_produk"),`kategori_id`);--> statement-breakpoint
+CREATE TABLE `rasa_treshold_mix` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`rasa_mix` text NOT NULL,
+	`created_at` text DEFAULT CURRENT_TIMESTAMP
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `rasaTresholdMixUniqueIndex` ON `rasa_treshold_mix` (lower("rasa_mix"));--> statement-breakpoint
 CREATE TABLE `session` (
 	`id` text PRIMARY KEY NOT NULL,
 	`expires_at` integer NOT NULL,

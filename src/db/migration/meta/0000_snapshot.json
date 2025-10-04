@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "ce344fa4-45a2-404c-b3f3-837ff3ddcd66",
+  "id": "88e2cc37-1f35-40a9-8438-ad411505a534",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "account": {
@@ -146,7 +146,15 @@
           "default": "CURRENT_TIMESTAMP"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "jenisUjianUniqueIndex": {
+          "name": "jenisUjianUniqueIndex",
+          "columns": [
+            "lower(\"jenis_ujian\")"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -168,9 +176,25 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "kategoriUniqueIndex": {
+          "name": "kategoriUniqueIndex",
+          "columns": [
+            "lower(\"kategori\")"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -188,6 +212,13 @@
         },
         "kode": {
           "name": "kode",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nilai": {
+          "name": "nilai",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -221,9 +252,26 @@
           "notNull": false,
           "autoincrement": false,
           "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "kodeUniquePerUjian": {
+          "name": "kodeUniquePerUjian",
+          "columns": [
+            "kode",
+            "session_uuid"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {
         "kode_nama_ujian_id_nama_ujian_id_fk": {
           "name": "kode_nama_ujian_id_nama_ujian_id_fk",
@@ -276,7 +324,15 @@
           "default": "CURRENT_TIMESTAMP"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "namUjianUniqueIndex": {
+          "name": "namUjianUniqueIndex",
+          "columns": [
+            "lower(\"nama_ujian\")"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {
         "nama_ujian_jenis_ujian_id_jenis_ujian_id_fk": {
           "name": "nama_ujian_jenis_ujian_id_jenis_ujian_id_fk",
@@ -319,9 +375,34 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "produkUniquePerKategori": {
+          "name": "produkUniquePerKategori",
+          "columns": [
+            "lower(\"nama_produk\")",
+            "kategori_id"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {
         "produk_kategori_id_kategori_produk_id_fk": {
           "name": "produk_kategori_id_kategori_produk_id_fk",
@@ -337,6 +418,46 @@
           "onUpdate": "no action"
         }
       },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "rasa_treshold_mix": {
+      "name": "rasa_treshold_mix",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "rasa_mix": {
+          "name": "rasa_mix",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {
+        "rasaTresholdMixUniqueIndex": {
+          "name": "rasaTresholdMixUniqueIndex",
+          "columns": [
+            "lower(\"rasa_mix\")"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}
@@ -584,6 +705,42 @@
     "columns": {}
   },
   "internal": {
-    "indexes": {}
+    "indexes": {
+      "jenisUjianUniqueIndex": {
+        "columns": {
+          "lower(\"jenis_ujian\")": {
+            "isExpression": true
+          }
+        }
+      },
+      "kategoriUniqueIndex": {
+        "columns": {
+          "lower(\"kategori\")": {
+            "isExpression": true
+          }
+        }
+      },
+      "namUjianUniqueIndex": {
+        "columns": {
+          "lower(\"nama_ujian\")": {
+            "isExpression": true
+          }
+        }
+      },
+      "produkUniquePerKategori": {
+        "columns": {
+          "lower(\"nama_produk\")": {
+            "isExpression": true
+          }
+        }
+      },
+      "rasaTresholdMixUniqueIndex": {
+        "columns": {
+          "lower(\"rasa_mix\")": {
+            "isExpression": true
+          }
+        }
+      }
+    }
   }
 }
