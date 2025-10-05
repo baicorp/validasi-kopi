@@ -1,3 +1,9 @@
+import { codes } from "@/db/schema";
+import { InferInsertModel } from "drizzle-orm";
+
+// Type when you SELECT from the table
+export type InsertCodesType = InferInsertModel<typeof codes>;
+
 export type SoalUjiClientStructure = {
   tipeUjian: string;
   soal: Record<string, string[][]>[];
