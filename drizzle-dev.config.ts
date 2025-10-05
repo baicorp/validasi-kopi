@@ -6,7 +6,7 @@ config({ path: ".env.local", override: true });
 
 export default defineConfig({
   out: "./src/db/migration",
-  schema: "./src/db/schema.ts",
+  schema: "./src/db/schema",
   dialect: "turso",
   dbCredentials: {
     url: process.env.TURSO_DATABASE_URL!,
