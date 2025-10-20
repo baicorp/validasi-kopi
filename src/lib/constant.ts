@@ -1,36 +1,27 @@
-type Rasa = "asam" | "asin" | "manis" | "pahit" | "tidak berasa";
+type Taste = "asam" | "asin" | "manis" | "pahit" | "hambar";
 
-export interface RasaIntensitas {
-  rasa: Rasa;
-  intensitas?: number; // undefined untuk "tidak berasa"
+export interface TasteWithIntensity {
+  taste: Taste;
+  intensity?: number; // undefined for "hambar"
 }
 
-const listNilaiTresholdSingle = [
-  { rasa: "asam", intensitas: 1 },
-  { rasa: "asam", intensitas: 2 },
-  { rasa: "asam", intensitas: 3 },
-  { rasa: "asin", intensitas: 1 },
-  { rasa: "asin", intensitas: 2 },
-  { rasa: "asin", intensitas: 3 },
-  { rasa: "manis", intensitas: 1 },
-  { rasa: "manis", intensitas: 2 },
-  { rasa: "manis", intensitas: 3 },
-  { rasa: "pahit", intensitas: 1 },
-  { rasa: "pahit", intensitas: 2 },
-  { rasa: "pahit", intensitas: 3 },
-  { rasa: "hambar" },
+const listTresholdSingleValue: TasteWithIntensity[] = [
+  { taste: "asam", intensity: 1 },
+  { taste: "asam", intensity: 2 },
+  { taste: "asam", intensity: 3 },
+  { taste: "asin", intensity: 1 },
+  { taste: "asin", intensity: 2 },
+  { taste: "asin", intensity: 3 },
+  { taste: "manis", intensity: 1 },
+  { taste: "manis", intensity: 2 },
+  { taste: "manis", intensity: 3 },
+  { taste: "pahit", intensity: 1 },
+  { taste: "pahit", intensity: 2 },
+  { taste: "pahit", intensity: 3 },
+  { taste: "hambar" },
 ];
 
-const listNilaiTresholdMix = [
-  "Asam + Asin",
-  "Asam + Manis",
-  "Asam + Pahit",
-  "Asin + Manis",
-  "Asin + Pahit",
-  "Manis + Pahit",
-];
-
-const kategoriProduk = [
+const productCategories = [
   "2 in 1 RnG",
   "3 in 1 RnG",
   "3 in 1 Instant",
@@ -39,4 +30,13 @@ const kategoriProduk = [
   "RTG",
 ];
 
-export { listNilaiTresholdSingle, listNilaiTresholdMix, kategoriProduk };
+const basicExam = [
+  "2 out of 5 campuran kopi",
+  "2 out of 5 kopi pure",
+  "treshold single",
+  "treshold mix",
+];
+
+const productExam = ["identifikasi", "triangle", "skoring"];
+
+export { listTresholdSingleValue, productCategories, basicExam, productExam };
