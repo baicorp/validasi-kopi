@@ -9,8 +9,10 @@
     "lint": "eslint",
     "db:generate:dev": "drizzle-kit generate --config=drizzle-dev.config.ts",
     "db:migrate:dev": "drizzle-kit migrate --config=drizzle-dev.config.ts",
+    "db:studio:dev": "drizzle-kit studio --config=drizzle-dev.config.ts",
     "db:generate:prod": "drizzle-kit generate --config=drizzle.config.ts",
-    "db:migrate:prod": "drizzle-kit migrate --config=drizzle.config.ts"
+    "db:migrate:prod": "drizzle-kit migrate --config=drizzle.config.ts",
+    "db:studio:prod": "drizzle-kit studio --config=drizzle.config.ts"
   },
   "dependencies": {
     "@libsql/client": "^0.15.15",
