@@ -54,39 +54,39 @@ CREATE TABLE `verification` (
 CREATE TABLE `code_groups` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`group_name` text NOT NULL,
-	`exams_label` text,
-	`total_participants` integer DEFAULT 0,
-	`created_at` integer DEFAULT CURRENT_TIMESTAMP,
-	`updated_at` integer DEFAULT CURRENT_TIMESTAMP
+	`exams_label` text NOT NULL,
+	`total_participants` integer DEFAULT 0 NOT NULL,
+	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
+	`updated_at` text DEFAULT (CURRENT_TIMESTAMP)
 );
 --> statement-breakpoint
 CREATE TABLE `codes` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`code` text NOT NULL,
-	`value` text,
+	`value` text NOT NULL,
 	`exam_id` integer NOT NULL,
-	`code_group_id` integer,
-	`created_at` integer DEFAULT CURRENT_TIMESTAMP,
-	`updated_at` integer DEFAULT CURRENT_TIMESTAMP,
+	`code_group_id` integer NOT NULL,
+	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
+	`updated_at` text DEFAULT (CURRENT_TIMESTAMP),
 	FOREIGN KEY (`exam_id`) REFERENCES `exams`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`code_group_id`) REFERENCES `code_groups`(`id`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`code_group_id`) REFERENCES `code_groups`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `exam_categories` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`category_name` text NOT NULL,
-	`created_at` integer DEFAULT CURRENT_TIMESTAMP,
-	`updated_at` integer DEFAULT CURRENT_TIMESTAMP
+	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
+	`updated_at` text DEFAULT (CURRENT_TIMESTAMP)
 );
 --> statement-breakpoint
 CREATE TABLE `exam_sessions` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`session_name` text NOT NULL,
-	`start_time` integer,
-	`end_time` integer,
+	`start_time` integer NOT NULL,
+	`end_time` integer NOT NULL,
 	`code_group_id` integer NOT NULL,
-	`created_at` integer DEFAULT CURRENT_TIMESTAMP,
-	`updated_at` integer DEFAULT CURRENT_TIMESTAMP,
+	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
+	`updated_at` text DEFAULT (CURRENT_TIMESTAMP),
 	FOREIGN KEY (`code_group_id`) REFERENCES `code_groups`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
@@ -94,23 +94,26 @@ CREATE TABLE `exams` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`exam_name` text NOT NULL,
 	`exam_category_id` integer NOT NULL,
-	`created_at` integer DEFAULT CURRENT_TIMESTAMP,
-	`updated_at` integer DEFAULT CURRENT_TIMESTAMP,
+	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
+	`updated_at` text DEFAULT (CURRENT_TIMESTAMP),
 	FOREIGN KEY (`exam_category_id`) REFERENCES `exam_categories`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE TABLE `product_categories` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`category_name` text NOT NULL,
-	`created_at` integer DEFAULT CURRENT_TIMESTAMP,
-	`updated_at` integer DEFAULT CURRENT_TIMESTAMP
+	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
+	`updated_at` text DEFAULT (CURRENT_TIMESTAMP)
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX `product_categories_category_name_unique` ON `product_categories` (`category_name`);--> statement-breakpoint
 CREATE TABLE `products` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`product_name` text NOT NULL,
 	`product_category_id` integer NOT NULL,
-	`created_at` integer DEFAULT CURRENT_TIMESTAMP,
-	`updated_at` integer DEFAULT CURRENT_TIMESTAMP,
+	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
+	`updated_at` text DEFAULT (CURRENT_TIMESTAMP),
 	FOREIGN KEY (`product_category_id`) REFERENCES `product_categories`(`id`) ON UPDATE no action ON DELETE no action
 );
+--> statement-breakpoint
+CREATE UNIQUE INDEX `products_product_name_unique` ON `products` (`product_name`);
