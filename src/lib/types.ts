@@ -1,30 +1,27 @@
-import { codes } from "@/db/schema";
+import { formatRawExamsData } from "./utils";
 import { InferInsertModel } from "drizzle-orm";
+import { codeGroups, codes } from "@/db/schema";
 
-// Type when you SELECT from the table
-export type InsertCodesType = InferInsertModel<typeof codes>;
+export type InsertCodes = InferInsertModel<typeof codes>;
 
-export type SoalUjiClientStructure = {
-  tipeUjian: string;
-  soal: Record<string, string[][]>[];
-  totalKode: number;
+export type InsertCodeGroups = InferInsertModel<typeof codeGroups>;
+
+export type RawExamsData = {
+  id?: number;
+  examCategoryName?: string;
+  groupName: string;
+  examsLabel: string;
+  totalParticipants: number;
+  code: string;
+  value: string;
+  examName: string;
 };
 
-// export type JenisUjiType = "uji dasar" | "uji produk";
+export type ExamDataDetails = InsertCodeGroups & {
+  examsData: RawExamsData[];
+  formatedExamsData: ReturnType<typeof formatRawExamsData>;
+};
 
-interface SoalUjiDBStructure {
-  kode: string;
-  nilai: string;
-  sessionUuid: string;
-  sessionName: string;
-}
-
-export interface SoalUjiDBStructureInsert extends SoalUjiDBStructure {
-  namaUjianId: number;
-}
-
-export interface SoalUjiDBStructureRead extends SoalUjiDBStructure {
-  id: number;
-  namaUjian: string;
-  jenisUjian: string;
-}
+export type SearchParams = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
