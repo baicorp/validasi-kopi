@@ -1,14 +1,13 @@
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { validateSessionServer } from "@/actions/validateSession";
 
 export default async function Page() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-  if (!session) {
-    redirect("/sign-in");
-  }
+  const session = await validateSessionServer();
 
-  redirect("/dashboard/produk");
+  const redirectUrl =
+    session.user.role === "admin"
+      ? "/dashboard/produk"
+      : `/user/${session.user.username}`;
+
+  redirect(redirectUrl);
 }

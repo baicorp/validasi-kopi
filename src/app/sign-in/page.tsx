@@ -1,5 +1,6 @@
 "use client";
 
+import useSWR from "swr";
 import { toast } from "sonner";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -9,9 +10,18 @@ import { authClient } from "@/lib/authClient";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
+export async function validateSessionClient() {
+  return await authClient.getSession();
+}
+
 export default function Page() {
   const [isLoad, setIsLoad] = useState(false);
   const router = useRouter();
+
+  const { data: session } = useSWR("session", validateSessionClient);
+  if (session?.data?.user !== undefined) {
+    router.replace("/");
+  }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -38,7 +48,7 @@ export default function Page() {
         return;
       }
 
-      router.replace("/dashboard/produk");
+      router.replace("/");
     } catch (e) {
       if (e instanceof Error) {
         toast.error(e.message);
