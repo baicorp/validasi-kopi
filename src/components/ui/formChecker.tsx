@@ -61,35 +61,54 @@ export default function FormChecker({
   }
 
   return (
-    <form onSubmit={handleCheck}>
-      <div className="flex flex-col gap-4">
-        {formatedExamsData.map((examData, index) => {
-          return (
-            <DynamicComponent
-              key={index}
-              formatedExamData={examData}
-              triggerReset={reset}
-              wrongCodes={wrongCodes}
-              halfWrongCodes={partiallyWrongCodes}
-            />
-          );
-        })}
+    <>
+      <div className="pb-4 border-b mb-4">
+        <p className="font-medium">Indikator pengecekan jawaban</p>
+        <div className="flex gap-4">
+          <div className="flex gap-1.5 items-center">
+            <div className="bg-white border border-muted-foreground w-3.5 h-3.5" />
+            <p>Benar</p>
+          </div>
+          <div className="flex gap-1 items-center">
+            <div className="bg-yellow-400 border border-muted-foreground w-3.5 h-3.5" />
+            <p>Salah sebagian</p>
+          </div>
+          <div className="flex gap-1 items-center">
+            <div className="bg-red-600 border border-muted-foreground w-3.5 h-3.5" />
+            <p>Salah</p>
+          </div>
+        </div>
       </div>
-      <div className="flex gap-2 mt-4">
-        <Button
-          type="reset"
-          variant={"outline"}
-          onClick={() => {
-            setWrongCodes([]);
-            setPartiallyWrongCodes([]);
-            setReset((prev) => !prev);
-          }}
-        >
-          Bersihkan
-        </Button>
-        <Button type="submit">Cek Jawaban</Button>
-      </div>
-    </form>
+      <form onSubmit={handleCheck}>
+        <div className="flex flex-col gap-4">
+          {formatedExamsData.map((examData, index) => {
+            return (
+              <DynamicComponent
+                key={index}
+                formatedExamData={examData}
+                triggerReset={reset}
+                wrongCodes={wrongCodes}
+                halfWrongCodes={partiallyWrongCodes}
+              />
+            );
+          })}
+        </div>
+        <div className="flex gap-2 mt-4">
+          <Button
+            type="reset"
+            variant={"outline"}
+            onClick={() => {
+              setWrongCodes([]);
+              setPartiallyWrongCodes([]);
+              setReset((prev) => !prev);
+            }}
+          >
+            Bersihkan
+          </Button>
+          <Button type="submit">Cek Jawaban</Button>
+        </div>
+      </form>
+    </>
   );
 }
 
