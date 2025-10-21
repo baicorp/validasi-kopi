@@ -32,6 +32,11 @@ export function formatRawExamsData(rows: RawExamsData[]) {
         }),
       );
 
+      // sort based on code value
+      codeValue.sort((a, b) =>
+        Object.keys(a)[0].localeCompare(Object.keys(b)[0]),
+      );
+
       return { examName, codeValue };
     },
   );
