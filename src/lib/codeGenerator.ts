@@ -155,40 +155,42 @@ export class ExamGenerator {
       let examResult: { code: string; value: string }[] = [];
 
       if (examLower.includes("2 out of 5")) {
-        const needed = this.totalParticipants * 5;
+        const needed = this.totalParticipants * this.numberOfTwoOutOfFiveGlass;
         examResult = this.generateTwoOutOfFiveCodes(
           allCodes.slice(cursor, cursor + needed),
           valuesStore[examLower],
         );
         cursor += needed;
       } else if (examLower === "treshold single") {
-        const needed = this.totalParticipants * 12;
+        const needed =
+          this.totalParticipants * this.numberOfTresholdSingleGlass;
         examResult = this.generateTresholdSingleCodes(
           allCodes.slice(cursor, cursor + needed),
           valuesStore[examLower],
         );
         cursor += needed;
       } else if (examLower === "treshold mix") {
-        const needed = this.totalParticipants * 5;
+        const needed = this.totalParticipants * this.numberOfTresholdMixGlass;
         examResult = this.generateTresholdMixCodes(
           allCodes.slice(cursor, cursor + needed),
           valuesStore[examLower],
         );
         cursor += needed;
       } else if (examLower === "triangle") {
-        const needed = this.totalParticipants * 3;
+        const needed = this.totalParticipants * this.numberOfTriangleGlass;
         examResult = this.generateTriangleCodes(
           allCodes.slice(cursor, cursor + needed),
         );
         cursor += needed;
       } else if (examLower === "skoring") {
-        const needed = this.totalParticipants * 5;
+        const needed = this.totalParticipants * this.numberOfScoringGlass;
         examResult = this.generateScoringCodes(
           allCodes.slice(cursor, cursor + needed),
         );
         cursor += needed;
       } else if (examLower === "identifikasi") {
-        const needed = this.totalParticipants * 3;
+        const needed =
+          this.totalParticipants * this.numberOfIdentificationGlass;
         examResult = this.generateIdentificationCodes(
           allCodes.slice(cursor, cursor + needed),
           valuesStore[examLower],
