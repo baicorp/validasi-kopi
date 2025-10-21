@@ -12,18 +12,18 @@ import { Input } from "./input";
 import { Button } from "./button";
 import { FormEvent, useState } from "react";
 import { LoaderCircle } from "lucide-react";
-import { updateProduk } from "@/actions/produk";
+import { updateProduct } from "@/actions/products";
 import { DropdownMenuItem } from "./dropdown-menu";
-import SelectListKategori from "./selectListKategori";
+import SelectProductCategories from "./selectProductCategories";
 
 export default function EditDialog({
-  idProduk,
-  namaProduk,
-  idKategori,
+  productId,
+  productName,
+  productCategoryId,
 }: {
-  idProduk: string;
-  namaProduk: string;
-  idKategori: string;
+  productId: string;
+  productName: string;
+  productCategoryId: string;
 }) {
   const [isLoad, setIsLoad] = useState(false);
   const [open, setOpen] = useState(false);
@@ -34,7 +34,7 @@ export default function EditDialog({
 
     const formData = new FormData(e.currentTarget);
     try {
-      await updateProduk(Number(idProduk), formData);
+      await updateProduct(Number(productId), formData);
       setOpen(false);
     } catch (e) {
       if (e instanceof Error) {
@@ -61,9 +61,9 @@ export default function EditDialog({
           <Input
             placeholder="Nama produk"
             name="nama-produk"
-            defaultValue={namaProduk}
+            defaultValue={productName}
           />
-          <SelectListKategori defaultValue={idKategori} />
+          <SelectProductCategories defaultValue={productCategoryId} />
           <Button type="submit" disabled={isLoad}>
             Simpan {isLoad && <LoaderCircle className="animate-spin" />}
           </Button>

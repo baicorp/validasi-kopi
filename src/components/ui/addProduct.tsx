@@ -11,11 +11,11 @@ import { toast } from "sonner";
 import { Input } from "./input";
 import { Button } from "./button";
 import { FormEvent, useState } from "react";
-import { addProduct } from "@/actions/produk";
+import { addProduct } from "@/actions/products";
 import { LoaderCircle, Plus } from "lucide-react";
-import SelectListKategori from "./selectListKategori";
+import SelectProductCategories from "./selectProductCategories";
 
-export default function TambahProduk() {
+export default function AddProductBtn() {
   const [isLoad, setIsLoad] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -27,10 +27,7 @@ export default function TambahProduk() {
     try {
       await addProduct(formData);
     } catch (e) {
-      if (e instanceof Error) {
-        // toast.error(e.message);
-        // return;
-      }
+      console.error(e);
       toast.error(
         "Gagal menambahkan produk, pastikan produk belum pernah ditambahkan sebelumnya.",
       );
@@ -54,7 +51,7 @@ export default function TambahProduk() {
         </DialogHeader>
         <form className="space-y-4" onSubmit={(e) => handleTambahProduk(e)}>
           <Input placeholder="Nama produk" name="nama-produk" required />
-          <SelectListKategori />
+          <SelectProductCategories />
           <Button type="submit" disabled={isLoad} className="ml-auto">
             Simpan
             {isLoad && <LoaderCircle className="animate-spin" />}
