@@ -4,11 +4,8 @@ import {
   FileText,
   FilePlus,
   Coffee,
-  LogOut,
   ChevronRight,
-  LoaderCircle,
   HeartHandshake,
-  TestTubes,
 } from "lucide-react";
 import {
   Sidebar,
@@ -32,8 +29,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbList";
 
 const sidebarMenu = [
   { url: "/dashboard/produk", menu: "Produk", icon: Coffee },
-  { url: "/dashboard/rasa-mix", menu: "Rasa Mix", icon: TestTubes },
-  { url: "/dashboard/list-soal", menu: "List Soal", icon: FileText },
+  { url: "/dashboard/daftar-soal", menu: "Daftar Soal", icon: FileText },
 ];
 
 const collapsibleSidebarMenu = [
@@ -212,36 +208,5 @@ function CollapsibleMenu({ Icon, menu, subMenu }: CollapsibleMenuData) {
         </SidebarMenu>
       )}
     </>
-  );
-}
-
-function SignOutButton() {
-  const [isLoad, setIsLoad] = useState(false);
-  const router = useRouter();
-
-  return (
-    <Button
-      disabled={isLoad}
-      className="flex gap-3 hover:border cursor-pointer w-full"
-      onClick={async () => {
-        await authClient.signOut({
-          fetchOptions: {
-            onRequest: () => setIsLoad(true),
-            onSuccess: () => {
-              setIsLoad(false);
-              router.replace("/sign-in");
-            },
-            onError: (ctx) => {
-              setIsLoad(false);
-              toast.error(ctx.error.message);
-            },
-          },
-        });
-      }}
-    >
-      <LogOut />
-      <span>Keluar</span>
-      {isLoad && <LoaderCircle className="animate-spin" />}
-    </Button>
   );
 }
