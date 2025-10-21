@@ -1,6 +1,6 @@
 "use client";
 
-import { getAllCategory } from "@/actions/kategory";
+import { getAllProductCategories } from "@/actions/productCategories";
 import {
   Select,
   SelectContent,
@@ -12,12 +12,19 @@ import {
 } from "./select";
 import useSWR from "swr";
 
-export default function SelectListKategori({
+export default function SelectProductCategories({
   defaultValue,
 }: {
   defaultValue?: string;
 }) {
-  const { data: listKategori } = useSWR("listCategory", getAllCategory);
+  const { data: listKategori } = useSWR(
+    "listCategory",
+    getAllProductCategories,
+  );
+
+  if (listKategori === undefined || "error" in listKategori) {
+    return <p>Data Not found</p>;
+  }
 
   return (
     <Select name="kategori-produk" defaultValue={defaultValue} required>
@@ -27,9 +34,9 @@ export default function SelectListKategori({
       <SelectContent>
         <SelectGroup>
           <SelectLabel>kategori</SelectLabel>
-          {listKategori?.map((kategori, index) => (
-            <SelectItem key={index} value={kategori?.id.toString()}>
-              {kategori?.kategori}
+          {listKategori.map((category, index) => (
+            <SelectItem key={index} value={category.id.toString()}>
+              {category.categoryName}
             </SelectItem>
           ))}
         </SelectGroup>
