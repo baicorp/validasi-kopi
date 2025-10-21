@@ -97,7 +97,7 @@ async function TableProductsData({
     tableRowData = products.data.map((product, idx) => (
       <TableRow key={product.id}>
         <TableCell className="pl-4 py-1">
-          {(currentPage - 1) * 15 + idx + 1}
+          {(currentPage - 1) * 12 + idx + 1}
         </TableCell>
         <TableCell className="py-1">{product.productName}</TableCell>
         <TableCell className="py-1">{product.categoryName}</TableCell>
