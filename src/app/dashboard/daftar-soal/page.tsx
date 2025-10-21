@@ -3,7 +3,6 @@ import { Suspense } from "react";
 import { toTitleCase } from "@/lib/utils";
 import { redirect } from "next/navigation";
 import { SearchParams } from "@/lib/types";
-import { Badge } from "@/components/ui/badge";
 import ErrorComp from "@/components/ui/error";
 import Paginator from "@/components/ui/paginator";
 import SearchData from "@/components/ui/searchData";
@@ -122,12 +121,8 @@ function CodeGroupItem({
             </div>
           </div>
         </div>
-        <div className="flex flex-wrap gap-0.5 items-center w-76 mx-auto">
-          {examsLabel.split(",").length === 4 ? (
-            <Badge variant={"outline"}>Semua</Badge>
-          ) : (
-            <CodeGroupsLabel label={examsLabel.split(",")} />
-          )}
+        <div className="hidden lg:flex flex-wrap gap-0.5 items-center mx-auto w-76">
+          <CodeGroupsLabel label={examsLabel.split(",")} />
         </div>
       </Link>
       <div className="invisible group-hover:visible px-2.5 p-1.5">
