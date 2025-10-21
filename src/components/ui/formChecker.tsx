@@ -1,81 +1,76 @@
 "use client";
 
-import { Button } from "./button";
-import { FormEvent, useEffect, useState } from "react";
-import { codeCheck, toTitleCase, transformDataFromDB } from "@/lib/utils";
-import { SoalUjiClientStructure, SoalUjiDBStructureRead } from "@/lib/types";
 import { toast } from "sonner";
+import { Button } from "./button";
+import { RawExamsData } from "@/lib/types";
+import { FormEvent, useEffect, useState } from "react";
+import { codeCheck, formatRawExamsData, toTitleCase } from "@/lib/utils";
+
+type FormCheckerProps = {
+  rawExamsData: RawExamsData[];
+  formatedExamsData: ReturnType<typeof formatRawExamsData>;
+};
 
 export default function FormChecker({
-  dataSoal,
-}: {
-  dataSoal: SoalUjiDBStructureRead[];
-}) {
-  const soal = transformDataFromDB(dataSoal);
-  const [listKodeSalah, setListKodeSalah] = useState<string[]>([]);
-  const [listKodeSalahSebagian, setListKodeSalahSebagian] = useState<string[]>(
-    [],
-  );
+  rawExamsData,
+  formatedExamsData,
+}: FormCheckerProps) {
   const [reset, setReset] = useState(false);
+  const [wrongCodes, setWrongCodes] = useState<string[]>([]);
+  const [partiallyWrongCodes, setPartiallyWrongCodes] = useState<string[]>([]);
 
   function handleCheck(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
-    const entries: Record<string, FormDataEntryValue[]> = {};
+    const inputEntries: { code: string; value: string }[] = [];
+    const distincCodes = new Set<string>();
 
-    for (const [key, value] of formData.entries()) {
-      if (entries[key]) {
-        entries[key].push(value);
-      } else {
-        entries[key] = [value];
+    for (const [value, code] of formData.entries()) {
+      const strCode = (code as string).trim();
+      if (strCode) {
+        // only do operation when strCode not empty string
+        inputEntries.push({ code: strCode, value });
+        if (distincCodes.has(strCode)) {
+          toast.error("Kode yang dimasukkan tidak boleh ada yang sama.");
+          return;
+        }
+        distincCodes.add(strCode);
       }
     }
 
-    const listKode = Object.values(entries)
-      .flat()
-      .filter((kode) => (kode as string).trim().length !== 0);
-
-    if (listKode.length === 0) {
-      toast.error("Masukkan setidaknya 1 kode.");
+    if (distincCodes.size < 1) {
+      toast.error("Setidaknya masukkan 1 kode.");
       return;
     }
 
-    if (new Set(listKode).size !== listKode.length) {
-      toast.error("Setiap kode yang dimasukkan harus berbeda.");
-      return;
-    }
+    const wrongCodes: string[] = [];
+    const partiallyWrongCodes: string[] = [];
 
-    const kodeSalah: string[] = [];
-    const salahSebagian: string[] = [];
-
-    Object.keys(entries).forEach((key) => {
-      entries[key].map((kode) => {
-        kode = kode as string;
-        const result = codeCheck(kode, key, dataSoal);
-        if (result === "salah") {
-          kodeSalah.push(kode);
-        } else if (result === "salah-sebagian") {
-          salahSebagian.push(kode);
-        }
-      });
+    inputEntries.forEach((input) => {
+      const result = codeCheck(input.code, input.value, rawExamsData);
+      if (result === "wrong") {
+        wrongCodes.push(input.code);
+      } else if (result === "partially-wrong") {
+        partiallyWrongCodes.push(input.code);
+      }
     });
 
-    setListKodeSalah(kodeSalah);
-    setListKodeSalahSebagian(salahSebagian);
+    setWrongCodes(wrongCodes);
+    setPartiallyWrongCodes(partiallyWrongCodes);
   }
 
   return (
     <form onSubmit={handleCheck}>
       <div className="flex flex-col gap-4">
-        {soal.map((data, index) => {
+        {formatedExamsData.map((examData, index) => {
           return (
             <DynamicComponent
               key={index}
-              obj={data}
+              formatedExamData={examData}
               triggerReset={reset}
-              wrongCodes={listKodeSalah}
-              halfWrongCodes={listKodeSalahSebagian}
+              wrongCodes={wrongCodes}
+              halfWrongCodes={partiallyWrongCodes}
             />
           );
         })}
@@ -85,8 +80,8 @@ export default function FormChecker({
           type="reset"
           variant={"outline"}
           onClick={() => {
-            setListKodeSalah([]);
-            setListKodeSalahSebagian([]);
+            setWrongCodes([]);
+            setPartiallyWrongCodes([]);
             setReset((prev) => !prev);
           }}
         >
@@ -102,36 +97,38 @@ function DynamicComponent({
   triggerReset,
   halfWrongCodes,
   wrongCodes,
-  obj,
+  formatedExamData,
 }: {
   triggerReset: boolean;
   halfWrongCodes: string[];
   wrongCodes: string[];
-  obj: SoalUjiClientStructure;
+  formatedExamData: ReturnType<typeof formatRawExamsData>[number];
 }) {
   return (
     <div>
-      <p className="font-medium mb-2">{toTitleCase(obj.tipeUjian)}</p>
+      <p className="font-medium mb-2">
+        {toTitleCase(formatedExamData.examName)}
+      </p>
       <div className="grid grid-cols-6 gap-2">
-        {obj.soal.map((data) => {
-          return Object.keys(data).map((nilaiKode) => (
+        {formatedExamData.codeValue.map((exam) => {
+          return Object.keys(exam).map((value) => (
             <div
-              key={nilaiKode}
+              key={value}
               className="bg-card text-card-foreground shadow-sm border rounded-lg p-1 flex flex-col justify-between"
             >
-              <p className="p-2 font-medium text-center">{nilaiKode}</p>
+              <p className="p-2 font-medium text-center">{value}</p>
               <div className="flex flex-col gap-1">
                 <DynamicInput
                   halfWrongCodes={halfWrongCodes}
                   triggerReset={triggerReset}
-                  nilaiKode={nilaiKode}
+                  codeValue={value}
                   wrongCodes={wrongCodes}
                 />
-                {nilaiKode.toLowerCase().includes("sama") && (
+                {value.toLowerCase().includes("sama") && (
                   <DynamicInput
                     halfWrongCodes={halfWrongCodes}
                     triggerReset={triggerReset}
-                    nilaiKode={nilaiKode}
+                    codeValue={value}
                     wrongCodes={wrongCodes}
                   />
                 )}
@@ -148,12 +145,12 @@ function DynamicInput({
   triggerReset,
   halfWrongCodes,
   wrongCodes,
-  nilaiKode,
+  codeValue,
 }: {
   triggerReset: boolean;
   halfWrongCodes: string[];
   wrongCodes: string[];
-  nilaiKode: string;
+  codeValue: string;
 }) {
   const [value, setValue] = useState<string>("");
 
@@ -163,7 +160,7 @@ function DynamicInput({
 
   return (
     <input
-      name={nilaiKode}
+      name={codeValue}
       type="number"
       placeholder="Kode"
       max={9999}
