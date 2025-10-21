@@ -3,7 +3,8 @@
 import { db } from "@/db";
 import { toTitleCase } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { isValidRole } from "./validateSession";
+import { and, desc, eq, like, sql } from "drizzle-orm";
 import { productCategories, products } from "@/db/schema";
 
 export async function addProduct(formData: FormData) {
@@ -15,6 +16,11 @@ export async function addProduct(formData: FormData) {
   }
 
   try {
+    const isValid = await isValidRole("admin");
+    if (!isValid) {
+      return { error: "401 : Anda tidak memiliki izin." };
+    }
+
     db.transaction(async (tx) => {
       const rows = await tx
         .select()
@@ -45,21 +51,53 @@ export async function addProduct(formData: FormData) {
   }
 }
 
-export async function getAllProduct() {
+export async function getAllProduct(
+  page: number = 1,
+  search: string | undefined,
+  categoryId: string | undefined,
+) {
+  const limit = 12;
+  const offset = (page - 1) * limit;
+
+  const conditions = [];
+  if (search) conditions.push(like(products.productName, `%${search}%`));
+  if (categoryId)
+    conditions.push(eq(products.productCategoryId, Number(categoryId)));
+
   try {
-    return await db
+    const isValid = await isValidRole("admin");
+    if (!isValid) {
+      return { error: "401 : Anda tidak memiliki izin." };
+    }
+
+    const [{ count }] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(products)
+      .where(conditions.length ? and(...conditions) : undefined);
+
+    const data = await db
       .select({
         id: products.id,
-        namaProduk: products.productName,
-        namaKategori: productCategories.categoryName,
-        idKategori: productCategories.id,
+        productName: products.productName,
+        categoryName: productCategories.categoryName,
+        productCategoryId: productCategories.id,
+        createdAt: products.createdAt,
       })
       .from(products)
       .leftJoin(
         productCategories,
         eq(products.productCategoryId, productCategories.id),
       )
-      .orderBy(desc(products.createdAt));
+      .where(conditions.length ? and(...conditions) : undefined)
+      .orderBy(desc(products.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    return {
+      data,
+      page,
+      totalPages: Math.ceil(count / limit),
+    };
   } catch (error) {
     console.error(error);
     return { error: "Gagal mengambil data produk, Database bermasalah." };
@@ -70,7 +108,15 @@ export async function getProductsByCategory(productId: string) {
   const id = parseInt(productId.trim());
 
   try {
-    return await db.select().from(products).where(eq(products.id, id));
+    const isValid = await isValidRole("admin");
+    if (!isValid) {
+      return { error: "401 : Anda tidak memiliki izin." };
+    }
+
+    return await db
+      .select()
+      .from(products)
+      .where(eq(products.productCategoryId, id));
   } catch (error) {
     console.error(error);
     return {
@@ -88,6 +134,11 @@ export async function updateProduct(productId: number, formData: FormData) {
   }
 
   try {
+    const isValid = await isValidRole("admin");
+    if (!isValid) {
+      return { error: "401 : Anda tidak memiliki izin." };
+    }
+
     await db
       .update(products)
       .set({
@@ -103,10 +154,13 @@ export async function updateProduct(productId: number, formData: FormData) {
   }
 }
 
-export async function deleteProduct(productId: string) {
-  const id = Number(productId);
-
+export async function deleteProduct(id: number) {
   try {
+    const isValid = await isValidRole("admin");
+    if (!isValid) {
+      return { error: "401 : Anda tidak memiliki izin." };
+    }
+
     await db.delete(products).where(eq(products.id, id));
     revalidatePath("/dashboard/produk");
   } catch (error) {

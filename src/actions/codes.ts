@@ -1,51 +1,77 @@
 "use server";
 
 import { db } from "@/db";
-import { desc, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { InsertCodesType } from "@/lib/types";
+import { isValidRole } from "./validateSession";
+import { and, desc, eq, like, sql } from "drizzle-orm";
+import { InsertCodes, ExamDataDetails } from "@/lib/types";
+import { formatRawExamsData, getExamsId } from "@/lib/utils";
 import { codes, codeGroups, examCategories, exams } from "@/db/schema";
 
-export async function addGeneratedCodes(
-  codeGroupsName: string,
-  examsLabel: string,
-  totalParticipants: number,
-  listCode: InsertCodesType[],
-) {
-  if (listCode.length === 0) {
+export async function addGeneratedCodes(data: ExamDataDetails) {
+  if (data.examsData.length === 0) {
     return { error: "Daftar soal kosong." };
   }
 
+  let codeGroupId: number;
+
   try {
-    await db.transaction(async (tx) => {
-      const rows = await tx
+    const isValid = await isValidRole("admin");
+    if (!isValid) {
+      return { error: "401 : Anda tidak memiliki izin." };
+    }
+
+    const result = await db.transaction(async (tx) => {
+      const rowCodeGroups = await tx
         .insert(codeGroups)
         .values({
-          groupName: codeGroupsName,
-          examsLabel,
-          totalParticipants,
+          groupName: data.groupName,
+          examsLabel: data.examsLabel,
+          totalParticipants: data.totalParticipants,
         })
         .returning();
 
-      if (rows.length === 0) {
-        return { error: "Gagal menyimpan soal. Database bermasalah." };
+      // get id and examName from exams table (use for getting exam id based on examName)
+      const rowExams = await tx
+        .select({ id: exams.id, examName: exams.examName })
+        .from(exams);
+
+      if (rowExams.length === 0 || rowCodeGroups.length === 0) {
+        return { error: "Gagal menyimpan soal." };
       }
 
-      const codeGroupId = rows[0].id;
-      const codesToInsert = listCode.map((code) => ({ ...code, codeGroupId }));
+      // data to insert in codes table
+      codeGroupId = rowCodeGroups[0].id;
+      const codesToInsert: InsertCodes[] = data.examsData.map((row) => ({
+        code: row.code,
+        value: row.value,
+        examId: getExamsId(row.examName, rowExams),
+        codeGroupId,
+      }));
 
-      await tx.insert(codes).values(codesToInsert);
+      const row = await tx.insert(codes).values(codesToInsert);
+      if (row.rowsAffected === 0) {
+        return { error: "Gagal menyimpan daftar kode." };
+      }
+
+      return rowCodeGroups[0];
     });
+
     revalidatePath("/dashboard/list-soal");
+    return result;
   } catch (error) {
     console.error(error);
-    return { error: "Gagal menyimpan soal. Database bermasalah." };
+    return { error: "Gagal menyimpan soal." };
   }
 }
 
-export async function deleteGeneratedCode(codeGroupsId: string) {
-  const id = parseInt(codeGroupsId.trim());
+export async function deleteGeneratedCode(id: number) {
   try {
+    const isValid = await isValidRole("admin");
+    if (!isValid) {
+      return { error: "401 : Anda tidak memiliki izin." };
+    }
+
     await db.delete(codeGroups).where(eq(codeGroups.id, id));
     revalidatePath("/dashboard/list-soal");
   } catch (error) {
@@ -54,11 +80,18 @@ export async function deleteGeneratedCode(codeGroupsId: string) {
   }
 }
 
-export async function getTableData(codeGroupId: string) {
+export async function getTableData(
+  codeGroupId: string,
+): Promise<ExamDataDetails | { error: string }> {
   const groupId = parseInt(codeGroupId.trim());
 
   try {
-    return await db
+    const isValid = await isValidRole("admin");
+    if (!isValid) {
+      return { error: "401 : Anda tidak memiliki izin." };
+    }
+
+    const rows = await db
       .select({
         id: codes.id,
         groupName: codeGroups.groupName,
@@ -74,6 +107,14 @@ export async function getTableData(codeGroupId: string) {
       .innerJoin(exams, eq(exams.id, codes.examId))
       .innerJoin(examCategories, eq(exams.examCategoryId, examCategories.id))
       .where(eq(codeGroups.id, groupId));
+
+    return {
+      groupName: rows[0].groupName,
+      examsLabel: rows[0].examsLabel,
+      totalParticipants: rows[0].totalParticipants,
+      examsData: rows,
+      formatedExamsData: formatRawExamsData(rows),
+    };
   } catch (error) {
     console.error(error);
     return {
@@ -82,12 +123,40 @@ export async function getTableData(codeGroupId: string) {
   }
 }
 
-export async function getListSoal() {
+export async function getCodeGroups(
+  page: number = 1,
+  search: string | undefined,
+) {
+  const limit = 12;
+  const offset = (page - 1) * limit;
+  const conditions = [];
+  if (search) conditions.push(like(codeGroups.groupName, `%${search}%`));
+  if (search) conditions.push(like(codeGroups.groupName, `%${search}%`));
+
   try {
-    return await db
+    const isValid = await isValidRole("admin");
+    if (!isValid) {
+      return { error: "401 : Anda tidak memiliki izin." };
+    }
+
+    const [{ count }] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(codeGroups)
+      .where(conditions.length ? and(...conditions) : undefined);
+
+    const data = await db
       .select()
       .from(codeGroups)
-      .orderBy(desc(codeGroups.createdAt));
+      .where(conditions.length ? and(...conditions) : undefined)
+      .orderBy(desc(codeGroups.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    return {
+      data,
+      page,
+      totalPages: Math.ceil(count / limit),
+    };
   } catch (error) {
     console.error(error);
     return { error: "Gagal mendapat list soal. Database bermasalah." };
