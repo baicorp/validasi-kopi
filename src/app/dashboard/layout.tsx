@@ -24,12 +24,10 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { toast } from "sonner";
-import { cn } from "@/lib/utils"; // shadcn helper
+import { cn } from "@/lib/utils";
 import { useState } from "react";
-import { authClient } from "@/lib/authClient";
-import { Button } from "@/components/ui/button";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
+import SignOutButton from "@/components/ui/signOutBtn";
 import { Breadcrumbs } from "@/components/ui/breadcrumbList";
 
 const sidebarMenu = [
@@ -111,15 +109,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </SidebarGroup>
         </SidebarFooter>
       </Sidebar>
-
-      {/* Main content */}
-      <main className="px-12 py-4 w-full">
-        <div className="flex items-center gap-2 mb-4">
+      <main className="basis-full py-4">
+        <section className="flex items-center gap-2 px-3 lg:px-8">
           <SidebarTrigger />
           <div className="bg-border w-0.5 h-3.5 mr-1" />
           <Breadcrumbs />
-        </div>
-        {children}
+        </section>
+        <div className="flex flex-col gap-4 px-4 lg:px-10 pb-4">{children}</div>
       </main>
     </SidebarProvider>
   );
