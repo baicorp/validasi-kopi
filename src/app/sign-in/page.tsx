@@ -18,9 +18,13 @@ export default function Page() {
   const [isLoad, setIsLoad] = useState(false);
   const router = useRouter();
 
-  const { data: session } = useSWR("session", validateSessionClient);
-  if (session?.data?.user !== undefined) {
-    router.replace("/");
+  const { data } = useSWR("session", validateSessionClient);
+  if (data?.data?.user.role !== undefined) {
+    const redirectUrl =
+      data.data.user.role === "admin"
+        ? "/dasrboard/produk"
+        : `/user/${data.data.user.username}`;
+    router.replace(redirectUrl);
   }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
