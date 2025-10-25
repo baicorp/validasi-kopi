@@ -19,7 +19,7 @@ export default function AddProductBtn() {
   const [isLoad, setIsLoad] = useState(false);
   const [open, setOpen] = useState(false);
 
-  async function handleTambahProduk(e: FormEvent<HTMLFormElement>) {
+  async function handleAddProduct(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsLoad(true);
 
@@ -49,7 +49,7 @@ export default function AddProductBtn() {
         <DialogHeader>
           <DialogTitle>Tambah Produk</DialogTitle>
         </DialogHeader>
-        <form className="space-y-4" onSubmit={(e) => handleTambahProduk(e)}>
+        <form className="space-y-4" onSubmit={(e) => handleAddProduct(e)}>
           <Input placeholder="Nama produk" name="nama-produk" required />
           <SelectProductCategories />
           <Button type="submit" disabled={isLoad} className="ml-auto">
