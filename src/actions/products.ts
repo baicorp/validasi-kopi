@@ -21,7 +21,7 @@ export async function addProduct(formData: FormData) {
       return { error: "401 : Anda tidak memiliki izin." };
     }
 
-    db.transaction(async (tx) => {
+    const result = await db.transaction(async (tx) => {
       const rows = await tx
         .select()
         .from(products)
@@ -38,13 +38,14 @@ export async function addProduct(formData: FormData) {
         };
       }
 
-      await tx.insert(products).values({
+      return await tx.insert(products).values({
         productName: productName,
         productCategoryId: Number(productCategoryId),
       });
     });
 
     revalidatePath("/dashboard/produk");
+    return result;
   } catch (error) {
     console.error(error);
     return { error: "Gagal menambahkan produk. Database bermasalah." };

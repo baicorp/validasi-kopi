@@ -25,12 +25,15 @@ export default function AddProductBtn() {
 
     const formData = new FormData(e.currentTarget);
     try {
-      await addProduct(formData);
+      const result = await addProduct(formData);
+      if ("error" in result) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success("Berhasil menambahkan produk.");
     } catch (e) {
       console.error(e);
-      toast.error(
-        "Gagal menambahkan produk, pastikan produk belum pernah ditambahkan sebelumnya.",
-      );
+      toast.error("Gagal menambahkan produk.");
     } finally {
       setOpen(false);
       setIsLoad(false);
