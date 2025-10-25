@@ -14,4 +14,17 @@ export const auth = betterAuth({
     schema,
     provider: "sqlite", // or "mysql", "sqlite"
   }),
+  user: {
+    additionalFields: {
+      username: {
+        type: "string",
+        unique: true,
+        required: true,
+      },
+      position: {
+        type: "string",
+        required: true,
+      },
+    },
+  },
 });
