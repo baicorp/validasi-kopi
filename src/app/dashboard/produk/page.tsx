@@ -19,9 +19,9 @@ import { MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Paginator from "@/components/ui/paginator";
 import SearchData from "@/components/ui/searchData";
-import EditDialog from "@/components/ui/editDialog";
-import DeleteDialog from "@/components/ui/deleteDialog";
 import AddProductBtn from "@/components/ui/addProduct";
+import DeleteDialog from "@/components/ui/deleteDialog";
+import EditDialogProduct from "@/components/ui/editDialogProduct";
 import { deleteProduct, getAllProduct } from "@/actions/products";
 import { validateSessionServer } from "@/actions/validateSession";
 import TableProductsDataSkeleton from "@/components/skeleton/tableProductsDataSkeleton";
@@ -109,7 +109,7 @@ async function TableProductsData({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <EditDialog
+              <EditDialogProduct
                 productId={product.id.toString()}
                 productName={product.productName}
                 productCategoryId={
@@ -121,8 +121,8 @@ async function TableProductsData({
                 dialogTitle="produk"
                 variant="dropDown"
                 deleteFnAction={deleteProduct}
-                id={product.id}
-                productName={product.productName}
+                id={product.id.toString()}
+                data={product.productName}
               />
             </DropdownMenuContent>
           </DropdownMenu>

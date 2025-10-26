@@ -140,7 +140,7 @@ export async function updateProduct(productId: number, formData: FormData) {
       return { error: "401 : Anda tidak memiliki izin." };
     }
 
-    await db
+    const result = await db
       .update(products)
       .set({
         productName: productName,
@@ -149,20 +149,22 @@ export async function updateProduct(productId: number, formData: FormData) {
       .where(eq(products.id, productId));
 
     revalidatePath("/dashboard/produk");
+    return result.rows;
   } catch (error) {
     console.error(error);
     return { error: "Gagal memperbarui produk. Database bermasalah." };
   }
 }
 
-export async function deleteProduct(id: number) {
+export async function deleteProduct(id: string) {
+  const strId = Number(id);
   try {
     const isValid = await isValidRole("admin");
     if (!isValid) {
       return { error: "401 : Anda tidak memiliki izin." };
     }
 
-    await db.delete(products).where(eq(products.id, id));
+    await db.delete(products).where(eq(products.id, strId));
     revalidatePath("/dashboard/produk");
   } catch (error) {
     console.error(error);

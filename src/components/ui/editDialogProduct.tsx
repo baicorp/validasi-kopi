@@ -16,7 +16,7 @@ import { updateProduct } from "@/actions/products";
 import { DropdownMenuItem } from "./dropdown-menu";
 import SelectProductCategories from "./selectProductCategories";
 
-export default function EditDialog({
+export default function EditDialogProduct({
   productId,
   productName,
   productCategoryId,
@@ -34,13 +34,16 @@ export default function EditDialog({
 
     const formData = new FormData(e.currentTarget);
     try {
-      await updateProduct(Number(productId), formData);
-      setOpen(false);
-    } catch (e) {
-      if (e instanceof Error) {
-        toast.error(e.message);
+      const result = await updateProduct(Number(productId), formData);
+      if ("error" in result) {
+        toast.error(result.error);
+        return;
       }
-      toast.error("Gagal tambah produk.");
+      toast.success("Berhasil memperbarui produk.");
+      setOpen(false);
+    } catch (error) {
+      console.error(error);
+      toast.error("Gagal memperbarui produk.");
     } finally {
       setIsLoad(false);
     }
