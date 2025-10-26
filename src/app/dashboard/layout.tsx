@@ -6,6 +6,7 @@ import {
   Coffee,
   ChevronRight,
   HeartHandshake,
+  User,
 } from "lucide-react";
 import {
   Sidebar,
@@ -29,6 +30,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbList";
 
 const sidebarMenu = [
   { url: "/dashboard/produk", menu: "Produk", icon: Coffee },
+  { url: "/dashboard/karyawan", menu: "Karyawan", icon: User },
   { url: "/dashboard/daftar-soal", menu: "Daftar Soal", icon: FileText },
 ];
 
