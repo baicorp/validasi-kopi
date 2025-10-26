@@ -15,7 +15,7 @@ import { FormEvent, useState } from "react";
 import { LoaderCircle } from "lucide-react";
 import { DropdownMenuItem } from "./dropdown-menu";
 
-type DeleteAction = (id: number) => Promise<
+type DeleteAction = (id: string) => Promise<
   | {
       error: string;
     }
@@ -25,13 +25,13 @@ type DeleteAction = (id: number) => Promise<
 export default function DeleteDialog({
   id,
   variant = "default",
-  productName,
+  data,
   dialogTitle,
   deleteFnAction,
 }: {
-  id: number;
+  id: string;
   variant?: "default" | "dropDown";
-  productName: string;
+  data: string;
   dialogTitle: string;
   deleteFnAction: DeleteAction;
 }) {
@@ -72,7 +72,7 @@ export default function DeleteDialog({
         </DialogHeader>
         <form onSubmit={handleDelete} className="flex flex-col gap-4">
           <p>
-            Yakin Hapus <span className="font-bold">{productName}</span>
+            Yakin Hapus <span className="font-bold">{data}</span>
           </p>
           <div className="flex gap-2 mt-4">
             <DialogClose asChild>
