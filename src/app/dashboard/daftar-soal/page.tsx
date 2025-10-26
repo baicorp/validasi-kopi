@@ -129,8 +129,8 @@ function CodeGroupItem({
         <DeleteDialog
           dialogTitle="Soal"
           deleteFnAction={deleteGeneratedCode}
-          id={id}
-          productName={groupName}
+          id={id.toString()}
+          data={groupName}
         />
       </div>
     </div>

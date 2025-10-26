@@ -65,14 +65,15 @@ export async function addGeneratedCodes(data: ExamDataDetails) {
   }
 }
 
-export async function deleteGeneratedCode(id: number) {
+export async function deleteGeneratedCode(id: string) {
+  const numbId = Number(id);
   try {
     const isValid = await isValidRole("admin");
     if (!isValid) {
       return { error: "401 : Anda tidak memiliki izin." };
     }
 
-    await db.delete(codeGroups).where(eq(codeGroups.id, id));
+    await db.delete(codeGroups).where(eq(codeGroups.id, numbId));
     revalidatePath("/dashboard/list-soal");
   } catch (error) {
     console.error(error);
