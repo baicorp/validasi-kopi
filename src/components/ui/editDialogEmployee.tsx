@@ -37,7 +37,7 @@ export default function EditDialogEmployee({
     try {
       const result = await updateEmployee(id, formData);
       if ("error" in result) {
-        toast.error("Gagal memperbarui karyawan.");
+        toast.error(result.error);
         return;
       }
       toast.success("Berhasil memperbarui karyawan.");
