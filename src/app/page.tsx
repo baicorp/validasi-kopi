@@ -6,8 +6,8 @@ export default async function Page() {
 
   const redirectUrl =
     session.user.role === "admin"
-      ? "/dashboard/produk"
-      : `/user/${session.user.username}`;
+      ? "/dashboard/ujian"
+      : `/${session.user.username}`;
 
   redirect(redirectUrl);
 }

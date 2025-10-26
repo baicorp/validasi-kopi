@@ -7,6 +7,7 @@ import {
   ChevronRight,
   HeartHandshake,
   User,
+  BookCheck,
 } from "lucide-react";
 import {
   Sidebar,
@@ -29,9 +30,10 @@ import SignOutButton from "@/components/ui/signOutBtn";
 import { Breadcrumbs } from "@/components/ui/breadcrumbList";
 
 const sidebarMenu = [
-  { url: "/dashboard/produk", menu: "Produk", icon: Coffee },
-  { url: "/dashboard/karyawan", menu: "Karyawan", icon: User },
+  { url: "/dashboard/ujian", menu: "Ujian", icon: BookCheck },
   { url: "/dashboard/daftar-soal", menu: "Daftar Soal", icon: FileText },
+  { url: "/dashboard/ujian", menu: "Produk", icon: Coffee },
+  { url: "/dashboard/karyawan", menu: "Karyawan", icon: User },
 ];
 
 const collapsibleSidebarMenu = [
@@ -53,7 +55,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild className="mt-2.5">
-                <Link href="/dashboard/produk">
+                <Link href="/dashboard/ujian">
                   <HeartHandshake />
                   <span className="text-base font-semibold">
                     Quality Assurance.
