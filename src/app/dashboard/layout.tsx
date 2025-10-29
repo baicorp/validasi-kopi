@@ -32,7 +32,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbList";
 const sidebarMenu = [
   { url: "/dashboard/ujian", menu: "Ujian", icon: BookCheck },
   { url: "/dashboard/daftar-soal", menu: "Daftar Soal", icon: FileText },
-  { url: "/dashboard/ujian", menu: "Produk", icon: Coffee },
+  { url: "/dashboard/produk", menu: "Produk", icon: Coffee },
   { url: "/dashboard/karyawan", menu: "Karyawan", icon: User },
 ];
 
