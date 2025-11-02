@@ -22,6 +22,69 @@
       "when": 1760451009885,
       "tag": "0002_shocking_lila_cheney",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1761381973857,
+      "tag": "0003_freezing_dagger",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1761382003200,
+      "tag": "0004_omniscient_power_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1761382133236,
+      "tag": "0005_illegal_rhodey",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1761382754292,
+      "tag": "0006_warm_switch",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1761384848581,
+      "tag": "0007_complete_songbird",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1761385139497,
+      "tag": "0008_past_sabretooth",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1761385910463,
+      "tag": "0009_nasty_talos",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1761386601110,
+      "tag": "0010_military_phantom_reporter",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1762066513298,
+      "tag": "0011_slow_lester",
+      "breakpoints": true
     }
   ]
 }
