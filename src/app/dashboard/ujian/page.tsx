@@ -70,9 +70,9 @@ async function ExamEventList({
 
   return (
     <>
-      <div className="grid grid-cols-4 gap-2.5">
+      <div className="grid grid-cols-1 md:grid-cols-[repeat(auto-fit,minmax(238px,1fr))] xl:grid-cols-4 gap-2.5">
         {examEvents.data.map((event) => (
-          <Link key={event.id} href={`ujian/${event.id}`}>
+          <Link key={event.id} href={`ujian/${event.id}/peserta-ujian`}>
             <EventItem key={event.id} {...event} />
           </Link>
         ))}
@@ -98,11 +98,11 @@ function EventItem({
   updatedAt,
 }: InferSelectModel<typeof examEvents>) {
   return (
-    <div className="rounded-lg overflow-hidden border shadow w-fit">
-      <div className="p-5 flex flex-col gap-4">
-        <p className="text-lg font-medium">{toTitleCase(examEventName)}</p>
+    <div className="rounded-lg overflow-hidden border shadow">
+      <div className="p-5 flex flex-col gap-2">
+        <p className="font-medium">{toTitleCase(examEventName)}</p>
         <div>
-          <p className="text-muted-foreground mb-1.5">Registrasi</p>
+          <p className="text-muted-foreground mb-1">Registrasi</p>
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 shrink-0" />
             <p className="text-sm">{registrationStart}</p>
@@ -111,7 +111,7 @@ function EventItem({
           </div>
         </div>
         <div>
-          <p className="text-muted-foreground mb-1.5">Pelaksanaan</p>
+          <p className="text-muted-foreground mb-1">Pelaksanaan</p>
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 shrink-0" />
             <p className="text-sm">{examStart}</p>
