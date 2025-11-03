@@ -23,16 +23,44 @@ export async function addExamEvent(formData: FormData) {
 
   if (
     !registrationName.trim() ||
-    !registrationStartDate.trim() ||
-    !registrationStartTime.trim() ||
-    !registrationEndDate.trim() ||
-    !registrationEndTime.trim() ||
-    !eventStartDate.trim() ||
-    !eventStartTime.trim() ||
-    !eventEndDate.trim() ||
-    !eventEndTime.trim()
+    !registrationStartDate ||
+    !registrationStartTime ||
+    !registrationEndDate ||
+    !registrationEndTime ||
+    !eventStartDate ||
+    !eventStartTime ||
+    !eventEndDate ||
+    !eventEndTime
   ) {
     return { error: "Lengkapi semua data pendaftaran ujian." };
+  }
+
+  // gabungkan tanggal dan waktu agar mudah dibandingkan
+  const regStart = new Date(
+    `${registrationStartDate}T${registrationStartTime}`,
+  );
+  const regEnd = new Date(`${registrationEndDate}T${registrationEndTime}`);
+  const examStart = new Date(`${eventStartDate}T${eventStartTime}`);
+  const examEnd = new Date(`${eventEndDate}T${eventEndTime}`);
+
+  // validasi urutan waktu
+  if (regEnd <= regStart) {
+    return {
+      error:
+        "Tanggal/waktu pendaftaran selesai harus setelah pendaftaran dimulai.",
+    };
+  }
+
+  if (examStart <= regEnd) {
+    return {
+      error: "Tanggal/waktu ujian harus setelah pendaftaran selesai.",
+    };
+  }
+
+  if (examEnd <= examStart) {
+    return {
+      error: "Tanggal/waktu pelaksanaan selesai harus setelah ujian dimulai.",
+    };
   }
 
   try {
