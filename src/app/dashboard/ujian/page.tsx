@@ -67,7 +67,7 @@ async function ExamEventList({
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-[repeat(auto-fit,minmax(238px,1fr))] xl:grid-cols-4 gap-2.5">
+      <div className="grid grid-cols-1 md:grid-cols-[repeat(auto-fit,minmax(270px,1fr))] xl:grid-cols-4 gap-2.5">
         {examEvents.data.map((event) => (
           <Link key={event.id} href={`ujian/${event.id}/peserta-ujian`}>
             <EventItem key={event.id} {...event} />
