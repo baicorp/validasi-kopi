@@ -18,12 +18,13 @@ export const examEvents = sqliteTable("exam_events", {
 export const examRegistrations = sqliteTable("exam_registrations", {
   id: integer("id").primaryKey(),
   selectedExam: text("selected_exam").notNull(),
-  userId: integer("user_id")
+  userId: text("user_id")
     .notNull()
     .references(() => user.id),
   examEventId: integer("exam_event_id")
     .notNull()
     .references(() => examEvents.id),
+  codeGroupId: integer("code_group_id").references(() => codeGroups.id),
   createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
   updatedAt: text("updated_at").default(sql`(CURRENT_TIMESTAMP)`),
 });
@@ -32,7 +33,7 @@ export const examSubmissions = sqliteTable("exam_submissions", {
   id: integer("id").primaryKey(),
   code: text("code").notNull(),
   value: text("value").notNull(),
-  userId: integer("user_id")
+  userId: text("user_id")
     .notNull()
     .references(() => user.id),
   examId: integer("exam_id")
