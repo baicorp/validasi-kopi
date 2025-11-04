@@ -53,7 +53,7 @@ export async function addExamEvent(formData: FormData) {
     };
   }
 
-  if (registrationStart <= registrationEnd) {
+  if (examStart <= registrationEnd) {
     return {
       error: "Tanggal/waktu ujian harus setelah pendaftaran selesai.",
     };
