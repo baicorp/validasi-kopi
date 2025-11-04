@@ -1,17 +1,14 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { toTitleCase } from "@/lib/utils";
 import { SearchParams } from "@/lib/types";
 import { redirect } from "next/navigation";
+import { BrushCleaning } from "lucide-react";
 import ErrorComp from "@/components/ui/error";
-import { InferSelectModel } from "drizzle-orm";
+import EventItem from "@/components/ui/eventItem";
 import Paginator from "@/components/ui/paginator";
-import { examEvents } from "@/db/schema/examEvents";
 import SearchData from "@/components/ui/searchData";
-import { Separator } from "@/components/ui/separator";
 import { getAllExamEvents } from "@/actions/examEvents";
 import AddExamEventBtn from "@/components/ui/addExamEvent";
-import { BrushCleaning, Calendar, Clock } from "lucide-react";
 import { validateSessionServer } from "@/actions/validateSession";
 
 export default async function Page({ searchParams }: SearchParams) {
@@ -86,46 +83,5 @@ async function ExamEventList({
         )}
       </div>
     </>
-  );
-}
-
-function EventItem({
-  examEventName,
-  registrationStart,
-  registrationEnd,
-  examStart,
-  examEnd,
-  updatedAt,
-}: InferSelectModel<typeof examEvents>) {
-  return (
-    <div className="rounded-lg overflow-hidden border shadow">
-      <div className="p-5 flex flex-col gap-2">
-        <p className="font-medium">{toTitleCase(examEventName)}</p>
-        <div>
-          <p className="text-muted-foreground mb-1">Registrasi</p>
-          <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 shrink-0" />
-            <p className="text-sm">{registrationStart}</p>
-            <span>→</span>
-            <p className="text-sm">{registrationEnd}</p>
-          </div>
-        </div>
-        <div>
-          <p className="text-muted-foreground mb-1">Pelaksanaan</p>
-          <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 shrink-0" />
-            <p className="text-sm">{examStart}</p>
-            <span>→</span>
-            <p className="text-sm">{examEnd}</p>
-          </div>
-        </div>
-      </div>
-      <Separator />
-      <div className="p-4 bg-muted">
-        <p className="text-xs text-muted-foreground">
-          Diperbarui : {new Date(updatedAt + "Z").toLocaleString()}
-        </p>
-      </div>
-    </div>
   );
 }
