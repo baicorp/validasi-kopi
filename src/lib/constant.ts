@@ -31,8 +31,8 @@ const productCategories = [
 ];
 
 const basicExam = [
-  "2 out of 5 campuran kopi",
   "2 out of 5 kopi pure",
+  "2 out of 5 campuran kopi",
   "treshold single",
   "treshold mix",
 ];
