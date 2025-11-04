@@ -7,7 +7,7 @@ import { examEvents } from "@/db/schema/examEvents";
 import { and, desc, like, sql } from "drizzle-orm";
 
 export async function addExamEvent(formData: FormData) {
-  const registrationName = formData.get("registration-name") as string;
+  const eventName = formData.get("registration-name") as string;
   const registrationStartDate = formData.get(
     "registration-start-date",
   ) as string;
@@ -22,7 +22,7 @@ export async function addExamEvent(formData: FormData) {
   const eventEndTime = formData.get("event-end-time") as string;
 
   if (
-    !registrationName.trim() ||
+    !eventName.trim() ||
     !registrationStartDate ||
     !registrationStartTime ||
     !registrationEndDate ||
@@ -35,23 +35,25 @@ export async function addExamEvent(formData: FormData) {
     return { error: "Lengkapi semua data pendaftaran ujian." };
   }
 
-  // gabungkan tanggal dan waktu agar mudah dibandingkan
-  const regStart = new Date(
-    `${registrationStartDate}T${registrationStartTime}`,
-  );
-  const regEnd = new Date(`${registrationEndDate}T${registrationEndTime}`);
-  const examStart = new Date(`${eventStartDate}T${eventStartTime}`);
-  const examEnd = new Date(`${eventEndDate}T${eventEndTime}`);
+  const registrationStart = new Date(
+    `${registrationStartDate} ${registrationStartTime}`,
+  ).toISOString();
+  const registrationEnd = new Date(
+    `${registrationEndDate} ${registrationEndTime}`,
+  ).toISOString();
+  const examStart = new Date(
+    `${eventStartDate} ${eventStartTime}`,
+  ).toISOString();
+  const examEnd = new Date(`${eventEndDate} ${eventEndTime}`).toISOString();
 
-  // validasi urutan waktu
-  if (regEnd <= regStart) {
+  if (registrationEnd <= registrationStart) {
     return {
       error:
         "Tanggal/waktu pendaftaran selesai harus setelah pendaftaran dimulai.",
     };
   }
 
-  if (examStart <= regEnd) {
+  if (registrationStart <= registrationEnd) {
     return {
       error: "Tanggal/waktu ujian harus setelah pendaftaran selesai.",
     };
@@ -70,11 +72,11 @@ export async function addExamEvent(formData: FormData) {
     }
 
     const newEvent = await db.insert(examEvents).values({
-      examEventName: registrationName,
-      registrationStart: `${registrationStartDate} ${registrationStartTime}`,
-      registrationEnd: `${registrationEndDate} ${registrationEndTime}`,
-      examStart: `${eventStartDate} ${eventStartTime}`,
-      examEnd: `${eventEndDate} ${eventEndTime}`,
+      examEventName: eventName,
+      registrationStart,
+      registrationEnd,
+      examStart,
+      examEnd,
     });
 
     if (newEvent.rowsAffected === 0) {
