@@ -1,8 +1,7 @@
-import { Clock } from "lucide-react";
-import { Calendar } from "./calendar";
 import { Separator } from "./separator";
 import { toTitleCase } from "@/lib/utils";
 import { InferSelectModel } from "drizzle-orm";
+import { Clock, Calendar } from "lucide-react";
 import { examEvents } from "@/db/schema/examEvents";
 import { formatLocalTime } from "@/lib/datetimeFormat";
 
