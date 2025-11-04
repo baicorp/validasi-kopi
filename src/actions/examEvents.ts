@@ -4,7 +4,7 @@ import { db } from "@/db";
 import { revalidatePath } from "next/cache";
 import { isValidRole } from "./validateSession";
 import { examEvents } from "@/db/schema/examEvents";
-import { and, desc, like, sql } from "drizzle-orm";
+import { and, desc, gte, like, lte, sql } from "drizzle-orm";
 
 export async function addExamEvent(formData: FormData) {
   const eventName = formData.get("registration-name") as string;
@@ -90,6 +90,26 @@ export async function addExamEvent(formData: FormData) {
   } catch (error) {
     console.error(error);
     return { error: "Gagal membuat pendaftaran baru." };
+  }
+}
+
+export async function getActiveExamEvent() {
+  try {
+    const currentDateTime = new Date().toISOString();
+    const rows = await db
+      .select()
+      .from(examEvents)
+      .where(
+        and(
+          lte(examEvents.registrationStart, currentDateTime),
+          gte(examEvents.registrationEnd, currentDateTime),
+        ),
+      );
+
+    return rows;
+  } catch (error) {
+    console.error(error);
+    return { error: "Gagal mendapatkan data ujian aktif." };
   }
 }
 
