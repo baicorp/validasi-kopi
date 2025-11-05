@@ -6,10 +6,13 @@ import { validateSessionServer } from "./validateSession";
 import { examEvents, examRegistrations } from "@/db/schema/examEvents";
 
 export async function registerEvent(formData: FormData, examEventId: number) {
-  const selectedExam = formData.getAll("selected-exam") as string[];
+  let selectedExam = formData.getAll("selected-exam") as string[];
   if (selectedExam.length === 0) {
     return { error: "Setidaknya pilih salah satu ujian" };
   }
+
+  // sort selectedExam. IMPORTANT for grouping query
+  selectedExam = selectedExam.sort();
 
   try {
     // get user id;
