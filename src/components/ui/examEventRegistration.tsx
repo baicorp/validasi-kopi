@@ -9,16 +9,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./select";
+import { toast } from "sonner";
 import { Label } from "./label";
 import { Button } from "./button";
 import { Checkbox } from "./checkbox";
 import { toTitleCase } from "@/lib/utils";
-import { FormEvent, useState } from "react";
+import { LoaderCircle } from "lucide-react";
+import { FormEvent, useEffect, useState } from "react";
 import { basicExam, productExam } from "@/lib/constant";
 import { CheckedState } from "@radix-ui/react-checkbox";
 import { registerEvent } from "@/actions/examRegistrations";
-import { toast } from "sonner";
-import { LoaderCircle } from "lucide-react";
 
 type ExamCategory = "uji dasar" | "uji produk";
 
@@ -101,6 +101,10 @@ function ListExam({
       setSelectedExam((prev) => prev.filter((exam) => exam !== examName));
     }
   }
+
+  useEffect(() => {
+    setSelectedExam([]);
+  }, [examCategory]);
 
   const exams = examCategory === "uji dasar" ? basicExam : productExam;
 
