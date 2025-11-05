@@ -105,8 +105,8 @@ export async function getActiveExamEvent() {
       .from(examEvents)
       .where(
         and(
-          lte(examEvents.registrationStart, currentDateTime),
-          gte(examEvents.registrationEnd, currentDateTime),
+          lte(examEvents.examStart, currentDateTime),
+          gte(examEvents.examEnd, currentDateTime),
         ),
       );
 
