@@ -1,8 +1,14 @@
 import Link from "next/link";
+import { Suspense } from "react";
+import { toTitleCase } from "@/lib/utils";
 import { redirect } from "next/navigation";
-import EventItem from "@/components/ui/eventItem";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Loading from "@/components/skeleton/loading";
 import { getActiveExamEvent } from "@/actions/examEvents";
 import { validateSessionServer } from "@/actions/validateSession";
+import { formatLocalTime, getDurationString } from "@/lib/datetimeFormat";
 
 export default async function Page({
   params,
@@ -30,13 +36,15 @@ export default async function Page({
   }
 
   return (
-    <div className="h-full flex justify-center items-center">
-      <ExamEvent />
+    <div>
+      <Suspense fallback={<Loading />}>
+        <ActiveExamEvent />
+      </Suspense>
     </div>
   );
 }
 
-async function ExamEvent() {
+async function ActiveExamEvent() {
   const examEvent = await getActiveExamEvent();
 
   if ("error" in examEvent)
@@ -51,13 +59,51 @@ async function ExamEvent() {
       {examEvent.length !== 0 ? (
         examEvent.map((event) => {
           return (
-            <Link
-              key={event.id}
-              href={`ujian/${event.id}`}
-              className="w-[270px] block"
+            <div
+              key={event.examEventId}
+              className="rounded-lg overflow-hidden border shadow w-[270px]"
             >
-              <EventItem key={event.id} {...event} />
-            </Link>
+              <div className="p-5 flex flex-col gap-2">
+                <p className="font-medium">
+                  {toTitleCase(event.examEventName)}
+                </p>
+                <div>
+                  <p className="text-muted-foreground mb-1">Pelaksanaan</p>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 shrink-0" />
+                    <p className="text-sm">
+                      {formatLocalTime(event.examStart)}
+                    </p>
+                    <span>→</span>
+                    <p className="text-sm">{formatLocalTime(event.examEnd)}</p>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-muted-foreground mb-1">Waktu pengerjaan</p>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 shrink-0" />
+                    <p className="text-sm">
+                      {getDurationString(event.examStart, event.examEnd)}
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-muted-foreground mb-1">
+                    Ujian yang dipilih
+                  </p>
+                  <div className="flex items-center flex-wrap gap-2">
+                    {event.selectedExam?.split(",").map((exam) => (
+                      <Badge key={exam} variant="secondary">
+                        {exam}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                <Link href={`ujian/${event.examEventId}`} className="mt-4">
+                  <Button className="w-full">Mulai ujian</Button>
+                </Link>
+              </div>
+            </div>
           );
         })
       ) : (
