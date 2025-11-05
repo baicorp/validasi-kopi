@@ -2,6 +2,7 @@
 
 import { db } from "@/db";
 import { user } from "@/db/schema/auth";
+import { codeGroups } from "@/db/schema";
 import { revalidatePath } from "next/cache";
 import { and, desc, eq, gte, like, lte, sql } from "drizzle-orm";
 import { examEvents, examRegistrations } from "@/db/schema/examEvents";
@@ -101,11 +102,26 @@ export async function addExamEvent(formData: FormData) {
 export async function getActiveExamEvent() {
   try {
     const currentDateTime = new Date().toISOString();
+
+    // get current user username (nik)
+    const session = await validateSessionServer();
+    const userId = session.user.id;
+
     const rows = await db
-      .select()
-      .from(examEvents)
+      .select({
+        examEventId: examEvents.id,
+        examEventName: examEvents.examEventName,
+        examStart: examEvents.examStart,
+        examEnd: examEvents.examEnd,
+        selectedExam: examRegistrations.selectedExam,
+        codeGroupId: codeGroups.id,
+      })
+      .from(examRegistrations)
+      .innerJoin(examEvents, eq(examRegistrations.examEventId, examEvents.id))
+      .leftJoin(codeGroups, eq(examRegistrations.codeGroupId, codeGroups.id))
       .where(
         and(
+          eq(examRegistrations.userId, userId),
           lte(examEvents.examStart, currentDateTime),
           gte(examEvents.examEnd, currentDateTime),
         ),
