@@ -35,6 +35,7 @@ export async function addExamEvent(formData: FormData) {
     return { error: "Lengkapi semua data pendaftaran ujian." };
   }
 
+  // combine date and time into Date objects (ISO format)
   const registrationStart = new Date(
     `${registrationStartDate} ${registrationStartTime}`,
   ).toISOString();
@@ -46,6 +47,7 @@ export async function addExamEvent(formData: FormData) {
   ).toISOString();
   const examEnd = new Date(`${eventEndDate} ${eventEndTime}`).toISOString();
 
+  // registration end must be after registration start
   if (registrationEnd <= registrationStart) {
     return {
       error:
@@ -53,12 +55,14 @@ export async function addExamEvent(formData: FormData) {
     };
   }
 
+  // exam start must be after registration end
   if (examStart <= registrationEnd) {
     return {
       error: "Tanggal/waktu ujian harus setelah pendaftaran selesai.",
     };
   }
 
+  // exam end must be after exam start
   if (examEnd <= examStart) {
     return {
       error: "Tanggal/waktu pelaksanaan selesai harus setelah ujian dimulai.",
