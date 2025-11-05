@@ -1,10 +1,11 @@
 "use server";
 
 import { db } from "@/db";
+import { user } from "@/db/schema/auth";
 import { revalidatePath } from "next/cache";
-import { isValidRole } from "./validateSession";
-import { examEvents } from "@/db/schema/examEvents";
-import { and, desc, gte, like, lte, sql } from "drizzle-orm";
+import { and, desc, eq, gte, like, lte, sql } from "drizzle-orm";
+import { examEvents, examRegistrations } from "@/db/schema/examEvents";
+import { isValidRole, validateSessionServer } from "./validateSession";
 
 export async function addExamEvent(formData: FormData) {
   const eventName = formData.get("registration-name") as string;
@@ -114,6 +115,49 @@ export async function getActiveExamEvent() {
   } catch (error) {
     console.error(error);
     return { error: "Gagal mendapatkan data ujian aktif." };
+  }
+}
+
+export async function getActiveRegistrationExamEvent() {
+  try {
+    const currentDateTime = new Date().toISOString();
+
+    // get current user username (nik)
+    const session = await validateSessionServer();
+    const username = session.user.username;
+
+    const rows = await db
+      .select({
+        examEventId: examEvents.id,
+        examEventName: examEvents.examEventName,
+        registrationStart: examEvents.registrationStart,
+        registrationEnd: examEvents.registrationEnd,
+        examStart: examEvents.examStart,
+        examEnd: examEvents.examEnd,
+        selectedExam: examRegistrations.selectedExam,
+        isRegistered: sql<boolean>`CASE WHEN ${examRegistrations.id} IS NOT NULL THEN 1 ELSE 0 END`,
+      })
+      .from(user)
+      .innerJoin(
+        examEvents,
+        and(
+          lte(examEvents.registrationStart, currentDateTime),
+          gte(examEvents.registrationEnd, currentDateTime),
+        ),
+      )
+      .leftJoin(
+        examRegistrations,
+        and(
+          eq(examRegistrations.examEventId, examEvents.id),
+          eq(examRegistrations.userId, user.id),
+        ),
+      )
+      .where(eq(user.username, username));
+
+    return rows;
+  } catch (error) {
+    console.error(error);
+    return { error: "Gagal mendapatkan data pendaftaran ujian aktif." };
   }
 }
 
