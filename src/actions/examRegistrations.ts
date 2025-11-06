@@ -107,3 +107,32 @@ export async function getUserRegisteredExamEvents(examEventId: number) {
     return { error: "Gagal mendapatkan daftar peserta ujian." };
   }
 }
+
+export async function assignCodeGroupExam({
+  formData,
+  selectedExam,
+}: {
+  formData: FormData;
+  selectedExam: string;
+}) {
+  const codeGroupId = formData.get("code-group-exam") as string;
+
+  if (!codeGroupId.trim()) {
+    return { error: "Tidak ada id soal diberikan." };
+  }
+
+  try {
+    const result = await db
+      .update(examRegistrations)
+      .set({ codeGroupId: Number(codeGroupId) })
+      .where(eq(examRegistrations.selectedExam, selectedExam));
+
+    if (result.rowsAffected === 0) {
+      return { error: "Gagal mengupdate soal ujian" };
+    }
+
+    return result.rows;
+  } catch (error) {
+    console.error(error);
+  }
+}
