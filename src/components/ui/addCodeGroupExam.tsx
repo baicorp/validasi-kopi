@@ -2,7 +2,8 @@
 
 import { toast } from "sonner";
 import { Button } from "./button";
-import { FormEvent } from "react";
+import { FormEvent, useState } from "react";
+import { LoaderCircle } from "lucide-react";
 import SelectCodeGroupExam from "./selectCodeGroupExam";
 import { assignCodeGroupExam } from "@/actions/examRegistrations";
 
@@ -21,20 +22,25 @@ export default function CodeGroupExamForm({
     selectedExam: string;
   }[];
 }) {
+  const [isLoad, setIsLoad] = useState(false);
+
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
+    setIsLoad(true);
     const result = await assignCodeGroupExam({ formData, selectedExam });
 
     if (!result || "error" in result) {
       toast.error(result?.error || "Ada yang salah.");
+      setIsLoad(false);
       return;
     }
 
     toast.success(
-      `Berhasil menambahkan soal ujian untuk uji : ${selectedExam}`,
+      `Berhasil memperbarui soal ujian untuk uji : ${selectedExam}`,
     );
+    setIsLoad(false);
   }
 
   return (
@@ -47,8 +53,9 @@ export default function CodeGroupExamForm({
           totalParticipants={participants.length}
         />
       </div>
-      <Button type="submit" className="self-end">
+      <Button type="submit" disabled={isLoad} className="self-end">
         Simpan
+        {isLoad && <LoaderCircle className="animate-spin" />}
       </Button>
     </form>
   );
