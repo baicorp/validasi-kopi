@@ -84,6 +84,7 @@ export async function getUserRegisteredExamEvents(examEventId: number) {
         username: user.username,
         name: user.name,
         position: user.position,
+        codeGroupId: codeGroups.id,
         selectedExam: examRegistrations.selectedExam,
       })
       .from(examRegistrations)
@@ -98,6 +99,7 @@ export async function getUserRegisteredExamEvents(examEventId: number) {
     );
     return Object.keys(groupBySelectedExam).map((key) => ({
       examGroup: key,
+      codeGroupId: groupBySelectedExam[key]![0].codeGroupId,
       data: groupBySelectedExam[key]!,
     }));
   } catch (error) {
