@@ -1,8 +1,10 @@
 "use server";
 
 import { db } from "@/db";
+import { user } from "@/db/schema/auth";
+import { codeGroups } from "@/db/schema";
 import { and, eq, gte, lte } from "drizzle-orm";
-import { validateSessionServer } from "./validateSession";
+import { isValidRole, validateSessionServer } from "./validateSession";
 import { examEvents, examRegistrations } from "@/db/schema/examEvents";
 
 export async function registerEvent(formData: FormData, examEventId: number) {
@@ -67,5 +69,39 @@ export async function registerEvent(formData: FormData, examEventId: number) {
   } catch (error) {
     console.error(error);
     return { error: "Gagal melakukan pendaftaran. ID ujian tidak valid" };
+  }
+}
+
+export async function getUserRegisteredExamEvents(examEventId: number) {
+  try {
+    const isValid = await isValidRole("admin");
+    if (!isValid) {
+      return { error: "401 : Anda tidak memiliki izin." };
+    }
+
+    const rows = await db
+      .select({
+        username: user.username,
+        name: user.name,
+        position: user.position,
+        selectedExam: examRegistrations.selectedExam,
+      })
+      .from(examRegistrations)
+      .innerJoin(examEvents, eq(examRegistrations.examEventId, examEvents.id))
+      .innerJoin(user, eq(examRegistrations.userId, user.id))
+      .leftJoin(codeGroups, eq(examRegistrations.codeGroupId, codeGroups.id))
+      .where(eq(examEvents.id, examEventId));
+
+    const groupBySelectedExam = Object.groupBy(
+      rows,
+      ({ selectedExam }) => selectedExam,
+    );
+    return Object.keys(groupBySelectedExam).map((key) => ({
+      examGroup: key,
+      data: groupBySelectedExam[key]!,
+    }));
+  } catch (error) {
+    console.error(error);
+    return { error: "Gagal mendapatkan daftar peserta ujian." };
   }
 }
