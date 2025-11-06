@@ -70,7 +70,7 @@ async function ExamParticipantList({ examEventId }: { examEventId: string }) {
             <p className="font-medium mb-1">
               Daftar Peserta Ujian ({data.data.length} orang)
             </p>
-            <div className="flex gap-2 flex-wrap">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
               {data.data.map((participant) => (
                 <ExamParticipantItem
                   key={participant.username}
