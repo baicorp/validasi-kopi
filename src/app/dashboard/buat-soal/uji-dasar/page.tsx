@@ -60,7 +60,7 @@ export default function Page() {
           {basicExam.map((exam) => {
             const checkboxId = exam.replaceAll(" ", "-");
             return (
-              <Label key={exam} htmlFor={checkboxId} className="te">
+              <Label key={exam} htmlFor={checkboxId} className="font-normal">
                 <Checkbox
                   id={checkboxId}
                   onCheckedChange={(e) => handleSelectedExamChange(e, exam)}
