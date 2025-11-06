@@ -1,22 +1,26 @@
 "use client";
 
+import { Input } from "./input";
 import { Label } from "./label";
 import { useState } from "react";
 import { Button } from "./button";
 import { Calendar } from "./calendar";
 import { ChevronDownIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
-import { Input } from "./input";
 
 export default function DateTimePicker({
   label,
   name,
+  defaultDate,
+  defaultTime,
 }: {
   label: string;
   name: string;
+  defaultDate?: Date | undefined;
+  defaultTime?: string | undefined;
 }) {
   const [open, setOpen] = useState(false);
-  const [date, setDate] = useState<Date | undefined>(undefined);
+  const [date, setDate] = useState<Date | undefined>(defaultDate);
 
   return (
     <div className="flex flex-col gap-3">
@@ -42,6 +46,7 @@ export default function DateTimePicker({
               selected={date}
               captionLayout="dropdown"
               onSelect={(date) => {
+                console.log(date);
                 setDate(date);
                 setOpen(false);
               }}
@@ -59,7 +64,7 @@ export default function DateTimePicker({
           type="time"
           id="time-picker"
           step="1"
-          defaultValue="00:00:00"
+          defaultValue={defaultTime ?? "00:00:00"}
           name={`${name}-time`}
           required
           className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"

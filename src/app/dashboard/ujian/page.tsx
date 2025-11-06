@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Suspense } from "react";
 import { SearchParams } from "@/lib/types";
 import { redirect } from "next/navigation";
@@ -69,9 +68,7 @@ async function ExamEventList({
     <>
       <div className="grid grid-cols-1 md:grid-cols-[repeat(auto-fit,minmax(270px,1fr))] xl:grid-cols-4 gap-2.5">
         {examEvents.data.map((event) => (
-          <Link key={event.id} href={`ujian/${event.id}/peserta-ujian`}>
-            <EventItem key={event.id} {...event} />
-          </Link>
+          <EventItem key={event.id} {...event} />
         ))}
       </div>
       <div>

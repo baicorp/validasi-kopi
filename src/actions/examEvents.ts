@@ -99,6 +99,100 @@ export async function addExamEvent(formData: FormData) {
   }
 }
 
+export async function updateExamEvent(formData: FormData, examEventId: number) {
+  const eventName = formData.get("registration-name") as string;
+  const registrationStartDate = formData.get(
+    "registration-start-date",
+  ) as string;
+  const registrationStartTime = formData.get(
+    "registration-start-time",
+  ) as string;
+  const registrationEndDate = formData.get("registration-end-date") as string;
+  const registrationEndTime = formData.get("registration-end-time") as string;
+  const eventStartDate = formData.get("event-start-date") as string;
+  const eventStartTime = formData.get("event-start-time") as string;
+  const eventEndDate = formData.get("event-end-date") as string;
+  const eventEndTime = formData.get("event-end-time") as string;
+
+  if (
+    !eventName.trim() ||
+    !registrationStartDate ||
+    !registrationStartTime ||
+    !registrationEndDate ||
+    !registrationEndTime ||
+    !eventStartDate ||
+    !eventStartTime ||
+    !eventEndDate ||
+    !eventEndTime
+  ) {
+    return { error: "Lengkapi semua data pendaftaran ujian." };
+  }
+
+  // combine date and time into Date objects (ISO format)
+  const registrationStart = new Date(
+    `${registrationStartDate} ${registrationStartTime}`,
+  ).toISOString();
+  const registrationEnd = new Date(
+    `${registrationEndDate} ${registrationEndTime}`,
+  ).toISOString();
+  const examStart = new Date(
+    `${eventStartDate} ${eventStartTime}`,
+  ).toISOString();
+  const examEnd = new Date(`${eventEndDate} ${eventEndTime}`).toISOString();
+
+  // registration end must be after registration start
+  if (registrationEnd <= registrationStart) {
+    return {
+      error:
+        "Tanggal/waktu pendaftaran selesai harus setelah pendaftaran dimulai.",
+    };
+  }
+
+  // exam start must be after registration end
+  if (examStart <= registrationEnd) {
+    return {
+      error: "Tanggal/waktu ujian harus setelah pendaftaran selesai.",
+    };
+  }
+
+  // exam end must be after exam start
+  if (examEnd <= examStart) {
+    return {
+      error: "Tanggal/waktu pelaksanaan selesai harus setelah ujian dimulai.",
+    };
+  }
+
+  try {
+    const isValid = await isValidRole("admin");
+    if (!isValid) {
+      return { error: "401 : Anda tidak memiliki izin." };
+    }
+
+    const updatedEvent = await db
+      .update(examEvents)
+      .set({
+        examEventName: eventName,
+        registrationStart,
+        registrationEnd,
+        examStart,
+        examEnd,
+      })
+      .where(eq(examEvents.id, examEventId));
+
+    if (updatedEvent.rowsAffected === 0) {
+      return {
+        error: "Gagal memperbarui waktu ujian.",
+      };
+    }
+
+    revalidatePath("/dashboard/ujian");
+    return updatedEvent.rows;
+  } catch (error) {
+    console.error(error);
+    return { error: "Gagal memperbarui waktu ujian." };
+  }
+}
+
 export async function getActiveExamEvent() {
   try {
     const currentDateTime = new Date().toISOString();
