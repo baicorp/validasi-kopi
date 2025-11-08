@@ -54,12 +54,7 @@ export default function AddExamEventBtn() {
           <DialogTitle>Buka pendaftaran ujian</DialogTitle>
         </DialogHeader>
         <form className="space-y-4" onSubmit={(e) => handleAddExamEvent(e)}>
-          <Input placeholder="Nama ujian" name="registration-name" required />
-          <DateTimePicker
-            label="Pendaftaran dibuka"
-            name="registration-start"
-          />
-          <DateTimePicker label="Pendaftaran ditutup" name="registration-end" />
+          <Input placeholder="Nama ujian" name="event-name" required />
           <DateTimePicker label="Ujian dibuka" name="event-start" />
           <DateTimePicker label="Ujian ditutup" name="event-end" />
           <Button type="submit" disabled={isLoad} className="ml-auto">

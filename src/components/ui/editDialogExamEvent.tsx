@@ -17,22 +17,14 @@ import { updateExamEvent } from "@/actions/examEvents";
 
 export default function EditDialogExamEvent({
   eventId,
-  registrationName,
-  registerDefaultDateStart,
-  registerDefaultTimeStart,
-  registerDefaultDateEnd,
-  registerDefaultTimeEnd,
+  eventName,
   examDefaultDateStart,
   examDefaultTimeStart,
   examDefaultDateEnd,
   examDefaultTimeEnd,
 }: {
   eventId: number;
-  registrationName: string;
-  registerDefaultDateStart: Date;
-  registerDefaultTimeStart: string;
-  registerDefaultDateEnd: Date;
-  registerDefaultTimeEnd: string;
+  eventName: string;
   examDefaultDateStart: Date;
   examDefaultTimeStart: string;
   examDefaultDateEnd: Date;
@@ -77,21 +69,9 @@ export default function EditDialogExamEvent({
         <form className="space-y-4" onSubmit={(e) => handleEdit(e)}>
           <Input
             placeholder="Nama ujian"
-            name="registration-name"
+            name="event-name"
             required
-            defaultValue={registrationName}
-          />
-          <DateTimePicker
-            label="Pendaftaran dibuka"
-            name="registration-start"
-            defaultDate={registerDefaultDateStart}
-            defaultTime={registerDefaultTimeStart}
-          />
-          <DateTimePicker
-            label="Pendaftaran ditutup"
-            name="registration-end"
-            defaultDate={registerDefaultDateEnd}
-            defaultTime={registerDefaultTimeEnd}
+            defaultValue={eventName}
           />
           <DateTimePicker
             label="Ujian dibuka"
