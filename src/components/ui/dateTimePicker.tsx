@@ -23,7 +23,7 @@ export default function DateTimePicker({
   const [date, setDate] = useState<Date | undefined>(defaultDate);
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2">
       <Label htmlFor="date-picker" className="px-1">
         {label}
       </Label>
