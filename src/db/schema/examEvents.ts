@@ -7,8 +7,6 @@ import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 export const examEvents = sqliteTable("exam_events", {
   id: integer("id").primaryKey(),
   examEventName: text("exam_event_name").notNull(),
-  registrationStart: text("registration_start").notNull(),
-  registrationEnd: text("registration_end").notNull(),
   examStart: text("exam_start").notNull(),
   examEnd: text("exam_end").notNull(),
   createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
