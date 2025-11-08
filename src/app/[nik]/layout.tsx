@@ -20,9 +20,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <Link className="py-4 text-center basis-1/2" href={"ujian"}>
           Ujian
         </Link>
-        <Link className="py-4 text-center basis-1/2" href="daftar-ujian">
-          Daftar Ujian
-        </Link>
       </section>
       <section className="pt-4 px-4 lg:px-10 h-[calc(100dvh_-_136px)]">
         {children}
