@@ -7,9 +7,9 @@ import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 export const examEvents = sqliteTable("exam_events", {
   id: integer("id").primaryKey(),
   examEventName: text("exam_event_name").notNull(),
-  selectedExam: text("selected_exam").notNull(),
   examStart: text("exam_start").notNull(),
   examEnd: text("exam_end").notNull(),
+  codeGroupId: integer("code_group_id").references(() => codeGroups.id),
   createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
   updatedAt: text("updated_at").default(sql`(CURRENT_TIMESTAMP)`),
 });
