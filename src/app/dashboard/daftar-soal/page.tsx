@@ -6,11 +6,12 @@ import { SearchParams } from "@/lib/types";
 import ErrorComp from "@/components/ui/error";
 import Paginator from "@/components/ui/paginator";
 import SearchData from "@/components/ui/searchData";
+import { deleteGeneratedCode } from "@/actions/codes";
+import { getAllCodeGroups } from "@/actions/codeGroups";
 import DeleteDialog from "@/components/ui/deleteDialog";
 import { BrushCleaning, Sheet, User } from "lucide-react";
 import CodeGroupsLabel from "@/components/ui/codeGroupsLabel";
 import { validateSessionServer } from "@/actions/validateSession";
-import { deleteGeneratedCode, getCodeGroups } from "@/actions/codes";
 import CodeGroupsSkeleton from "@/components/skeleton/codeGroupsSkeleton";
 
 export default async function Page({ searchParams }: SearchParams) {
@@ -29,7 +30,7 @@ export default async function Page({ searchParams }: SearchParams) {
       </div>
       <div className="flex justify-between items-center">
         <div className="basis-1/3">
-          <SearchData placeholder="Cari nama soal tersimpan" />
+          <SearchData placeholder="Cari nama / ujian soal tersimpan" />
         </div>
       </div>
       <Suspense key={search} fallback={<CodeGroupsSkeleton />}>
@@ -40,7 +41,7 @@ export default async function Page({ searchParams }: SearchParams) {
 }
 
 async function CodeGroups({ page, search }: { page: string; search: string }) {
-  const codeGroups = await getCodeGroups(Number(page), search);
+  const codeGroups = await getAllCodeGroups(Number(page), search);
 
   if ("error" in codeGroups) {
     return <ErrorComp error={codeGroups.error} />;
