@@ -1,12 +1,12 @@
 "use server";
 
+import { db } from "@/db";
 import { auth } from "@/lib/auth";
+import { user } from "@/db/schema";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { db } from "@/db";
-import { user } from "@/db/schema";
-import { and, desc, eq, like, sql } from "drizzle-orm";
 import { isValidRole } from "./validateSession";
+import { and, desc, eq, like, or, sql } from "drizzle-orm";
 
 export async function addEmployee(formData: FormData) {
   const nik = formData.get("employee-nik") as string;
@@ -47,15 +47,18 @@ export async function addEmployee(formData: FormData) {
   }
 }
 
-export async function getAllEmployees(
-  page: number = 1,
-  search: string | undefined,
-) {
+export async function getAllEmployees(page: number = 1, search?: string) {
   const limit = 12;
   const offset = (page - 1) * limit;
 
   const conditions = [eq(user.role, "user")];
-  if (search) conditions.push(like(user.name, `%${search}%`));
+  if (search) {
+    conditions.push(
+      // @ts-expect-error NOTE: This expression works correctly at runtime,
+      // but TypeScript infers incompatible types for `or()` with dynamic LIKE conditions.
+      or(like(user.name, `%${search}%`), like(user.username, `%${search}%`)),
+    );
+  }
 
   try {
     const isValid = await isValidRole("admin");
