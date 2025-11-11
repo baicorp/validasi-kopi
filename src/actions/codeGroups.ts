@@ -2,9 +2,9 @@
 
 import { db } from "@/db";
 import { codeGroups } from "@/db/schema";
-import { and, desc, eq, isNull, like, sql } from "drizzle-orm";
 import { isValidRole } from "./validateSession";
 import { examEvents } from "@/db/schema/examEvents";
+import { desc, eq, isNull, like, or, sql } from "drizzle-orm";
 
 export async function getAllCodeGroups(page: number = 1, search?: string) {
   const limit = 12;
@@ -26,12 +26,12 @@ export async function getAllCodeGroups(page: number = 1, search?: string) {
     const [{ count }] = await db
       .select({ count: sql<number>`count(*)` })
       .from(codeGroups)
-      .where(conditions.length ? and(...conditions) : undefined);
+      .where(conditions.length ? or(...conditions) : undefined);
 
     const data = await db
       .select()
       .from(codeGroups)
-      .where(conditions.length ? and(...conditions) : undefined)
+      .where(conditions.length ? or(...conditions) : undefined)
       .orderBy(desc(codeGroups.createdAt))
       .limit(limit)
       .offset(offset);
