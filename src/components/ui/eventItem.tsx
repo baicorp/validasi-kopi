@@ -31,7 +31,7 @@ export default function EventItem({
         <EditDialogExamEvent
           eventId={id}
           eventName={examEventName}
-          codeGroupId={codeGroupId}
+          codeGroupId={codeGroupId ?? undefined}
           examDefaultDateStart={examDateStart}
           examDefaultDateEnd={examDateEnd}
           examDefaultTimeStart={examTimeStart}
