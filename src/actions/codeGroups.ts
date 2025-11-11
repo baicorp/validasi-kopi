@@ -88,7 +88,11 @@ export async function getCodeGroupById(codeGroupId: number) {
       .where(eq(codeGroups.id, codeGroupId))
       .orderBy(desc(codeGroups.createdAt));
 
-    return rows;
+    if (rows.length === 0) {
+      return { error: "Soal tidak ditemukan." };
+    }
+
+    return rows[0];
   } catch (error) {
     console.error(error);
     return { error: "Gagal mendapat list soal. Database bermasalah." };

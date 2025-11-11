@@ -10,55 +10,42 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./select";
-import { getCodeGroupById, getCodeGroupsForExam } from "@/actions/codeGroups";
+import { getCodeGroupsForExam } from "@/actions/codeGroups";
 
-export default function SelectCodeGroupExam({
-  defaultCodeGroupId,
-}: {
-  defaultCodeGroupId?: number;
-}) {
-  const defaultValue = defaultCodeGroupId?.toString();
+export default function SelectCodeGroupExam() {
   return (
-    <Select
-      disabled={defaultCodeGroupId ? true : false}
-      name="code-group-exam"
-      required
-      defaultValue={defaultValue}
-    >
+    <Select name="code-group-exam" required>
       <SelectTrigger className="w-full">
         <SelectValue placeholder="Pilih soal ujian" />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
-          <SelectItems defaultValue={defaultCodeGroupId} />
+          <SelectItems />
         </SelectGroup>
       </SelectContent>
     </Select>
   );
 }
 
-function SelectItems({ defaultValue }: { defaultValue?: number }) {
+function SelectItems() {
   const {
     data: codeGroupsExams,
     isLoading,
     error,
-  } = useSWR(
-    defaultValue ? ["codeGroups", defaultValue] : "codeGroups",
-    defaultValue ? () => getCodeGroupById(defaultValue) : getCodeGroupsForExam,
-  );
-
-  if (error || !codeGroupsExams || "error" in codeGroupsExams) {
-    return (
-      <SelectItem disabled value={"undefined"}>
-        Gagal medapatakan daftar soal {error}
-      </SelectItem>
-    );
-  }
+  } = useSWR("codeGroups", getCodeGroupsForExam);
 
   if (isLoading) {
     return (
       <SelectItem disabled value="#" className="text-center">
         Loading...
+      </SelectItem>
+    );
+  }
+
+  if (error || !codeGroupsExams || "error" in codeGroupsExams) {
+    return (
+      <SelectItem disabled value={"undefined"}>
+        Gagal medapatakan daftar soal {error}
       </SelectItem>
     );
   }
