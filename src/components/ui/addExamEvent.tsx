@@ -8,12 +8,14 @@ import {
   DialogTrigger,
 } from "./dialog";
 import { toast } from "sonner";
+import { Label } from "./label";
 import { Input } from "./input";
 import { Button } from "./button";
 import { FormEvent, useState } from "react";
 import DateTimePicker from "./dateTimePicker";
 import { LoaderCircle, Plus } from "lucide-react";
 import { addExamEvent } from "@/actions/examEvents";
+import SelectCodeGroupExam from "./selectCodeGroupExam";
 
 export default function AddExamEventBtn() {
   const [isLoad, setIsLoad] = useState(false);
@@ -31,10 +33,10 @@ export default function AddExamEventBtn() {
         toast.error(result.error);
         return;
       }
-      toast.success("Berhasil membuka pendaftaran ujian.");
+      toast.success("Berhasil membuat ujian baru.");
     } catch (e) {
       console.error(e);
-      toast.error("Gagal membuka pendaftaran ujian.");
+      toast.error("Gagal membuat ujian baru.");
     } finally {
       setOpen(false);
       setIsLoad(false);
@@ -46,19 +48,31 @@ export default function AddExamEventBtn() {
       <DialogTrigger asChild className="ml-auto">
         <Button className="flex items-center gap-2 font-normal">
           <Plus className="w-4 h-4" />
-          Buka Pendaftaran Ujian
+          Buat Ujian Baru
         </Button>
       </DialogTrigger>
       <DialogContent className="w-96">
         <DialogHeader>
-          <DialogTitle>Buka pendaftaran ujian</DialogTitle>
+          <DialogTitle>Buat Ujian Baru</DialogTitle>
         </DialogHeader>
         <form className="space-y-4" onSubmit={(e) => handleAddExamEvent(e)}>
-          <Input placeholder="Nama ujian" name="event-name" required />
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="event-name">Soal ujian</Label>
+            <Input
+              id="event-name"
+              placeholder="Nama ujian"
+              name="event-name"
+              required
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label>Soal ujian</Label>
+            <SelectCodeGroupExam />
+          </div>
           <DateTimePicker label="Ujian dibuka" name="event-start" />
           <DateTimePicker label="Ujian ditutup" name="event-end" />
           <Button type="submit" disabled={isLoad} className="ml-auto">
-            Buka Pendaftaran
+            Buat Ujian
             {isLoad && <LoaderCircle className="animate-spin" />}
           </Button>
         </form>

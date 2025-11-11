@@ -1,5 +1,6 @@
 "use client";
 
+import useSWR from "swr";
 import {
   Select,
   SelectContent,
@@ -9,55 +10,47 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./select";
-import useSWR from "swr";
-import { getCodeGroupsForExam } from "@/actions/codeGroups";
+import { getCodeGroupById, getCodeGroupsForExam } from "@/actions/codeGroups";
 
 export default function SelectCodeGroupExam({
   defaultCodeGroupId,
-  selectedExam,
-  totalParticipants,
 }: {
-  defaultCodeGroupId: number | null;
-  selectedExam: string;
-  totalParticipants: number;
+  defaultCodeGroupId?: number;
 }) {
   const defaultValue = defaultCodeGroupId?.toString();
   return (
-    <Select name="code-group-exam" required defaultValue={defaultValue}>
+    <Select
+      disabled={defaultCodeGroupId ? true : false}
+      name="code-group-exam"
+      required
+      defaultValue={defaultValue}
+    >
       <SelectTrigger className="w-full">
         <SelectValue placeholder="Pilih soal ujian" />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
-          <SelectItems
-            selectedExam={selectedExam}
-            totalParticipants={totalParticipants}
-          />
+          <SelectItems defaultValue={defaultCodeGroupId} />
         </SelectGroup>
       </SelectContent>
     </Select>
   );
 }
 
-function SelectItems({
-  selectedExam,
-  totalParticipants,
-}: {
-  selectedExam: string;
-  totalParticipants: number;
-}) {
+function SelectItems({ defaultValue }: { defaultValue?: number }) {
   const {
     data: codeGroupsExams,
-    error,
     isLoading,
-  } = useSWR(selectedExam, () =>
-    getCodeGroupsForExam(selectedExam, totalParticipants),
+    error,
+  } = useSWR(
+    defaultValue ? ["codeGroups", defaultValue] : "codeGroups",
+    defaultValue ? () => getCodeGroupById(defaultValue) : getCodeGroupsForExam,
   );
 
   if (error || !codeGroupsExams || "error" in codeGroupsExams) {
     return (
-      <SelectItem disabled value="#">
-        Gagal medapatakan daftar soal
+      <SelectItem disabled value={"undefined"}>
+        Gagal medapatakan daftar soal {error}
       </SelectItem>
     );
   }
@@ -73,7 +66,7 @@ function SelectItems({
   if (codeGroupsExams.length === 0) {
     return (
       <SelectItem disabled value="#" className="text-center">
-        Belum ada soal yang dibuat untuk ujian ini
+        Belum ada soal yang dibuat.
       </SelectItem>
     );
   }

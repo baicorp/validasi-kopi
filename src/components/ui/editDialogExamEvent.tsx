@@ -8,16 +8,19 @@ import {
   DialogTrigger,
 } from "./dialog";
 import { toast } from "sonner";
+import { Label } from "./label";
 import { Input } from "./input";
 import { Button } from "./button";
 import { FormEvent, useState } from "react";
 import DateTimePicker from "./dateTimePicker";
 import { LoaderCircle, SquarePen } from "lucide-react";
 import { updateExamEvent } from "@/actions/examEvents";
+import SelectCodeGroupExam from "./selectCodeGroupExam";
 
 export default function EditDialogExamEvent({
   eventId,
   eventName,
+  codeGroupId,
   examDefaultDateStart,
   examDefaultTimeStart,
   examDefaultDateEnd,
@@ -25,6 +28,7 @@ export default function EditDialogExamEvent({
 }: {
   eventId: number;
   eventName: string;
+  codeGroupId: number | null;
   examDefaultDateStart: Date;
   examDefaultTimeStart: string;
   examDefaultDateEnd: Date;
@@ -67,12 +71,22 @@ export default function EditDialogExamEvent({
           <DialogTitle>Edit Data Ujian</DialogTitle>
         </DialogHeader>
         <form className="space-y-4" onSubmit={(e) => handleEdit(e)}>
-          <Input
-            placeholder="Nama ujian"
-            name="event-name"
-            required
-            defaultValue={eventName}
-          />
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="event-name">Nama ujian</Label>
+            <Input
+              id="event-name"
+              placeholder="Nama ujian"
+              name="event-name"
+              defaultValue={eventName}
+              required
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label>Soal ujian</Label>
+            <SelectCodeGroupExam
+              defaultCodeGroupId={codeGroupId ?? undefined}
+            />
+          </div>
           <DateTimePicker
             label="Ujian dibuka"
             name="event-start"

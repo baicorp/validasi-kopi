@@ -1,19 +1,25 @@
 import Link from "next/link";
+import { Badge } from "./badge";
 import { Clock } from "lucide-react";
 import { Separator } from "./separator";
 import { toTitleCase } from "@/lib/utils";
-import { InferSelectModel } from "drizzle-orm";
-import { examEvents } from "@/db/schema/examEvents";
 import { formatLocalTime } from "@/lib/datetimeFormat";
 import EditDialogExamEvent from "./editDialogExamEvent";
+import { getAllExamEvents } from "@/actions/examEvents";
+
+type GetAllExamEventsResult = Awaited<ReturnType<typeof getAllExamEvents>>;
+type ExamEventItem = NonNullable<GetAllExamEventsResult["data"]>[number];
 
 export default function EventItem({
   id,
   examEventName,
+  codeGroupId,
   examStart,
   examEnd,
   updatedAt,
-}: InferSelectModel<typeof examEvents>) {
+  selectedExams,
+  totalParticipants,
+}: ExamEventItem) {
   const examDateStart = new Date(examStart);
   const examTimeStart = to24Hour(examDateStart);
   const examDateEnd = new Date(examEnd);
@@ -25,6 +31,7 @@ export default function EventItem({
         <EditDialogExamEvent
           eventId={id}
           eventName={examEventName}
+          codeGroupId={codeGroupId}
           examDefaultDateStart={examDateStart}
           examDefaultDateEnd={examDateEnd}
           examDefaultTimeStart={examTimeStart}
@@ -36,13 +43,27 @@ export default function EventItem({
           <p className="font-medium">{toTitleCase(examEventName)}</p>
         </Link>
         <div>
-          <p className="text-muted-foreground mb-1">Pelaksanaan</p>
+          <p className="text-muted-foreground mb-1">Daftar ujian</p>
+          <div className="flex flex-wrap gap-1">
+            {selectedExams?.split(",")?.map((exam) => (
+              <Badge key={exam} variant="secondary">
+                {exam}
+              </Badge>
+            ))}
+          </div>
+        </div>
+        <div>
+          <p className="text-muted-foreground mb-1">Tanggal / Waktu Ujian</p>
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 shrink-0" />
             <p className="text-sm">{formatLocalTime(examStart)}</p>
             <span>→</span>
             <p className="text-sm">{formatLocalTime(examEnd)}</p>
           </div>
+        </div>
+        <div>
+          <p className="text-muted-foreground mb-1">Kuota peserta ujian</p>
+          <p>{totalParticipants} Orang</p>
         </div>
       </div>
       <Separator />
