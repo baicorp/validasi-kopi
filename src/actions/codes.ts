@@ -1,9 +1,9 @@
 "use server";
 
 import { db } from "@/db";
+import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { isValidRole } from "./validateSession";
-import { and, desc, eq, like, sql } from "drizzle-orm";
 import { InsertCodes, ExamDataDetails } from "@/lib/types";
 import { formatRawExamsData, getExamsId } from "@/lib/utils";
 import { codes, codeGroups, examCategories, exams } from "@/db/schema";
@@ -121,45 +121,5 @@ export async function getTableData(
     return {
       error: `Gagal mendapat soal dengan id ${codeGroupId}. Database bermasalah.`,
     };
-  }
-}
-
-export async function getCodeGroups(
-  page: number = 1,
-  search: string | undefined,
-) {
-  const limit = 12;
-  const offset = (page - 1) * limit;
-  const conditions = [];
-  if (search) conditions.push(like(codeGroups.groupName, `%${search}%`));
-  if (search) conditions.push(like(codeGroups.groupName, `%${search}%`));
-
-  try {
-    const isValid = await isValidRole("admin");
-    if (!isValid) {
-      return { error: "401 : Anda tidak memiliki izin." };
-    }
-
-    const [{ count }] = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(codeGroups)
-      .where(conditions.length ? and(...conditions) : undefined);
-
-    const data = await db
-      .select()
-      .from(codeGroups)
-      .where(conditions.length ? and(...conditions) : undefined)
-      .orderBy(desc(codeGroups.createdAt))
-      .limit(limit)
-      .offset(offset);
-
-    return {
-      data,
-      page,
-      totalPages: Math.ceil(count / limit),
-    };
-  } catch (error) {
-    console.error(error);
-    return { error: "Gagal mendapat list soal. Database bermasalah." };
   }
 }
