@@ -8,14 +8,16 @@ import { examEvents, examRegistrations } from "@/db/schema/examEvents";
 import { isValidRole, validateSessionServer } from "./validateSession";
 
 export async function addExamEvent(formData: FormData) {
-  const eventName = formData.get("event-name") as string;
+  const eventName = (formData.get("event-name") as string).trim();
+  const codeGroupId = (formData.get("code-group-exam") as string).trim();
   const eventStartDate = formData.get("event-start-date") as string;
   const eventStartTime = formData.get("event-start-time") as string;
   const eventEndDate = formData.get("event-end-date") as string;
   const eventEndTime = formData.get("event-end-time") as string;
 
   if (
-    !eventName.trim() ||
+    !eventName ||
+    !codeGroupId ||
     !eventStartDate ||
     !eventStartTime ||
     !eventEndDate ||
@@ -45,6 +47,7 @@ export async function addExamEvent(formData: FormData) {
 
     const newEvent = await db.insert(examEvents).values({
       examEventName: eventName,
+      codeGroupId: Number(codeGroupId),
       examStart,
       examEnd,
     });
@@ -64,14 +67,14 @@ export async function addExamEvent(formData: FormData) {
 }
 
 export async function updateExamEvent(formData: FormData, examEventId: number) {
-  const eventName = formData.get("event-name") as string;
+  const eventName = (formData.get("event-name") as string).trim();
   const eventStartDate = formData.get("event-start-date") as string;
   const eventStartTime = formData.get("event-start-time") as string;
   const eventEndDate = formData.get("event-end-date") as string;
   const eventEndTime = formData.get("event-end-time") as string;
 
   if (
-    !eventName.trim() ||
+    !eventName ||
     !eventStartDate ||
     !eventStartTime ||
     !eventEndDate ||
@@ -136,12 +139,12 @@ export async function getActiveExamEvent() {
         examEventName: examEvents.examEventName,
         examStart: examEvents.examStart,
         examEnd: examEvents.examEnd,
-        selectedExam: examRegistrations.selectedExam,
+        selectedExam: codeGroups.examsLabel,
         codeGroupId: codeGroups.id,
       })
       .from(examRegistrations)
       .innerJoin(examEvents, eq(examRegistrations.examEventId, examEvents.id))
-      .leftJoin(codeGroups, eq(examRegistrations.codeGroupId, codeGroups.id))
+      .innerJoin(codeGroups, eq(examEvents.codeGroupId, codeGroups.id))
       .where(
         and(
           eq(examRegistrations.userId, userId),
@@ -157,10 +160,36 @@ export async function getActiveExamEvent() {
   }
 }
 
-export async function getAllExamEvents(
-  page: number = 1,
-  search: string | undefined,
-) {
+export async function getExamEventById(examEventId: number) {
+  try {
+    const rows = await db
+      .select({
+        id: examEvents.id,
+        examEventName: examEvents.examEventName,
+        examStart: examEvents.examStart,
+        examEnd: examEvents.examEnd,
+        codeGroupId: examEvents.codeGroupId,
+        createdAt: examEvents.createdAt,
+        updatedAt: examEvents.updatedAt,
+        selectedExams: codeGroups.examsLabel,
+        totalParticipants: codeGroups.totalParticipants,
+      })
+      .from(examEvents)
+      .innerJoin(codeGroups, eq(examEvents.codeGroupId, codeGroups.id))
+      .where(and(eq(examEvents.id, examEventId)));
+
+    if (rows.length === 0) {
+      return { error: `Tidak ada ujian dengan id ${examEventId}` };
+    }
+
+    return rows[0];
+  } catch (error) {
+    console.error(error);
+    return { error: "Gagal mendapatkan data ujian aktif." };
+  }
+}
+
+export async function getAllExamEvents(page: number = 1, search?: string) {
   const limit = 12;
   const offset = (page - 1) * limit;
 
@@ -176,11 +205,23 @@ export async function getAllExamEvents(
     const [{ count }] = await db
       .select({ count: sql<number>`count(*)` })
       .from(examEvents)
+      .innerJoin(codeGroups, eq(examEvents.codeGroupId, codeGroups.id))
       .where(conditions.length ? and(...conditions) : undefined);
 
     const data = await db
-      .select()
+      .select({
+        id: examEvents.id,
+        examEventName: examEvents.examEventName,
+        examStart: examEvents.examStart,
+        examEnd: examEvents.examEnd,
+        codeGroupId: examEvents.codeGroupId,
+        createdAt: examEvents.createdAt,
+        updatedAt: examEvents.updatedAt,
+        selectedExams: codeGroups.examsLabel,
+        totalParticipants: codeGroups.totalParticipants,
+      })
       .from(examEvents)
+      .innerJoin(codeGroups, eq(examEvents.codeGroupId, codeGroups.id))
       .where(conditions.length ? and(...conditions) : undefined)
       .orderBy(desc(examEvents.createdAt))
       .limit(limit)
