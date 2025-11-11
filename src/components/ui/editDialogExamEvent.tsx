@@ -8,14 +8,11 @@ import {
   DialogTrigger,
 } from "./dialog";
 import { toast } from "sonner";
-import { Label } from "./label";
-import { Input } from "./input";
 import { Button } from "./button";
+import { SquarePen } from "lucide-react";
 import { FormEvent, useState } from "react";
-import DateTimePicker from "./dateTimePicker";
-import { LoaderCircle, SquarePen } from "lucide-react";
 import { updateExamEvent } from "@/actions/examEvents";
-import SelectCodeGroupExam from "./selectCodeGroupExam";
+import ExamEventForm, { ExamEventFormInputProps } from "../form/examEventForm";
 
 export default function EditDialogExamEvent({
   eventId,
@@ -27,13 +24,7 @@ export default function EditDialogExamEvent({
   examDefaultTimeEnd,
 }: {
   eventId: number;
-  eventName: string;
-  codeGroupId: number | null;
-  examDefaultDateStart: Date;
-  examDefaultTimeStart: string;
-  examDefaultDateEnd: Date;
-  examDefaultTimeEnd: string;
-}) {
+} & ExamEventFormInputProps) {
   const [isLoad, setIsLoad] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -49,7 +40,6 @@ export default function EditDialogExamEvent({
         return;
       }
       toast.success("Berhasil memperbarui waktu ujian.");
-      setOpen(false);
     } catch (error) {
       console.error(error);
       toast.error("Gagal memperbarui waktu ujian.");
@@ -70,40 +60,16 @@ export default function EditDialogExamEvent({
         <DialogHeader>
           <DialogTitle>Edit Data Ujian</DialogTitle>
         </DialogHeader>
-        <form className="space-y-4" onSubmit={(e) => handleEdit(e)}>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="event-name">Nama ujian</Label>
-            <Input
-              id="event-name"
-              placeholder="Nama ujian"
-              name="event-name"
-              defaultValue={eventName}
-              required
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label>Soal ujian</Label>
-            <SelectCodeGroupExam
-              defaultCodeGroupId={codeGroupId ?? undefined}
-            />
-          </div>
-          <DateTimePicker
-            label="Ujian dibuka"
-            name="event-start"
-            defaultDate={examDefaultDateStart}
-            defaultTime={examDefaultTimeStart}
-          />
-          <DateTimePicker
-            label="Ujian ditutup"
-            name="event-end"
-            defaultDate={examDefaultDateEnd}
-            defaultTime={examDefaultTimeEnd}
-          />
-          <Button type="submit" disabled={isLoad} className="ml-auto">
-            Simpan perubahan
-            {isLoad && <LoaderCircle className="animate-spin" />}
-          </Button>
-        </form>
+        <ExamEventForm
+          handleSubmit={handleEdit}
+          isLoad={isLoad}
+          eventName={eventName}
+          codeGroupId={codeGroupId}
+          examDefaultDateStart={examDefaultDateStart}
+          examDefaultTimeStart={examDefaultTimeStart}
+          examDefaultDateEnd={examDefaultDateEnd}
+          examDefaultTimeEnd={examDefaultTimeEnd}
+        />
       </DialogContent>
     </Dialog>
   );

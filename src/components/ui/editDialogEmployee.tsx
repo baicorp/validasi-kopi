@@ -8,24 +8,19 @@ import {
   DialogTrigger,
 } from "./dialog";
 import { toast } from "sonner";
-import { Input } from "./input";
-import { Button } from "./button";
 import { FormEvent, useState } from "react";
-import { LoaderCircle } from "lucide-react";
+import EmployeeForm, { EmployeeFormInputProps } from "../form/employeeForm";
 import { DropdownMenuItem } from "./dropdown-menu";
 import { updateEmployee } from "@/actions/employees";
 
 export default function EditDialogEmployee({
   id,
-  nik,
+  username,
   name,
   position,
 }: {
   id: string;
-  nik: string;
-  name: string;
-  position: string;
-}) {
+} & EmployeeFormInputProps) {
   const [isLoad, setIsLoad] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -41,11 +36,11 @@ export default function EditDialogEmployee({
         return;
       }
       toast.success("Berhasil memperbarui karyawan.");
-      setOpen(false);
     } catch (error) {
       console.error(error);
       toast.error("Gagal memperbarui karyawan.");
     } finally {
+      setOpen(false);
       setIsLoad(false);
     }
   }
@@ -61,37 +56,13 @@ export default function EditDialogEmployee({
         <DialogHeader>
           <DialogTitle>Edit Produk</DialogTitle>
         </DialogHeader>
-        <form className="space-y-4" onSubmit={(e) => handleEdit(e)}>
-          <Input
-            placeholder="NIK"
-            defaultValue={nik}
-            name="employee-nik"
-            required
-          />
-          <Input
-            placeholder="Nama Karyawan"
-            defaultValue={name}
-            name="employee-name"
-            required
-          />
-          <Input
-            placeholder="Jabatan"
-            defaultValue={position}
-            name="employee-position"
-            required
-          />
-          <Input
-            placeholder="Default password : supersecure"
-            readOnly
-            disabled
-            name="employee-password"
-            required
-          />
-          <Button type="submit" disabled={isLoad} className="ml-auto">
-            Simpan
-            {isLoad && <LoaderCircle className="animate-spin" />}
-          </Button>
-        </form>
+        <EmployeeForm
+          isLoad={isLoad}
+          name={name}
+          username={username}
+          position={position}
+          handleSubmit={handleEdit}
+        />
       </DialogContent>
     </Dialog>
   );

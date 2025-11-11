@@ -8,13 +8,10 @@ import {
   DialogTrigger,
 } from "./dialog";
 import { toast } from "sonner";
-import { Input } from "./input";
-import { Button } from "./button";
 import { FormEvent, useState } from "react";
-import { LoaderCircle } from "lucide-react";
 import { updateProduct } from "@/actions/products";
 import { DropdownMenuItem } from "./dropdown-menu";
-import SelectProductCategories from "./selectProductCategories";
+import ProductForm, { ProductFormInputProps } from "../form/productForm";
 
 export default function EditDialogProduct({
   productId,
@@ -22,9 +19,7 @@ export default function EditDialogProduct({
   productCategoryId,
 }: {
   productId: string;
-  productName: string;
-  productCategoryId: string;
-}) {
+} & ProductFormInputProps) {
   const [isLoad, setIsLoad] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -40,7 +35,6 @@ export default function EditDialogProduct({
         return;
       }
       toast.success("Berhasil memperbarui produk.");
-      setOpen(false);
     } catch (error) {
       console.error(error);
       toast.error("Gagal memperbarui produk.");
@@ -60,17 +54,12 @@ export default function EditDialogProduct({
         <DialogHeader>
           <DialogTitle>Edit Produk</DialogTitle>
         </DialogHeader>
-        <form className="space-y-4" onSubmit={(e) => handleEdit(e)}>
-          <Input
-            placeholder="Nama produk"
-            name="nama-produk"
-            defaultValue={productName}
-          />
-          <SelectProductCategories defaultValue={productCategoryId} />
-          <Button type="submit" disabled={isLoad}>
-            Simpan {isLoad && <LoaderCircle className="animate-spin" />}
-          </Button>
-        </form>
+        <ProductForm
+          handleSubmit={handleEdit}
+          isLoad={isLoad}
+          productName={productName}
+          productCategoryId={productCategoryId}
+        />
       </DialogContent>
     </Dialog>
   );

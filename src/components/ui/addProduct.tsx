@@ -8,12 +8,11 @@ import {
   DialogTrigger,
 } from "./dialog";
 import { toast } from "sonner";
-import { Input } from "./input";
 import { Button } from "./button";
+import { Plus } from "lucide-react";
 import { FormEvent, useState } from "react";
+import ProductForm from "../form/productForm";
 import { addProduct } from "@/actions/products";
-import { LoaderCircle, Plus } from "lucide-react";
-import SelectProductCategories from "./selectProductCategories";
 
 export default function AddProductBtn() {
   const [isLoad, setIsLoad] = useState(false);
@@ -35,7 +34,6 @@ export default function AddProductBtn() {
       console.error(e);
       toast.error("Gagal menambahkan produk.");
     } finally {
-      setOpen(false);
       setIsLoad(false);
     }
   }
@@ -52,14 +50,7 @@ export default function AddProductBtn() {
         <DialogHeader>
           <DialogTitle>Tambah Produk</DialogTitle>
         </DialogHeader>
-        <form className="space-y-4" onSubmit={(e) => handleAddProduct(e)}>
-          <Input placeholder="Nama produk" name="nama-produk" required />
-          <SelectProductCategories />
-          <Button type="submit" disabled={isLoad} className="ml-auto">
-            Simpan
-            {isLoad && <LoaderCircle className="animate-spin" />}
-          </Button>
-        </form>
+        <ProductForm handleSubmit={handleAddProduct} isLoad={isLoad} />
       </DialogContent>
     </Dialog>
   );

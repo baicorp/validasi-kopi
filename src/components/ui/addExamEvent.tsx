@@ -8,14 +8,11 @@ import {
   DialogTrigger,
 } from "./dialog";
 import { toast } from "sonner";
-import { Label } from "./label";
-import { Input } from "./input";
 import { Button } from "./button";
+import { Plus } from "lucide-react";
 import { FormEvent, useState } from "react";
-import DateTimePicker from "./dateTimePicker";
-import { LoaderCircle, Plus } from "lucide-react";
+import ExamEventForm from "../form/examEventForm";
 import { addExamEvent } from "@/actions/examEvents";
-import SelectCodeGroupExam from "./selectCodeGroupExam";
 
 export default function AddExamEventBtn() {
   const [isLoad, setIsLoad] = useState(false);
@@ -38,7 +35,6 @@ export default function AddExamEventBtn() {
       console.error(e);
       toast.error("Gagal membuat ujian baru.");
     } finally {
-      setOpen(false);
       setIsLoad(false);
     }
   }
@@ -55,27 +51,7 @@ export default function AddExamEventBtn() {
         <DialogHeader>
           <DialogTitle>Buat Ujian Baru</DialogTitle>
         </DialogHeader>
-        <form className="space-y-4" onSubmit={(e) => handleAddExamEvent(e)}>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="event-name">Soal ujian</Label>
-            <Input
-              id="event-name"
-              placeholder="Nama ujian"
-              name="event-name"
-              required
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label>Soal ujian</Label>
-            <SelectCodeGroupExam />
-          </div>
-          <DateTimePicker label="Ujian dibuka" name="event-start" />
-          <DateTimePicker label="Ujian ditutup" name="event-end" />
-          <Button type="submit" disabled={isLoad} className="ml-auto">
-            Buat Ujian
-            {isLoad && <LoaderCircle className="animate-spin" />}
-          </Button>
-        </form>
+        <ExamEventForm isLoad={isLoad} handleSubmit={handleAddExamEvent} />
       </DialogContent>
     </Dialog>
   );

@@ -8,11 +8,11 @@ import {
   DialogTrigger,
 } from "./dialog";
 import { toast } from "sonner";
-import { Input } from "./input";
 import { Button } from "./button";
+import { Plus } from "lucide-react";
 import { FormEvent, useState } from "react";
+import EmployeeForm from "../form/employeeForm";
 import { addEmployee } from "@/actions/employees";
-import { LoaderCircle, Plus } from "lucide-react";
 
 export default function AddEmployeeBtn() {
   const [isLoad, setIsLoad] = useState(false);
@@ -34,7 +34,6 @@ export default function AddEmployeeBtn() {
       console.error(e);
       toast.error("Gagal menambahkan karyawan.");
     } finally {
-      setOpen(false);
       setIsLoad(false);
     }
   }
@@ -51,22 +50,7 @@ export default function AddEmployeeBtn() {
         <DialogHeader>
           <DialogTitle>Tambah Karyawan</DialogTitle>
         </DialogHeader>
-        <form className="space-y-4" onSubmit={(e) => handleAddEmployee(e)}>
-          <Input placeholder="NIK" name="employee-nik" required />
-          <Input placeholder="Nama Karyawan" name="employee-name" required />
-          <Input placeholder="Jabatan" name="employee-position" required />
-          <Input
-            placeholder="Default password : supersecure"
-            readOnly
-            disabled
-            name="employee-password"
-            required
-          />
-          <Button type="submit" disabled={isLoad} className="ml-auto">
-            Simpan
-            {isLoad && <LoaderCircle className="animate-spin" />}
-          </Button>
-        </form>
+        <EmployeeForm handleSubmit={handleAddEmployee} isLoad={isLoad} />
       </DialogContent>
     </Dialog>
   );
