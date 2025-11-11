@@ -16,8 +16,8 @@ export function getDurationString(start: string, end: string): string {
 
   let result = "";
   if (days > 0) result += `${days} hari `;
-  if (hours > 0 || days > 0) result += `${hours} jam `;
-  result += `${minutes} menit`;
+  if (hours > 0) result += `${hours} jam `;
+  if (minutes > 0) result += `${minutes} menit`;
 
   return result.trim();
 }
