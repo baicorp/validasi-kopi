@@ -1,13 +1,12 @@
 "use server";
 
 import { db } from "@/db";
-import { eq } from "drizzle-orm";
 import { user } from "@/db/schema/auth";
-import { codeGroups } from "@/db/schema";
 import { isValidRole } from "./validateSession";
-import { examEvents, examRegistrations } from "@/db/schema/examEvents";
+import { eq, InferSelectModel } from "drizzle-orm";
+import { examRegistrations } from "@/db/schema/examEvents";
 
-export async function getUserRegisteredExamEvents(examEventId: number) {
+export async function getAllRegisteredUser(examEventId: number) {
   try {
     const isValid = await isValidRole("admin");
     if (!isValid) {
@@ -16,58 +15,62 @@ export async function getUserRegisteredExamEvents(examEventId: number) {
 
     const rows = await db
       .select({
-        username: user.username,
+        id: user.id,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        email: user.email,
+        emailVerified: user.emailVerified,
         name: user.name,
+        image: user.image,
+        username: user.username,
         position: user.position,
-        codeGroupId: codeGroups.id,
-        selectedExam: examRegistrations.selectedExam,
+        displayUsername: user.displayUsername,
+        role: user.role,
+        banReason: user.banReason,
+        banned: user.banned,
+        banExpires: user.banExpires,
       })
       .from(examRegistrations)
-      .innerJoin(examEvents, eq(examRegistrations.examEventId, examEvents.id))
       .innerJoin(user, eq(examRegistrations.userId, user.id))
-      .leftJoin(codeGroups, eq(examRegistrations.codeGroupId, codeGroups.id))
-      .where(eq(examEvents.id, examEventId));
+      .where(eq(examRegistrations.examEventId, examEventId));
 
-    const groupBySelectedExam = Object.groupBy(
-      rows,
-      ({ selectedExam }) => selectedExam,
-    );
-    return Object.keys(groupBySelectedExam).map((key) => ({
-      examGroup: key,
-      codeGroupId: groupBySelectedExam[key]![0].codeGroupId,
-      data: groupBySelectedExam[key]!,
-    }));
+    return rows;
   } catch (error) {
     console.error(error);
     return { error: "Gagal mendapatkan daftar peserta ujian." };
   }
 }
 
-export async function assignCodeGroupExam({
-  formData,
-  selectedExam,
-}: {
-  formData: FormData;
-  selectedExam: string;
-}) {
-  const codeGroupId = formData.get("code-group-exam") as string;
-
-  if (!codeGroupId.trim()) {
-    return { error: "Tidak ada id soal diberikan." };
-  }
-
+type Users = InferSelectModel<typeof user>[];
+export async function assignUser(listParticipant: Users, eventId: number) {
   try {
-    const result = await db
-      .update(examRegistrations)
-      .set({ codeGroupId: Number(codeGroupId) })
-      .where(eq(examRegistrations.selectedExam, selectedExam));
+    const isValid = await isValidRole("admin");
+    if (!isValid) {
+      return { error: "401 : Anda tidak memiliki izin." };
+    }
+
+    if (!listParticipant || listParticipant.length === 0) {
+      return { error: "Tidak ada peserta yang dipilih." };
+    }
+
+    await db
+      .delete(examRegistrations)
+      .where(eq(examRegistrations.examEventId, eventId));
+
+    const values = listParticipant.map((participant) => ({
+      examEventId: eventId,
+      userId: participant.id,
+    }));
+
+    const result = await db.insert(examRegistrations).values(values);
 
     if (result.rowsAffected === 0) {
-      return { error: "Gagal mengupdate soal ujian" };
+      return { error: "Gagal menambahkan peserta" };
     }
 
     return result.rows;
   } catch (error) {
-    console.error(error);
+    console.error("assignUser error:", error);
+    return { error: "Gagal menambahkan peserta ujian." };
   }
 }
