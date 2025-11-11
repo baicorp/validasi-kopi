@@ -35,6 +35,7 @@ export default function AddExamEventBtn() {
       console.error(e);
       toast.error("Gagal membuat ujian baru.");
     } finally {
+      setOpen(false);
       setIsLoad(false);
     }
   }

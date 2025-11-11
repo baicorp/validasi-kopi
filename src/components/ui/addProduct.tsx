@@ -34,6 +34,7 @@ export default function AddProductBtn() {
       console.error(e);
       toast.error("Gagal menambahkan produk.");
     } finally {
+      setOpen(false);
       setIsLoad(false);
     }
   }

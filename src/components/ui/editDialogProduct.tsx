@@ -39,6 +39,7 @@ export default function EditDialogProduct({
       console.error(error);
       toast.error("Gagal memperbarui produk.");
     } finally {
+      setOpen(false);
       setIsLoad(false);
     }
   }

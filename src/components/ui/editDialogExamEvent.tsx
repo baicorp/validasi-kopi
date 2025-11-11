@@ -44,6 +44,7 @@ export default function EditDialogExamEvent({
       console.error(error);
       toast.error("Gagal memperbarui waktu ujian.");
     } finally {
+      setOpen(false);
       setIsLoad(false);
     }
   }

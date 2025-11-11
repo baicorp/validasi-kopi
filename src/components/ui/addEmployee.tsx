@@ -34,6 +34,7 @@ export default function AddEmployeeBtn() {
       console.error(e);
       toast.error("Gagal menambahkan karyawan.");
     } finally {
+      setOpen(false);
       setIsLoad(false);
     }
   }
