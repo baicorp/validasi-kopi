@@ -8,8 +8,8 @@ import { and, desc, eq, like, sql } from "drizzle-orm";
 import { productCategories, products } from "@/db/schema";
 
 export async function addProduct(formData: FormData) {
-  const productName = (formData.get("nama-produk") as string).trim();
-  const productCategoryId = (formData.get("kategori-produk") as string).trim();
+  const productName = (formData.get("product-name") as string).trim();
+  const productCategoryId = (formData.get("product-category") as string).trim();
 
   if (!productName || !productCategoryId) {
     return { error: "Nama dan kategori produk harus di isi" };
@@ -38,10 +38,12 @@ export async function addProduct(formData: FormData) {
         };
       }
 
-      return await tx.insert(products).values({
+      const result = await tx.insert(products).values({
         productName: productName,
         productCategoryId: Number(productCategoryId),
       });
+
+      return result.rows;
     });
 
     revalidatePath("/dashboard/produk");
@@ -54,8 +56,8 @@ export async function addProduct(formData: FormData) {
 
 export async function getAllProduct(
   page: number = 1,
-  search: string | undefined,
-  categoryId: string | undefined,
+  search?: string,
+  categoryId?: string,
 ) {
   const limit = 12;
   const offset = (page - 1) * limit;
@@ -127,8 +129,8 @@ export async function getProductsByCategory(productId: string) {
 }
 
 export async function updateProduct(productId: number, formData: FormData) {
-  const productName = (formData.get("nama-produk") as string).trim();
-  const productCategoryId = (formData.get("kategori-produk") as string).trim();
+  const productName = (formData.get("product-name") as string).trim();
+  const productCategoryId = (formData.get("product-category") as string).trim();
 
   if (!productName || !productCategoryId) {
     return { error: "Nama dan id kategori produk harus di isi." };
