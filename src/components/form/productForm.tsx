@@ -3,6 +3,7 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { LoaderCircle } from "lucide-react";
 import SelectProductCategories from "../ui/selectProductCategories";
+import { Label } from "../ui/label";
 
 export interface ProductFormInputProps {
   productName?: string;
@@ -20,14 +21,22 @@ export default function ProductForm({
 }) {
   return (
     <form className="space-y-4" onSubmit={(e) => handleSubmit(e)}>
-      <Input
-        placeholder="Nama produk"
-        name="nama-produk"
-        defaultValue={productName}
-      />
-      <SelectProductCategories defaultValue={productCategoryId} />
+      <div className="space-y-2">
+        <Label htmlFor="product-name">Nama produk</Label>
+        <Input
+          placeholder="Nama produk"
+          id="product-name"
+          name="product-name"
+          defaultValue={productName}
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="product-category">Kategori produk</Label>
+        <SelectProductCategories defaultValue={productCategoryId} />
+      </div>
       <Button type="submit" disabled={isLoad}>
-        Simpan {isLoad && <LoaderCircle className="animate-spin" />}
+        {productName ? "Simpan perubahan" : "Simpan produk"}
+        {isLoad && <LoaderCircle className="animate-spin" />}
       </Button>
     </form>
   );

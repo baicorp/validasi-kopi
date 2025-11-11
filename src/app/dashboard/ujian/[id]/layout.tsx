@@ -37,23 +37,22 @@ async function ExamEventDetails({ examEventId }: { examEventId: string }) {
   }
 
   return (
-    <div className="space-y-3 border rounded-lg px-6 py-6">
-      <div className="flex gap-2 items-center">
-        <p className="text-lg font-semibold">{examEvent.examEventName}</p>
-        <p className="text-muted-foreground">(# {examEvent.id})</p>
+    <div className="space-y-6 border rounded-lg px-6 py-4">
+      <div>
+        <p className="text-lg font-semibold">
+          <span>{examEvent.examEventName}</span>
+          <span className="text-muted-foreground"> (# {examEvent.id})</span>
+        </p>
+        <div className="flex flex-wrap gap-1.5">
+          {examEvent.selectedExams?.split(",")?.map((exam) => (
+            <Badge variant={"secondary"} key={exam}>
+              {exam}
+            </Badge>
+          ))}
+        </div>
       </div>
       <div className="grid grid-cols-3">
-        <div className="space-y-2">
-          <Label className="text-muted-foreground">DAFTAR UJIAN</Label>
-          <div className="flex flex-wrap gap-1.5">
-            {examEvent.selectedExams?.split(",")?.map((exam) => (
-              <Badge variant={"secondary"} key={exam}>
-                {exam}
-              </Badge>
-            ))}
-          </div>
-        </div>
-        <div className="space-y-2 justify-self-center">
+        <div className="space-y-2 justify-self-start">
           <Label className="text-muted-foreground">TANGGAL / WAKTU UJIAN</Label>
           <div className="flex gap-2 items-center text-sm">
             <p>Mulai :</p>
@@ -66,19 +65,17 @@ async function ExamEventDetails({ examEventId }: { examEventId: string }) {
             <p>{formatLocalTime(examEvent.examEnd)}</p>
           </div>
         </div>
-        <div className="justify-self-end space-y-2">
-          <div className="space-y-1">
-            <Label className="text-muted-foreground">LAMA PENGERJAAN</Label>
-            <div className="flex gap-2 items-center">
-              <Clock className="w-4 h-4" />
-              <p>{getDurationString(examEvent.examStart, examEvent.examEnd)}</p>
-            </div>
+        <div className="space-y-2 justify-self-center">
+          <Label className="text-muted-foreground">LAMA PENGERJAAN</Label>
+          <div className="flex gap-2 items-center">
+            <Clock className="w-4 h-4" />
+            <p>{getDurationString(examEvent.examStart, examEvent.examEnd)}</p>
           </div>
+        </div>
+        <div className="space-y-2 justify-self-end">
+          <Label className="text-muted-foreground">KUOTA PESERTA UJIAN</Label>
           <div>
-            <Label className="text-muted-foreground">KUOTA PESERTA UJIAN</Label>
-            <div>
-              <p>{examEvent.totalParticipants} Orang</p>
-            </div>
+            <p>{examEvent.totalParticipants} Orang</p>
           </div>
         </div>
       </div>

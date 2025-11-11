@@ -38,7 +38,7 @@ export default function ExamEventForm({
 }) {
   return (
     <form className="space-y-4" onSubmit={(e) => handleSubmit(e)}>
-      <div className="flex flex-col gap-2">
+      <div className="space-y-2">
         <Label htmlFor="event-name">Nama ujian</Label>
         <Input
           id="event-name"
@@ -48,7 +48,7 @@ export default function ExamEventForm({
           required
         />
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="space-y-2">
         <Label>Soal ujian</Label>
         {codeGroupId ? (
           <SelectedCodeGroupCard codeGroupId={codeGroupId} />
@@ -69,7 +69,7 @@ export default function ExamEventForm({
         defaultTime={examDefaultTimeEnd}
       />
       <Button type="submit" disabled={isLoad} className="ml-auto">
-        Simpan perubahan
+        {eventName ? "Simpan perubahan" : "Buat ujian"}
         {isLoad && <LoaderCircle className="animate-spin" />}
       </Button>
     </form>

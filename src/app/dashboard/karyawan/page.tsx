@@ -102,7 +102,7 @@ async function TableEmployeesData({
             <DropdownMenuContent align="end">
               <EditDialogEmployee
                 id={user.id}
-                nik={user.username}
+                username={user.username}
                 name={user.name}
                 position={user.position}
               />

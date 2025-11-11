@@ -30,9 +30,12 @@ export default function TableEmployeesDataSkeleton() {
                 <span className="block w-28 h-4 bg-accent rounded-full animate-pulse"></span>
               </TableCell>
               <TableCell className="py-3.5">
-                <span className="block w-10 h-4 bg-accent rounded-full animate-pulse"></span>
+                <span className="block w-24 h-4 bg-accent rounded-full animate-pulse"></span>
               </TableCell>
-              <TableCell className="py-3.5 flex justify-end">
+              <TableCell className="py-3.5">
+                <span className="block w-16 h-4 bg-accent rounded-full animate-pulse"></span>
+              </TableCell>
+              <TableCell className="px-6 py-3.5 flex justify-end">
                 <span className="block w-4 h-4 bg-accent rounded-full animate-pulse"></span>
               </TableCell>
             </TableRow>

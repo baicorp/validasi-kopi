@@ -52,7 +52,7 @@ export default function OptionForTresholdMix() {
               e.preventDefault();
               const firstVal = firstValue.trim();
               const secondVal = secondValue.trim();
-              if (!firstVal || !secondVal.trim()) return;
+              if (!firstVal || !secondVal) return;
               setFirstValue("");
               setSecondValue("");
               setTresholdMixValues((prev) => [

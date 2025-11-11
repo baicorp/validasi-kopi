@@ -26,7 +26,7 @@ export default function EventItem({
   const examTimeEnd = to24Hour(examDateEnd);
 
   return (
-    <div className="rounded-lg overflow-hidden border shadow relative">
+    <div className="rounded-lg overflow-hidden border shadow relative flex flex-col justify-between">
       <div className="absolute right-4 top-4">
         <EditDialogExamEvent
           eventId={id}
@@ -62,15 +62,17 @@ export default function EventItem({
           </div>
         </div>
         <div>
-          <p className="text-muted-foreground mb-1">Kuota peserta ujian</p>
+          <p className="text-muted-foreground">Kuota peserta ujian</p>
           <p>{totalParticipants} Orang</p>
         </div>
       </div>
-      <Separator />
-      <div className="p-4 bg-muted">
-        <p className="text-xs text-muted-foreground">
-          Diperbarui : {new Date(updatedAt + "Z").toLocaleString()}
-        </p>
+      <div>
+        <Separator />
+        <div className="p-4 bg-muted">
+          <p className="text-xs text-muted-foreground">
+            Diperbarui : {new Date(updatedAt + "Z").toLocaleString()}
+          </p>
+        </div>
       </div>
     </div>
   );

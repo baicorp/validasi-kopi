@@ -21,7 +21,7 @@ export default async function page({
 
   return (
     <div>
-      <div className="p-6 border rounded-lg space-y-2">
+      <div className="px-6 py-4 border rounded-lg space-y-2">
         <Suspense key={id} fallback={<Loading />}>
           <Participants eventId={Number(id)} />
         </Suspense>

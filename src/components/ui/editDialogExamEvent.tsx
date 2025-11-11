@@ -53,8 +53,8 @@ export default function EditDialogExamEvent({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline">
-          <span>Edit</span>
           <SquarePen />
+          <span>Edit</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="w-96">

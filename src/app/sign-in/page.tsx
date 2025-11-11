@@ -32,23 +32,23 @@ export default function Page() {
     setIsLoad(true);
 
     const formData = new FormData(e.currentTarget);
-    const nik = formData.get("nik") as string;
-    const password = formData.get("password") as string;
+    const username = (formData.get("username") as string).trim();
+    const password = (formData.get("password") as string).trim();
 
-    if (!nik.trim() || !password.trim()) {
+    if (!username.trim() || !password.trim()) {
       setIsLoad(false);
-      toast.error("NIK atau password tidak boleh kosong.");
+      toast.error("Nomor induk karyawan dan kata sandi tidak boleh kosong.");
       return;
     }
 
     try {
       const { error } = await authClient.signIn.username({
-        username: nik,
+        username,
         password,
       });
 
       if (error) {
-        toast.error("NIK atau password salah.");
+        toast.error("Nomor induk karyawan atau kata sandi salah.");
         return;
       }
 
@@ -75,11 +75,11 @@ export default function Page() {
         <form onSubmit={handleSubmit}>
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
-              <Label htmlFor="nik">NIK</Label>
-              <Input id="nik" name="nik" />
+              <Label htmlFor="username">Nomor Induk Karyawan</Label>
+              <Input id="username" name="username" />
             </div>
             <div className="flex flex-col gap-1">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Kata sandi</Label>
               <Input id="password" name="password" type="password" />
             </div>
             <Button type="submit" disabled={isLoad}>

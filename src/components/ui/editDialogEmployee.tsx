@@ -9,9 +9,9 @@ import {
 } from "./dialog";
 import { toast } from "sonner";
 import { FormEvent, useState } from "react";
-import EmployeeForm, { EmployeeFormInputProps } from "../form/employeeForm";
 import { DropdownMenuItem } from "./dropdown-menu";
 import { updateEmployee } from "@/actions/employees";
+import EmployeeForm, { EmployeeFormInputProps } from "../form/employeeForm";
 
 export default function EditDialogEmployee({
   id,

@@ -38,7 +38,7 @@ export default function OptionForTresholdSingle() {
         );
         if (!availablebefore) {
           toast.info(
-            "Harus memilih intensity yang lebih rendah terlebih dahulu",
+            "Harus memilih intensitas yang lebih rendah terlebih dahulu.",
           );
           return;
         }
