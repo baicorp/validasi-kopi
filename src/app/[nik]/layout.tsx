@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import Loading from "../dashboard/loading";
@@ -15,11 +14,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <div className="flex gap-3">
           <SignOutButton />
         </div>
-      </section>
-      <section className="px-4 lg:px-10 flex justify-between">
-        <Link className="py-4 text-center basis-1/2" href={"ujian"}>
-          Ujian
-        </Link>
       </section>
       <section className="pt-4 px-4 lg:px-10 h-[calc(100dvh_-_136px)]">
         {children}
