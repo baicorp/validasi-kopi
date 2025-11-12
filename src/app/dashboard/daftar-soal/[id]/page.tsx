@@ -5,8 +5,8 @@ import { getTableData } from "@/actions/codes";
 import Loading from "@/components/skeleton/loading";
 import ExamDetails from "@/components/ui/examDetail";
 import { Separator } from "@/components/ui/separator";
-import FormChecker from "@/components/ui/formChecker";
 import ExamsTable from "@/components/table/examsTable";
+import FormChecker from "@/components/form/formChecker";
 import { validateSessionServer } from "@/actions/validateSession";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
