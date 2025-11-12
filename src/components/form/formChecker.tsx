@@ -1,7 +1,7 @@
 "use client";
 
 import { toast } from "sonner";
-import { Button } from "./button";
+import { Button } from "../ui/button";
 import { RawExamsData } from "@/lib/types";
 import { FormEvent, useEffect, useState } from "react";
 import { codeCheck, formatRawExamsData, toTitleCase } from "@/lib/utils";
