@@ -23,6 +23,12 @@ export const user = sqliteTable("user", {
   banReason: text("ban_reason"),
   banExpires: integer("ban_expires", { mode: "timestamp_ms" }),
   position: text("position").notNull(),
+  departmentId: integer("department_id")
+    .notNull()
+    .references(() => departments.id, { onDelete: "cascade" }),
+  plantAreaId: integer("plant_area_id")
+    .notNull()
+    .references(() => plantAreas.id, { onDelete: "cascade" }),
 });
 
 export const session = sqliteTable("session", {
@@ -81,4 +87,22 @@ export const verification = sqliteTable("verification", {
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
+});
+
+export const departments = sqliteTable("departments", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  departmentName: text("department_name").unique().notNull(),
+  createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
+  updatedAt: text("updated_at")
+    .default(sql`(CURRENT_TIMESTAMP)`)
+    .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+});
+
+export const plantAreas = sqliteTable("plant_areas", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  areaName: text("plant_area_name").unique().notNull(),
+  createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
+  updatedAt: text("updated_at")
+    .default(sql`(CURRENT_TIMESTAMP)`)
+    .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
 });

@@ -9,9 +9,16 @@ export const examEvents = sqliteTable("exam_events", {
   examEventName: text("exam_event_name").notNull(),
   examStart: text("exam_start").notNull(),
   examEnd: text("exam_end").notNull(),
-  codeGroupId: integer("code_group_id").references(() => codeGroups.id),
+  codeGroupRegulerId: integer("code_group_reguler_id")
+    .notNull()
+    .references(() => codeGroups.id),
+  codeGroupRetakeId: integer("code_group_retake_id")
+    .notNull()
+    .references(() => codeGroups.id),
   createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: text("updated_at").default(sql`(CURRENT_TIMESTAMP)`),
+  updatedAt: text("updated_at")
+    .default(sql`(CURRENT_TIMESTAMP)`)
+    .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
 });
 
 export const examRegistrations = sqliteTable("exam_registrations", {
@@ -22,9 +29,10 @@ export const examRegistrations = sqliteTable("exam_registrations", {
   examEventId: integer("exam_event_id")
     .notNull()
     .references(() => examEvents.id),
-  codeGroupId: integer("code_group_id").references(() => codeGroups.id),
   createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: text("updated_at").default(sql`(CURRENT_TIMESTAMP)`),
+  updatedAt: text("updated_at")
+    .default(sql`(CURRENT_TIMESTAMP)`)
+    .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
 });
 
 export const examSubmissions = sqliteTable("exam_submissions", {
@@ -40,9 +48,14 @@ export const examSubmissions = sqliteTable("exam_submissions", {
   examEventId: integer("exam_event_id")
     .notNull()
     .references(() => examEvents.id),
-  codeGroupId: integer("code_group_id").references(() => codeGroups.id),
+  codeGroupId: integer("code_group_id")
+    .notNull()
+    .references(() => codeGroups.id),
+  submissionAttemp: integer().notNull(),
   createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: text("updated_at").default(sql`(CURRENT_TIMESTAMP)`),
+  updatedAt: text("updated_at")
+    .default(sql`(CURRENT_TIMESTAMP)`)
+    .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
 });
 
 export const examSubmissionNotes = sqliteTable("exam_submission_notes", {
@@ -52,5 +65,7 @@ export const examSubmissionNotes = sqliteTable("exam_submission_notes", {
     .notNull()
     .references(() => examSubmissions.id),
   createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: text("updated_at").default(sql`(CURRENT_TIMESTAMP)`),
+  updatedAt: text("updated_at")
+    .default(sql`(CURRENT_TIMESTAMP)`)
+    .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
 });

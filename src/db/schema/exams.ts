@@ -7,7 +7,9 @@ export const examCategories = sqliteTable("exam_categories", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   categoryName: text("category_name").notNull(),
   createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: text("updated_at").default(sql`(CURRENT_TIMESTAMP)`),
+  updatedAt: text("updated_at")
+    .default(sql`(CURRENT_TIMESTAMP)`)
+    .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
 });
 
 // exams
@@ -18,7 +20,9 @@ export const exams = sqliteTable("exams", {
     .notNull()
     .references(() => examCategories.id),
   createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: text("updated_at").default(sql`(CURRENT_TIMESTAMP)`),
+  updatedAt: text("updated_at")
+    .default(sql`(CURRENT_TIMESTAMP)`)
+    .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
 });
 
 // exam_sessions
@@ -31,5 +35,7 @@ export const examSessions = sqliteTable("exam_sessions", {
     .notNull()
     .references(() => codeGroups.id),
   createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: text("updated_at").default(sql`(CURRENT_TIMESTAMP)`),
+  updatedAt: text("updated_at")
+    .default(sql`(CURRENT_TIMESTAMP)`)
+    .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
 });

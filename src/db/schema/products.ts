@@ -6,7 +6,9 @@ export const productCategories = sqliteTable("product_categories", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   categoryName: text("category_name").unique().notNull(),
   createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: text("updated_at").default(sql`(CURRENT_TIMESTAMP)`),
+  updatedAt: text("updated_at")
+    .default(sql`(CURRENT_TIMESTAMP)`)
+    .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
 });
 
 // products
@@ -17,5 +19,7 @@ export const products = sqliteTable("products", {
     .notNull()
     .references(() => productCategories.id),
   createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: text("updated_at").default(sql`(CURRENT_TIMESTAMP)`),
+  updatedAt: text("updated_at")
+    .default(sql`(CURRENT_TIMESTAMP)`)
+    .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
 });
