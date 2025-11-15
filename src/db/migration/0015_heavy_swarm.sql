@@ -1,1 +1,0 @@
-ALTER TABLE `exam_events` DROP COLUMN `selected_exam`;

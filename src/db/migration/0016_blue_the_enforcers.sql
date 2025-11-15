@@ -1,1 +1,0 @@
-ALTER TABLE `exam_events` ADD `code_group_id` integer REFERENCES code_groups(id);
