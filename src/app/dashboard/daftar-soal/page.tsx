@@ -66,7 +66,7 @@ async function CodeGroups({ page, search }: { page: string; search: string }) {
             key={codeGroup.id}
             id={codeGroup.id}
             groupName={codeGroup.groupName}
-            examsLabel={codeGroup.examsLabel}
+            selectedExam={codeGroup.selectedExam}
             totalParticipants={codeGroup.totalParticipants}
             createdAt={codeGroup.createdAt}
           />
@@ -87,13 +87,13 @@ async function CodeGroups({ page, search }: { page: string; search: string }) {
 function CodeGroupItem({
   id,
   groupName,
-  examsLabel,
+  selectedExam,
   totalParticipants,
   createdAt,
 }: {
   id: number;
   groupName: string;
-  examsLabel: string;
+  selectedExam: string;
   totalParticipants: number;
   createdAt: string | null;
 }) {
@@ -123,7 +123,7 @@ function CodeGroupItem({
           </div>
         </div>
         <div className="hidden lg:flex flex-wrap gap-0.5 items-center mx-auto w-76">
-          <CodeGroupsLabel label={examsLabel.split(",")} />
+          <CodeGroupsLabel label={selectedExam.split(",")} />
         </div>
       </Link>
       <div className="invisible group-hover:visible px-2.5 p-1.5">

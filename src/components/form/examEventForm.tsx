@@ -16,7 +16,8 @@ import SelectedCodeGroupCardSkeleton from "../skeleton/selectedCodeGroupCardSkel
 
 export interface ExamEventFormInputProps {
   eventName?: string;
-  codeGroupId?: number;
+  codeGroupReguler?: number;
+  codeGroupRetake?: number;
   examDefaultDateStart?: Date;
   examDefaultDateEnd?: Date;
   examDefaultTimeStart?: string;
@@ -25,7 +26,8 @@ export interface ExamEventFormInputProps {
 
 export default function ExamEventForm({
   eventName,
-  codeGroupId,
+  codeGroupReguler,
+  codeGroupRetake,
   examDefaultDateStart,
   examDefaultDateEnd,
   examDefaultTimeStart,
@@ -50,8 +52,16 @@ export default function ExamEventForm({
       </div>
       <div className="space-y-2">
         <Label>Soal ujian</Label>
-        {codeGroupId ? (
-          <SelectedCodeGroupCard codeGroupId={codeGroupId} />
+        {codeGroupReguler ? (
+          <SelectedCodeGroupCard codeGroupId={codeGroupReguler} />
+        ) : (
+          <SelectCodeGroupExam />
+        )}
+      </div>
+      <div className="space-y-2">
+        <Label>Soal ujian ulangan</Label>
+        {codeGroupRetake ? (
+          <SelectedCodeGroupCard codeGroupId={codeGroupRetake} />
         ) : (
           <SelectCodeGroupExam />
         )}
@@ -101,7 +111,7 @@ function SelectedCodeGroupCard({ codeGroupId }: { codeGroupId: number }) {
         <p className="font-medium">{toTitleCase(codeGroup.groupName)}</p>
       </Link>
       <div className="flex flex-wrap gap-1.5 mt-1.5">
-        {codeGroup.examsLabel?.split(",")?.map((exam) => (
+        {codeGroup.selectedExam?.split(",")?.map((exam) => (
           <Badge
             key={exam}
             variant={"secondary"}

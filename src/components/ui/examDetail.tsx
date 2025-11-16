@@ -26,7 +26,7 @@ export default function ExamDetails({
             onClick={() =>
               export_data(
                 examDataDetails.formatedExamsData,
-                `${examDataDetails.groupName} (${examDataDetails.examsLabel.replaceAll(",", ", ")})`,
+                `${examDataDetails.groupName} (${examDataDetails.selectedExam.replaceAll(",", ", ")})`,
               )
             }
           >
@@ -44,7 +44,7 @@ export default function ExamDetails({
         <p>Daftar ujian</p>
         <span>:</span>
         <div className="flex gap-1 items-center">
-          {examDataDetails.examsLabel.split(",").map((label) => (
+          {examDataDetails.selectedExam.split(",").map((label) => (
             <Badge key={label} variant={"outline"}>
               {label}
             </Badge>

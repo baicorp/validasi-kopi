@@ -84,14 +84,16 @@ async function TableEmployeesData({
       </TableRow>
     );
   } else {
-    tableRowData = employees.data.map((user, idx) => (
-      <TableRow key={user.id}>
+    tableRowData = employees.data.map((employee, idx) => (
+      <TableRow key={employee.username}>
         <TableCell className="pl-4 py-1">
           {(currentPage - 1) * 12 + idx + 1}
         </TableCell>
-        <TableCell className="py-1">{user.username}</TableCell>
-        <TableCell className="py-1">{user.name}</TableCell>
-        <TableCell className="py-1">{user.position}</TableCell>
+        <TableCell className="py-1">{employee.username}</TableCell>
+        <TableCell className="py-1">{employee.name}</TableCell>
+        <TableCell className="py-1">{employee.position}</TableCell>
+        <TableCell className="py-1">{employee.department}</TableCell>
+        <TableCell className="py-1">{employee.plantArea}</TableCell>
         <TableCell className="text-right py-1">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -101,18 +103,20 @@ async function TableEmployeesData({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <EditDialogEmployee
-                id={user.id}
-                username={user.username}
-                name={user.name}
-                position={user.position}
+                id={employee.id}
+                username={employee.username}
+                name={employee.name}
+                position={employee.position}
+                departmentId={employee.departmentId?.toString()}
+                plantAreaId={employee.plantAreaId?.toString()}
               />
               <DropdownMenuSeparator />
               <DeleteDialog
                 dialogTitle="Karyawan"
                 variant="dropDown"
                 deleteFnAction={deleteEmployee}
-                id={user.id}
-                data={user.name}
+                id={employee.id}
+                data={employee.name}
               />
             </DropdownMenuContent>
           </DropdownMenu>
@@ -131,6 +135,8 @@ async function TableEmployeesData({
               <TableHead>NIK</TableHead>
               <TableHead>Nama</TableHead>
               <TableHead>Jabatan</TableHead>
+              <TableHead>Departemen</TableHead>
+              <TableHead>Area Pabrik</TableHead>
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>

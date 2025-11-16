@@ -18,6 +18,8 @@ export default function EditDialogEmployee({
   username,
   name,
   position,
+  departmentId,
+  plantAreaId,
 }: {
   id: string;
 } & EmployeeFormInputProps) {
@@ -31,6 +33,7 @@ export default function EditDialogEmployee({
     const formData = new FormData(e.currentTarget);
     try {
       const result = await updateEmployee(id, formData);
+      console.log(result);
       if ("error" in result) {
         toast.error(result.error);
         return;
@@ -61,6 +64,8 @@ export default function EditDialogEmployee({
           name={name}
           username={username}
           position={position}
+          departmentId={departmentId}
+          plantAreaId={plantAreaId}
           handleSubmit={handleEdit}
         />
       </DialogContent>

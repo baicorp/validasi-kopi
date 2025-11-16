@@ -3,17 +3,23 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { LoaderCircle } from "lucide-react";
 import { Label } from "../ui/label";
+import SelectPlantArea from "../ui/selectPlantArea";
+import SelectDepartment from "../ui/selectDepartment";
 
 export interface EmployeeFormInputProps {
   username?: string;
   name?: string;
   position?: string;
+  departmentId?: string;
+  plantAreaId?: string;
 }
 
 export default function EmployeeForm({
   username,
   name,
   position,
+  departmentId,
+  plantAreaId,
   isLoad,
   handleSubmit,
 }: EmployeeFormInputProps & {
@@ -51,6 +57,14 @@ export default function EmployeeForm({
           name="employee-position"
           required
         />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="employee-department">Departemen</Label>
+        <SelectDepartment defaultValue={departmentId} />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="employee-plant-area">Area Pabrik</Label>
+        <SelectPlantArea defaultValue={plantAreaId} />
       </div>
       <div className="space-y-2">
         <Label htmlFor="employee-password" className="text-muted-foreground">

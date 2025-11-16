@@ -7,11 +7,10 @@ import ErrorComp from "./error";
 import { Input } from "./input";
 import { useState } from "react";
 import { Button } from "./button";
-import { user } from "@/db/schema";
 import { Checkbox } from "./checkbox";
 import Loading from "../skeleton/loading";
+import { Participants } from "@/lib/types";
 import { LoaderCircle } from "lucide-react";
-import { InferSelectModel } from "drizzle-orm";
 import { useDebounce } from "@/hooks/use-debounce";
 import { getAllEmployees } from "@/actions/employees";
 import { assignUser } from "@/actions/examRegistrations";
@@ -22,15 +21,15 @@ export default function ExamParticipants({
   totalParticipants,
 }: {
   examEventId: number;
-  listParticipant: InferSelectModel<typeof user>[];
+  listParticipant: Participants[];
   totalParticipants: number;
 }) {
   const [input, setInput] = useState("");
   const [isLoad, setIsload] = useState(false);
   const searchInput = useDebounce(input);
-  const [participants, setParticipants] = useState<
-    InferSelectModel<typeof user>[]
-  >(listParticipant ?? []);
+  const [participants, setParticipants] = useState<Participants[]>(
+    listParticipant ?? [],
+  );
 
   const {
     data: employees,
@@ -39,7 +38,7 @@ export default function ExamParticipants({
   } = useSWR(searchInput, () => getAllEmployees(1, searchInput));
 
   function handleCheckChange(
-    employee: InferSelectModel<typeof user>,
+    employee: Participants,
     checked: boolean | "indeterminate",
   ) {
     if (checked === true) {

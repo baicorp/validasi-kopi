@@ -17,7 +17,8 @@ import ExamEventForm, { ExamEventFormInputProps } from "../form/examEventForm";
 export default function EditDialogExamEvent({
   eventId,
   eventName,
-  codeGroupId,
+  codeGroupReguler,
+  codeGroupRetake,
   examDefaultDateStart,
   examDefaultTimeStart,
   examDefaultDateEnd,
@@ -65,7 +66,8 @@ export default function EditDialogExamEvent({
           handleSubmit={handleEdit}
           isLoad={isLoad}
           eventName={eventName}
-          codeGroupId={codeGroupId}
+          codeGroupReguler={codeGroupReguler}
+          codeGroupRetake={codeGroupRetake}
           examDefaultDateStart={examDefaultDateStart}
           examDefaultTimeStart={examDefaultTimeStart}
           examDefaultDateEnd={examDefaultDateEnd}

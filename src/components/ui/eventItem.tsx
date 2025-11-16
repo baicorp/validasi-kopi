@@ -13,7 +13,8 @@ type ExamEventItem = NonNullable<GetAllExamEventsResult["data"]>[number];
 export default function EventItem({
   id,
   examEventName,
-  codeGroupId,
+  codeGroupRegulerId,
+  codeGroupRetakeId,
   examStart,
   examEnd,
   updatedAt,
@@ -31,7 +32,8 @@ export default function EventItem({
         <EditDialogExamEvent
           eventId={id}
           eventName={examEventName}
-          codeGroupId={codeGroupId ?? undefined}
+          codeGroupReguler={codeGroupRegulerId ?? undefined}
+          codeGroupRetake={codeGroupRetakeId ?? undefined}
           examDefaultDateStart={examDateStart}
           examDefaultDateEnd={examDateEnd}
           examDefaultTimeStart={examTimeStart}
