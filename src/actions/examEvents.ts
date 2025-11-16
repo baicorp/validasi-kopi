@@ -9,7 +9,7 @@ import { isValidRole, validateSessionServer } from "./validateSession";
 
 export async function addExamEvent(formData: FormData) {
   const eventName = (formData.get("event-name") as string).trim();
-  const codeGroupId = (formData.get("code-group-exam") as string).trim();
+  const codeGroupExam = formData.getAll("code-group-exam") as string[];
   const eventStartDate = formData.get("event-start-date") as string;
   const eventStartTime = formData.get("event-start-time") as string;
   const eventEndDate = formData.get("event-end-date") as string;
@@ -17,7 +17,7 @@ export async function addExamEvent(formData: FormData) {
 
   if (
     !eventName ||
-    !codeGroupId ||
+    codeGroupExam.length !== 2 ||
     !eventStartDate ||
     !eventStartTime ||
     !eventEndDate ||
@@ -47,7 +47,8 @@ export async function addExamEvent(formData: FormData) {
 
     const newEvent = await db.insert(examEvents).values({
       examEventName: eventName,
-      codeGroupId: Number(codeGroupId),
+      codeGroupRegulerId: Number(codeGroupExam[0]),
+      codeGroupRetakeId: Number(codeGroupExam[1]),
       examStart,
       examEnd,
     });
@@ -139,12 +140,12 @@ export async function getActiveExamEvent() {
         examEventName: examEvents.examEventName,
         examStart: examEvents.examStart,
         examEnd: examEvents.examEnd,
-        selectedExam: codeGroups.examsLabel,
+        selectedExam: codeGroups.selectedExam,
         codeGroupId: codeGroups.id,
       })
       .from(examRegistrations)
       .innerJoin(examEvents, eq(examRegistrations.examEventId, examEvents.id))
-      .innerJoin(codeGroups, eq(examEvents.codeGroupId, codeGroups.id))
+      .innerJoin(codeGroups, eq(examEvents.codeGroupRegulerId, codeGroups.id))
       .where(
         and(
           eq(examRegistrations.userId, userId),
@@ -168,14 +169,15 @@ export async function getExamEventById(examEventId: number) {
         examEventName: examEvents.examEventName,
         examStart: examEvents.examStart,
         examEnd: examEvents.examEnd,
-        codeGroupId: examEvents.codeGroupId,
+        codeGroupRegulerId: examEvents.codeGroupRegulerId,
+        codeGroupRetakeId: examEvents.codeGroupRetakeId,
         createdAt: examEvents.createdAt,
         updatedAt: examEvents.updatedAt,
-        selectedExams: codeGroups.examsLabel,
+        selectedExams: codeGroups.selectedExam,
         totalParticipants: codeGroups.totalParticipants,
       })
       .from(examEvents)
-      .innerJoin(codeGroups, eq(examEvents.codeGroupId, codeGroups.id))
+      .innerJoin(codeGroups, eq(examEvents.codeGroupRegulerId, codeGroups.id))
       .where(and(eq(examEvents.id, examEventId)));
 
     if (rows.length === 0) {
@@ -205,7 +207,7 @@ export async function getAllExamEvents(page: number = 1, search?: string) {
     const [{ count }] = await db
       .select({ count: sql<number>`count(*)` })
       .from(examEvents)
-      .innerJoin(codeGroups, eq(examEvents.codeGroupId, codeGroups.id))
+      .innerJoin(codeGroups, eq(examEvents.codeGroupRegulerId, codeGroups.id))
       .where(conditions.length ? and(...conditions) : undefined);
 
     const data = await db
@@ -214,14 +216,15 @@ export async function getAllExamEvents(page: number = 1, search?: string) {
         examEventName: examEvents.examEventName,
         examStart: examEvents.examStart,
         examEnd: examEvents.examEnd,
-        codeGroupId: examEvents.codeGroupId,
+        codeGroupRegulerId: examEvents.codeGroupRegulerId,
+        codeGroupRetakeId: examEvents.codeGroupRetakeId,
         createdAt: examEvents.createdAt,
         updatedAt: examEvents.updatedAt,
-        selectedExams: codeGroups.examsLabel,
+        selectedExams: codeGroups.selectedExam,
         totalParticipants: codeGroups.totalParticipants,
       })
       .from(examEvents)
-      .innerJoin(codeGroups, eq(examEvents.codeGroupId, codeGroups.id))
+      .innerJoin(codeGroups, eq(examEvents.codeGroupRegulerId, codeGroups.id))
       .where(conditions.length ? and(...conditions) : undefined)
       .orderBy(desc(examEvents.createdAt))
       .limit(limit)

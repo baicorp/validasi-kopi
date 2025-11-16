@@ -1,10 +1,11 @@
 "use server";
 
 import { db } from "@/db";
+import { eq } from "drizzle-orm";
 import { user } from "@/db/schema/auth";
 import { isValidRole } from "./validateSession";
-import { eq, InferSelectModel } from "drizzle-orm";
 import { examRegistrations } from "@/db/schema/examEvents";
+import { Participants } from "@/lib/types";
 
 export async function getAllRegisteredUser(examEventId: number) {
   try {
@@ -16,19 +17,8 @@ export async function getAllRegisteredUser(examEventId: number) {
     const rows = await db
       .select({
         id: user.id,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-        email: user.email,
-        emailVerified: user.emailVerified,
-        name: user.name,
-        image: user.image,
         username: user.username,
-        position: user.position,
-        displayUsername: user.displayUsername,
-        role: user.role,
-        banReason: user.banReason,
-        banned: user.banned,
-        banExpires: user.banExpires,
+        name: user.name,
       })
       .from(examRegistrations)
       .innerJoin(user, eq(examRegistrations.userId, user.id))
@@ -41,8 +31,10 @@ export async function getAllRegisteredUser(examEventId: number) {
   }
 }
 
-type Users = InferSelectModel<typeof user>[];
-export async function assignUser(listParticipant: Users, eventId: number) {
+export async function assignUser(
+  listParticipant: Participants[],
+  eventId: number,
+) {
   try {
     const isValid = await isValidRole("admin");
     if (!isValid) {

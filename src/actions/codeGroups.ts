@@ -13,7 +13,7 @@ export async function getAllCodeGroups(page: number = 1, search?: string) {
   if (search) {
     conditions.push(
       like(codeGroups.groupName, `%${search}%`),
-      like(codeGroups.examsLabel, `%${search}%`),
+      like(codeGroups.selectedExam, `%${search}%`),
     );
   }
 
@@ -58,14 +58,25 @@ export async function getCodeGroupsForExam() {
       .select({
         id: codeGroups.id,
         groupName: codeGroups.groupName,
-        examsLabel: codeGroups.examsLabel,
+        selectedExam: codeGroups.selectedExam,
         totalParticipants: codeGroups.totalParticipants,
         createdAt: codeGroups.createdAt,
         updatedAt: codeGroups.updatedAt,
       })
       .from(codeGroups)
-      .leftJoin(examEvents, eq(examEvents.codeGroupId, codeGroups.id))
-      .where(isNull(examEvents.codeGroupId))
+      .leftJoin(
+        examEvents,
+        or(
+          eq(examEvents.codeGroupRegulerId, codeGroups.id),
+          eq(examEvents.codeGroupRetakeId, codeGroups.id),
+        ),
+      )
+      .where(
+        or(
+          isNull(examEvents.codeGroupRegulerId),
+          isNull(examEvents.codeGroupRetakeId),
+        ),
+      )
       .orderBy(desc(codeGroups.createdAt));
 
     return rows;

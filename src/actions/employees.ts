@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { auth } from "@/lib/auth";
-import { user } from "@/db/schema";
+import { departments, plantAreas, user } from "@/db/schema";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { isValidRole } from "./validateSession";
@@ -12,6 +12,8 @@ export async function addEmployee(formData: FormData) {
   const nik = formData.get("employee-nik") as string;
   const name = formData.get("employee-name") as string;
   const position = formData.get("employee-position") as string;
+  const department = formData.get("employee-department") as string;
+  const plantArea = formData.get("employee-plant-area") as string;
 
   if (!nik.trim() || !name.trim() || !position.trim()) {
     return { error: "Lengkapi semua data karyawan." };
@@ -29,7 +31,12 @@ export async function addEmployee(formData: FormData) {
         email: `${nik}@mail.com`,
         password: "supersecure", // so all user have default password supersecure
         role: "user",
-        data: { username: nik, position },
+        data: {
+          username: nik,
+          position,
+          departmentId: Number(department),
+          plantAreaId: Number(plantArea),
+        },
       },
     });
 
@@ -69,11 +76,24 @@ export async function getAllEmployees(page: number = 1, search?: string) {
     const [{ count }] = await db
       .select({ count: sql<number>`count(*)` })
       .from(user)
+      .leftJoin(departments, eq(user.departmentId, departments.id))
+      .leftJoin(plantAreas, eq(user.plantAreaId, plantAreas.id))
       .where(conditions.length ? and(...conditions) : undefined);
 
     const data = await db
-      .select()
+      .select({
+        id: user.id,
+        username: user.username,
+        name: user.name,
+        position: user.position,
+        departmentId: departments.id,
+        department: departments.departmentName,
+        plantAreaId: plantAreas.id,
+        plantArea: plantAreas.areaName,
+      })
       .from(user)
+      .leftJoin(departments, eq(user.departmentId, departments.id))
+      .leftJoin(plantAreas, eq(user.plantAreaId, plantAreas.id))
       .where(conditions.length ? and(...conditions) : undefined)
       .orderBy(desc(user.createdAt))
       .limit(limit)
@@ -94,8 +114,16 @@ export async function updateEmployee(id: string, formData: FormData) {
   const nik = formData.get("employee-nik") as string;
   const name = formData.get("employee-name") as string;
   const position = formData.get("employee-position") as string;
+  const department = formData.get("employee-department") as string;
+  const plantArea = formData.get("employee-plant-area") as string;
 
-  if (!nik.trim() || !name.trim() || !position.trim()) {
+  if (
+    !nik.trim() ||
+    !name.trim() ||
+    !position.trim() ||
+    !plantArea.trim() ||
+    !department.trim()
+  ) {
     return { error: "Lengkapi semua data karyawan." };
   }
 
@@ -108,7 +136,13 @@ export async function updateEmployee(id: string, formData: FormData) {
     const result = await auth.api.adminUpdateUser({
       body: {
         userId: id,
-        data: { name, username: nik, position },
+        data: {
+          username: nik,
+          name,
+          position,
+          departmentId: Number(department),
+          plantAreaId: Number(plantArea),
+        },
       },
       headers: await headers(),
     });
@@ -138,5 +172,23 @@ export async function deleteEmployee(id: string) {
   } catch (error) {
     console.error(error);
     return { error: `Gagal menghapus karyawan (id: ${id})` };
+  }
+}
+
+export async function getPlantAreas() {
+  try {
+    return await db.select().from(plantAreas);
+  } catch (error) {
+    console.error(error);
+    return { error: "Gagal mendapatkan area pabrik." };
+  }
+}
+
+export async function getDepartments() {
+  try {
+    return await db.select().from(departments);
+  } catch (error) {
+    console.error(error);
+    return { error: "Gagal mendapatkan data departemen." };
   }
 }

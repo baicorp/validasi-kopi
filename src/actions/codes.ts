@@ -26,7 +26,7 @@ export async function addGeneratedCodes(data: ExamDataDetails) {
         .insert(codeGroups)
         .values({
           groupName: data.groupName,
-          examsLabel: data.examsLabel,
+          selectedExam: data.selectedExam,
           totalParticipants: data.totalParticipants,
         })
         .returning();
@@ -96,7 +96,7 @@ export async function getTableData(
       .select({
         id: codes.id,
         groupName: codeGroups.groupName,
-        examsLabel: codeGroups.examsLabel,
+        selectedExam: codeGroups.selectedExam,
         totalParticipants: codeGroups.totalParticipants,
         code: codes.code,
         value: codes.value,
@@ -111,7 +111,7 @@ export async function getTableData(
 
     return {
       groupName: rows[0].groupName,
-      examsLabel: rows[0].examsLabel,
+      selectedExam: rows[0].selectedExam,
       totalParticipants: rows[0].totalParticipants,
       examsData: rows,
       formatedExamsData: formatRawExamsData(rows),
