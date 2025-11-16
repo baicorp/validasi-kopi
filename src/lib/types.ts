@@ -10,11 +10,17 @@ export type RawExamsData = {
   id?: number;
   examCategoryName?: string;
   groupName: string;
-  examsLabel: string;
+  selectedExam: string;
   totalParticipants: number;
   code: string;
   value: string;
   examName: string;
+};
+
+export type Participants = {
+  id: string;
+  username: string;
+  name: string;
 };
 
 export type ExamDataDetails = InsertCodeGroups & {

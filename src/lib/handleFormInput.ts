@@ -48,7 +48,7 @@ function getInputFromSelectedExam(formData: FormData, selectedExam: string[]) {
 
   return {
     totalParticipants,
-    examsLabel: labels.join(","),
+    selectedExam: labels.join(","),
     exams: valuesStore,
   };
 }
@@ -67,14 +67,14 @@ export function generateExamCodes(
   const examGen = new ExamGenerator(examsInput.totalParticipants);
   const results = examGen.generateExams(selectedExam, examsInput.exams);
 
-  const category = basicExam.includes(examsInput.examsLabel.split(",")[0])
+  const category = basicExam.includes(examsInput.selectedExam.split(",")[0])
     ? "uji dasar"
     : "uji produk";
 
   // detail for generated data from selected exam
   const generatedDataHeader = {
     groupName: `${category} ${codeGroupName ?? ""}`.trim(),
-    examsLabel: examsInput.examsLabel,
+    selectedExam: examsInput.selectedExam,
     totalParticipants: examsInput.totalParticipants,
   };
   const rowData: RawExamsData[] = results.flatMap((exam) =>
