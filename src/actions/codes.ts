@@ -9,7 +9,7 @@ import { formatRawExamsData, getExamsId } from "@/lib/utils";
 import { codes, codeGroups, examCategories, exams } from "@/db/schema";
 
 export async function addGeneratedCodes(data: ExamDataDetails) {
-  if (data.examsData.length === 0) {
+  if (data.rowExamsData.length === 0) {
     return { error: "Daftar soal kosong." };
   }
 
@@ -42,9 +42,10 @@ export async function addGeneratedCodes(data: ExamDataDetails) {
 
       // data to insert in codes table
       codeGroupId = rowCodeGroups[0].id;
-      const codesToInsert: InsertCodes[] = data.examsData.map((row) => ({
+      const codesToInsert: InsertCodes[] = data.rowExamsData.map((row) => ({
         code: row.code,
         value: row.value,
+        additionalValue: row.additionalValue,
         examId: getExamsId(row.examName, rowExams),
         codeGroupId,
       }));
@@ -100,6 +101,7 @@ export async function getTableData(
         totalParticipants: codeGroups.totalParticipants,
         code: codes.code,
         value: codes.value,
+        additionalValue: codes.additionalValue,
         examName: exams.examName,
         examCategoryName: examCategories.categoryName,
       })
@@ -113,7 +115,7 @@ export async function getTableData(
       groupName: rows[0].groupName,
       selectedExam: rows[0].selectedExam,
       totalParticipants: rows[0].totalParticipants,
-      examsData: rows,
+      rowExamsData: rows,
       formatedExamsData: formatRawExamsData(rows),
     };
   } catch (error) {
