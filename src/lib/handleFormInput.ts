@@ -83,13 +83,14 @@ export function generateExamCodes(
       examCategoryName: category,
       code: data.code,
       value: data.value,
+      additionalValue: data.additionalValue,
       examName: exam.examName,
     })),
   );
 
   return {
     ...generatedDataHeader,
-    examsData: rowData,
+    rowExamsData: rowData,
     formatedExamsData: formatRawExamsData(rowData),
   };
 }

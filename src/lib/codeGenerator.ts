@@ -11,13 +11,21 @@ export class ExamGenerator {
     this.totalParticipants = totalParticipants;
   }
 
-  private pairCodesWithValues(codes: string[], values: string[]) {
-    const result: { code: string; value: string }[] = [];
+  private pairCodesWithValues(
+    codes: string[],
+    values: string[],
+    additionalValues?: string[],
+  ) {
+    const result: { code: string; value: string; additionalValue?: string }[] =
+      [];
 
     // evenly pair random codes with values
     codes.forEach((code, index) => {
       const value = values[index % values.length];
-      result.push({ code, value });
+      const additionalValue = additionalValues
+        ? additionalValues[index % values.length]
+        : "";
+      result.push({ code, value, additionalValue });
     });
 
     return result;
@@ -72,11 +80,13 @@ export class ExamGenerator {
 
     const sameValueObjects = this.pairCodesWithValues(
       sameValueCodes,
-      sameValueProducts.map((value) => `sama (${value})`),
+      ["sama"],
+      sameValueProducts,
     );
     const differentValueObjects = this.pairCodesWithValues(
       differentValueCodes,
-      differentValueProducts.map((value) => `beda (${value})`),
+      ["beda", "beda", "beda"],
+      differentValueProducts,
     );
 
     return [...sameValueObjects, ...differentValueObjects];
@@ -85,8 +95,10 @@ export class ExamGenerator {
   // implementation for treshold single test code generation
   private generateTresholdSingleCodes(codes: string[], values: string[]) {
     if (codes.length % this.numberOfTresholdSingleGlass !== 0) return [];
+    const valuesList = values.map((val) => val.split("+")[0]);
+    const additionalValues = values.map((val) => val.split("+")[1]);
 
-    return this.pairCodesWithValues(codes, values);
+    return this.pairCodesWithValues(codes, valuesList, additionalValues);
   }
 
   // implementation for treshold mix test code generation
@@ -114,14 +126,14 @@ export class ExamGenerator {
 
     const sameValueCodes = codes
       .slice(0, numberOfSameValueCodes)
-      .map((code) => ({ code, value: "sama" }));
+      .map((code) => ({ code, value: "sama", additionalValue: undefined }));
 
     const differentValueCodes = codes
       .slice(
         numberOfSameValueCodes,
         numberOfSameValueCodes + numberOfDifferentValueCodes,
       )
-      .map((code) => ({ code, value: "beda" }));
+      .map((code) => ({ code, value: "beda", additionalValue: undefined }));
 
     return [...sameValueCodes, ...differentValueCodes];
   }
@@ -147,12 +159,16 @@ export class ExamGenerator {
     let cursor = 0;
     const results: {
       examName: string;
-      examValues: { value: string; code: string }[];
+      examValues: { value: string; code: string; additionalValue?: string }[];
     }[] = [];
 
     for (const exam of selectedExam) {
       const examLower = exam.toLowerCase();
-      let examResult: { code: string; value: string }[] = [];
+      let examResult: {
+        code: string;
+        value: string;
+        additionalValue?: string;
+      }[] = [];
 
       if (examLower.includes("2 out of 5")) {
         const needed = this.totalParticipants * this.numberOfTwoOutOfFiveGlass;

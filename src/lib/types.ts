@@ -14,6 +14,7 @@ export type RawExamsData = {
   totalParticipants: number;
   code: string;
   value: string;
+  additionalValue?: string | null;
   examName: string;
 };
 
@@ -24,7 +25,7 @@ export type Participants = {
 };
 
 export type ExamDataDetails = InsertCodeGroups & {
-  examsData: RawExamsData[];
+  rowExamsData: RawExamsData[];
   formatedExamsData: ReturnType<typeof formatRawExamsData>;
 };
 

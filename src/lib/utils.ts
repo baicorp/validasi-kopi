@@ -23,10 +23,14 @@ export function formatRawExamsData(rows: RawExamsData[]) {
   const formatedRows = Object.entries(groupedByExam).map(
     ([examName, group]) => {
       // 2. group groupedByExam by value
-      const groupedByValue = Object.groupBy(group!, (item) => item.value!);
+      const groupedByValueAndAdditionalValue = Object.groupBy(
+        group!,
+        (item) =>
+          item.value + (item.additionalValue ? "+" + item.additionalValue : ""),
+      );
 
       // 3. get each value with its list of codes
-      const codeValue = Object.entries(groupedByValue).map(
+      const codeValue = Object.entries(groupedByValueAndAdditionalValue).map(
         ([valueKey, items]) => ({
           [valueKey]: formatArrToTJ(items!.map((item) => item.code)),
         }),
