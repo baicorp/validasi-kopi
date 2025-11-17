@@ -73,7 +73,7 @@ export default function OptionForTresholdSingle() {
               }`}
             >
               {toTitleCase(item.taste)}
-              {item.intensity ? ` ${item.intensity}` : ""}
+              {item.intensity > 0 ? ` ${item.intensity}` : ""}
             </li>
           );
         })}
@@ -85,7 +85,7 @@ export default function OptionForTresholdSingle() {
           // IMPORTANT: ensure this name matches basicExam in constant.ts
           // replace all space with "-" and end with "-values"
           name="treshold-single-values"
-          value={`${data.taste} ${data?.intensity ? data.intensity : ""}`}
+          value={`${data.taste}${data?.intensity > 0 ? "+" + data.intensity : ""}`}
         />
       ))}
     </div>

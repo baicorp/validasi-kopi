@@ -52,6 +52,8 @@ export default function Page() {
     setExamDataDetails(examDataDetails);
   }
 
+  console.log(examDataDetails?.formatedExamsData);
+
   return (
     <>
       <section className="py-3 bg-background border-b">
