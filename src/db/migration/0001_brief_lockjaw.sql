@@ -1,0 +1,1 @@
+ALTER TABLE `codes` ADD `additional_value` text;

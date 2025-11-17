@@ -19,6 +19,7 @@ export const codes = sqliteTable("codes", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   code: text("code").notNull(),
   value: text("value").notNull(),
+  additionalValue: text("additional_value"),
   examId: integer("exam_id")
     .notNull()
     .references(() => exams.id),
