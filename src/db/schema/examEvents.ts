@@ -39,6 +39,8 @@ export const examSubmissions = sqliteTable("exam_submissions", {
   id: integer("id").primaryKey(),
   code: text("code").notNull(),
   value: text("value").notNull(),
+  additionalValue: text("additional_value"),
+  result: text("result").notNull(), // correct | partially correct | wrong
   userId: text("user_id")
     .notNull()
     .references(() => user.id),
