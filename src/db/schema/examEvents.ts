@@ -40,20 +40,37 @@ export const examSubmissions = sqliteTable("exam_submissions", {
   code: text("code").notNull(),
   value: text("value").notNull(),
   additionalValue: text("additional_value"),
-  result: text("result").notNull(), // correct | partially correct | wrong
+  result: text("result").notNull(), // correct | partial | wrong
   userId: text("user_id")
     .notNull()
     .references(() => user.id),
   examId: integer("exam_id")
     .notNull()
     .references(() => exams.id),
+  //FIXME : I think this is unnecessary because we have submission_attemp table that have examEventId
   examEventId: integer("exam_event_id")
     .notNull()
     .references(() => examEvents.id),
   codeGroupId: integer("code_group_id")
     .notNull()
     .references(() => codeGroups.id),
-  submissionAttemp: integer().notNull(),
+  createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
+  updatedAt: text("updated_at")
+    .default(sql`(CURRENT_TIMESTAMP)`)
+    .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+});
+
+export const submissionAttemps = sqliteTable("submission_attemps", {
+  id: integer("id").primaryKey(),
+  numberAttemp: text("number_attemp").notNull(),
+  grade: text("grade").notNull(),
+  retakeExam: text("retake_exam"),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id),
+  examEventId: integer("exam_event_id")
+    .notNull()
+    .references(() => examEvents.id),
   createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
   updatedAt: text("updated_at")
     .default(sql`(CURRENT_TIMESTAMP)`)
