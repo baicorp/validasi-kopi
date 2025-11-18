@@ -58,7 +58,7 @@ async function TabsContentData({ id }: { id: string }) {
         <TabsContent value="form-checker">
           <Separator className="my-4" />
           <FormChecker
-            rawExamsData={examDataDetails.examsData}
+            rawExamsData={examDataDetails.rowExamsData}
             formatedExamsData={examDataDetails.formatedExamsData}
           />
         </TabsContent>
