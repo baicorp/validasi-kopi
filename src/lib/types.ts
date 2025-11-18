@@ -32,3 +32,14 @@ export type ExamDataDetails = InsertCodeGroups & {
 export type SearchParams = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
+
+export type Answer = {
+  examName: string;
+  code: string;
+  value: string;
+  additionalValue?: string;
+};
+
+export type AnswerWithResult = Answer & {
+  result: "correct" | "partial" | "wrong";
+};
