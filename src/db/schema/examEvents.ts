@@ -54,6 +54,9 @@ export const examSubmissions = sqliteTable("exam_submissions", {
   codeGroupId: integer("code_group_id")
     .notNull()
     .references(() => codeGroups.id),
+  submissionAttemptId: integer("submission_attempt_id")
+    .notNull()
+    .references(() => submissionAttemps.id),
   createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
   updatedAt: text("updated_at")
     .default(sql`(CURRENT_TIMESTAMP)`)

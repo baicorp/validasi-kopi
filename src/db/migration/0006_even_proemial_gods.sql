@@ -1,0 +1,1 @@
+ALTER TABLE `exam_submissions` ADD `submission_attempt_id` integer NOT NULL REFERENCES submission_attemps(id);
