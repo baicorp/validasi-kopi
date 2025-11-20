@@ -135,7 +135,9 @@ function DynamicComponent({
               key={value}
               className="bg-card text-card-foreground shadow-sm border rounded-lg p-1 flex flex-col justify-between"
             >
-              <p className="p-2 font-medium text-center">{value}</p>
+              <p className="p-2 font-medium text-center">
+                {value.replaceAll("+", " ").replace("&", " + ").toUpperCase()}
+              </p>
               <div className="flex flex-col gap-1">
                 <DynamicInput
                   halfWrongCodes={halfWrongCodes}

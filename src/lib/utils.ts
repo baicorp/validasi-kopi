@@ -26,7 +26,8 @@ export function formatRawExamsData(rows: RawExamsData[]) {
       const groupedByValueAndAdditionalValue = Object.groupBy(
         group!,
         (item) =>
-          item.value + (item.additionalValue ? "+" + item.additionalValue : ""),
+          item.value +
+          (item.additionalValue ? " & " + item.additionalValue : ""),
       );
 
       // 3. get each value with its list of codes

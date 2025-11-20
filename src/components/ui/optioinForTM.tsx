@@ -4,8 +4,17 @@ import { Label } from "./label";
 import { Input } from "./input";
 import { Button } from "./button";
 import { Plus, X } from "lucide-react";
-import { toTitleCase } from "@/lib/utils";
-import { SetStateAction, useState } from "react";
+import { listTresholdSingleValue } from "@/lib/constant";
+import { Dispatch, SetStateAction, useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "./select";
 
 export default function OptionForTresholdMix() {
   const [tresholdMixValues, setTresholdMixValues] = useState<string[]>([]);
@@ -24,25 +33,15 @@ export default function OptionForTresholdMix() {
       </div>
       <div>
         <div className="flex gap-2 items-center lg:w-1/2">
-          <Input
-            type="text"
-            placeholder="Rasa 1"
-            required
-            value={firstValue}
-            onChange={(e) => {
-              setFirstValue(e.currentTarget.value);
-            }}
+          <SelectTasteInten
+            selectedTasteIntent={firstValue}
+            setSelectedTasteIntent={setFirstValue}
             disabled={tresholdMixValues.length === 5}
           />
           <Plus />
-          <Input
-            type="text"
-            placeholder="Rasa 2"
-            required
-            value={secondValue}
-            onChange={(e) => {
-              setSecondValue(e.currentTarget.value);
-            }}
+          <SelectTasteInten
+            selectedTasteIntent={secondValue}
+            setSelectedTasteIntent={setSecondValue}
             disabled={tresholdMixValues.length === 5}
           />
           <Button
@@ -57,7 +56,7 @@ export default function OptionForTresholdMix() {
               setSecondValue("");
               setTresholdMixValues((prev) => [
                 ...prev,
-                `${firstVal} + ${secondVal}`,
+                `${firstVal}&${secondVal}`,
               ]);
             }}
           >
@@ -96,7 +95,9 @@ function ThresholdMixValues({
           readOnly
           hidden
         />
-        <p className="text-sm">{toTitleCase(value)}</p>
+        <p className="text-sm">
+          {value.replaceAll("+", " ").replace("&", " + ")}
+        </p>
         <X
           className="w-4 h-4 cursor-pointer"
           onClick={() => {
@@ -108,4 +109,38 @@ function ThresholdMixValues({
       </div>
     );
   });
+}
+
+function SelectTasteInten({
+  selectedTasteIntent,
+  setSelectedTasteIntent,
+  disabled,
+}: {
+  selectedTasteIntent: string;
+  setSelectedTasteIntent: Dispatch<SetStateAction<string>>;
+  disabled: boolean;
+}) {
+  const data = [...listTresholdSingleValue];
+
+  return (
+    <Select
+      value={selectedTasteIntent}
+      onValueChange={setSelectedTasteIntent}
+      disabled={disabled}
+    >
+      <SelectTrigger className="w-full">
+        <SelectValue placeholder="Pilih Rasa" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          <SelectLabel>Daftar Rasa</SelectLabel>
+          {data.map((value, index) => (
+            <SelectItem key={index} value={value.tasteIntent}>
+              {value.tasteIntent.replace("+", " ")}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  );
 }

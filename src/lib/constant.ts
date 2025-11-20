@@ -1,24 +1,21 @@
-type Taste = "asam" | "asin" | "manis" | "pahit" | "tidak berasa";
-
 export interface TasteWithIntensity {
-  taste: Taste;
-  intensity: number; // undefined for "hambar"
+  tasteIntent: string;
 }
 
 const listTresholdSingleValue: TasteWithIntensity[] = [
-  { taste: "asam", intensity: 1 },
-  { taste: "asam", intensity: 2 },
-  { taste: "asam", intensity: 3 },
-  { taste: "asin", intensity: 1 },
-  { taste: "asin", intensity: 2 },
-  { taste: "asin", intensity: 3 },
-  { taste: "manis", intensity: 1 },
-  { taste: "manis", intensity: 2 },
-  { taste: "manis", intensity: 3 },
-  { taste: "pahit", intensity: 1 },
-  { taste: "pahit", intensity: 2 },
-  { taste: "pahit", intensity: 3 },
-  { taste: "tidak berasa", intensity: -1 },
+  { tasteIntent: "asam+1" },
+  { tasteIntent: "asam+2" },
+  { tasteIntent: "asam+3" },
+  { tasteIntent: "asin+1" },
+  { tasteIntent: "asin+2" },
+  { tasteIntent: "asin+3" },
+  { tasteIntent: "manis+1" },
+  { tasteIntent: "manis+2" },
+  { tasteIntent: "manis+3" },
+  { tasteIntent: "pahit+1" },
+  { tasteIntent: "pahit+2" },
+  { tasteIntent: "pahit+3" },
+  { tasteIntent: "tidak berasa" },
 ];
 
 const productCategories = [

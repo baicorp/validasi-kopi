@@ -31,6 +31,7 @@ export default function Page() {
   const [examDataDetails, setExamDataDetails] = useState<ExamDataDetails>();
 
   function handleSelectedExamChange(e: CheckedState, examName: string) {
+    setExamDataDetails(undefined); // reset table data
     if (e && !selectedExam.includes(examName)) {
       setSelectedExam((prev) => [...prev, examName].sort());
     } else if (!e) {

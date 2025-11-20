@@ -105,8 +105,8 @@ export class ExamGenerator {
   private generateTresholdMixCodes(codes: string[], values: string[]) {
     if (codes.length % this.numberOfTresholdMixGlass !== 0) return [];
 
-    const newValues = values.map((data) => data.split("+")[0]?.trim());
-    const additionalValues = values.map((data) => data.split("+")[1]?.trim());
+    const newValues = values.map((data) => data.split("&")[0]?.trim());
+    const additionalValues = values.map((data) => data.split("&")[1]?.trim());
 
     return this.pairCodesWithValues(codes, newValues, additionalValues);
   }
