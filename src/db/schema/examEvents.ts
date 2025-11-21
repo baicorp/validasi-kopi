@@ -94,3 +94,16 @@ export const examSubmissionNotes = sqliteTable("exam_submission_notes", {
     .default(sql`(CURRENT_TIMESTAMP)`)
     .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
 });
+
+export const sampleExamAnswer = sqliteTable("sample_exam_answer", {
+  id: integer("id").primaryKey(),
+  value: text("value").notNull(),
+  examEventId: integer("exam_event_id")
+    .notNull()
+    .references(() => examEvents.id),
+  examName: text("exam_name").notNull(),
+  createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
+  updatedAt: text("updated_at")
+    .default(sql`(CURRENT_TIMESTAMP)`)
+    .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+});
