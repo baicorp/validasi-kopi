@@ -15,7 +15,7 @@ import { getCodeGroupsForExam } from "@/actions/codeGroups";
 export default function SelectCodeGroupExam() {
   return (
     <Select name="code-group-exam" required>
-      <SelectTrigger className="w-full">
+      <SelectTrigger className="w-full max-w-[334px]">
         <SelectValue placeholder="Pilih soal ujian" />
       </SelectTrigger>
       <SelectContent>
