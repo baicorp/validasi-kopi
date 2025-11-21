@@ -108,7 +108,10 @@ function CodeGroupItem({
       >
         <Sheet size={27} />
         <div className="flex flex-col">
-          <span>{toTitleCase(groupName)}</span>
+          <p>
+            {toTitleCase(groupName)}{" "}
+            <span className="text-muted-foreground">#{id}</span>
+          </p>
           <div className="flex items-center gap-2.5">
             <time
               className="font-mono text-xs text-muted-foreground"

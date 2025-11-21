@@ -63,7 +63,10 @@ function SelectItems() {
       <SelectLabel>Daftar soal ujian</SelectLabel>
       {codeGroupsExams.map((group) => (
         <SelectItem key={group.id} value={group.id.toString()}>
-          <span>{group.groupName}</span>
+          <span>
+            {group.groupName}{" "}
+            <span className="text-muted-foreground">#{group.id}</span>
+          </span>
           <span className="text-xs text-muted-foreground">
             {group.createdAt}
           </span>

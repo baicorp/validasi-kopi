@@ -108,7 +108,9 @@ function SelectedCodeGroupCard({ codeGroupId }: { codeGroupId: number }) {
   return (
     <div className="p-2.5 rounded-lg border text-sm text-muted-foreground space-y-2">
       <Link href={`/dashboard/daftar-soal/${codeGroupId}`}>
-        <p className="font-medium">{toTitleCase(codeGroup.groupName)}</p>
+        <p className="font-medium">
+          {toTitleCase(codeGroup.groupName)} <span>#{codeGroup.id}</span>
+        </p>
       </Link>
       <div className="flex flex-wrap gap-1.5 mt-1.5">
         {codeGroup.selectedExam?.split(",")?.map((exam) => (
