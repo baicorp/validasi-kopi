@@ -38,7 +38,7 @@ export default async function Page({
               Nilai
             </TableHead>
             <TableHead className="text-center text-orange-400 bg-muted py-2 md:text-lg">
-              Status Mengulang
+              Status Ujian
             </TableHead>
           </TableRow>
         </TableHeader>
