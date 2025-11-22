@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { Badge } from "./badge";
-import { Clock } from "lucide-react";
 import { Separator } from "./separator";
 import { toTitleCase } from "@/lib/utils";
+import { Clock, ExternalLink } from "lucide-react";
 import { formatLocalTime } from "@/lib/datetimeFormat";
 import EditDialogExamEvent from "./editDialogExamEvent";
 import { getAllExamEvents } from "@/actions/examEvents";
@@ -66,6 +66,25 @@ export default function EventItem({
         <div>
           <p className="text-muted-foreground">Kuota peserta ujian</p>
           <p>{totalParticipants} Orang</p>
+        </div>
+        <div>
+          <p className="text-muted-foreground">Link bank soal</p>
+          <div className="flex items-center gap-3 flex-wrap">
+            <Link
+              href={`daftar-soal/${codeGroupRegulerId}`}
+              className="flex gap-1 items-center text-blue-700"
+            >
+              <span className="text-sm">Soal reguler</span>
+              <ExternalLink className="w-3 h-3" />
+            </Link>
+            <Link
+              href={`daftar-soal/${codeGroupRetakeId}`}
+              className="flex gap-1 items-center text-blue-700"
+            >
+              <span className="text-sm">Soal mengulang</span>
+              <ExternalLink className="w-3 h-3" />
+            </Link>
+          </div>
         </div>
       </div>
       <div>
