@@ -4,10 +4,12 @@ import { db } from "@/db";
 import {
   examEvents,
   examRegistrations,
+  sampleExamAnswer,
   submissionAttemps,
 } from "@/db/schema/examEvents";
-import { codeGroups } from "@/db/schema";
+import { shuffle } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
+import { codeGroups, codes, exams } from "@/db/schema";
 import { isValidRole, validateSessionServer } from "./validateSession";
 import { and, desc, eq, gte, inArray, like, lte, sql } from "drizzle-orm";
 
@@ -294,5 +296,237 @@ export async function getAllExamEvents(page: number = 1, search?: string) {
   } catch (error) {
     console.error(error);
     return { error: "Gagal mendapatkan daftar pelaksanaan ujian." };
+  }
+}
+
+// this is for drop down list "identifikasi" || "2 out of 5"
+export async function getListValuesFromExamName(
+  examName: string,
+  eventId: string,
+) {
+  try {
+    const transactionResult = await db.transaction(async (tx) => {
+      const getCorrectValue = tx
+        .selectDistinct({
+          value: examName.includes("2 out of 5")
+            ? codes.additionalValue
+            : codes.value,
+        })
+        .from(examEvents)
+        .rightJoin(codeGroups, eq(examEvents.codeGroupRegulerId, codeGroups.id))
+        .leftJoin(codes, eq(codes.codeGroupId, codeGroups.id))
+        .leftJoin(exams, eq(codes.examId, exams.id))
+        .where(
+          and(eq(examEvents.id, Number(eventId)), eq(exams.examName, examName)),
+        );
+
+      const getSampleValue = tx
+        .selectDistinct({ value: sampleExamAnswer.value })
+        .from(sampleExamAnswer)
+        .where(
+          and(
+            eq(sampleExamAnswer.examEventId, Number(eventId)),
+            eq(sampleExamAnswer.examName, examName),
+          ),
+        );
+
+      const [correct, sample] = await Promise.all([
+        getCorrectValue,
+        getSampleValue,
+      ]);
+
+      const correctArr = correct.map((data) => data.value);
+      const sampleArr = sample.map((data) => data.value);
+
+      return shuffle([...correctArr, ...sampleArr]);
+    });
+
+    return transactionResult;
+  } catch (error) {
+    console.error(error);
+    return { error: "Gagal mendapatkan data." };
+  }
+}
+
+export async function getExamInputFormBasedOnSelectedExamForm(
+  examEventId: string,
+) {
+  try {
+    // 1. get userId
+    const session = await validateSessionServer();
+    const userId = session.user.id;
+
+    const validExams = await getExamEventById(Number(examEventId));
+    if ("error" in validExams) {
+      return { error: validExams.error };
+    }
+
+    const transactionResult = await db.transaction(async (tx) => {
+      // 2. get latestAttempt number
+      const [{ latestAttempt }] = await tx
+        .select({
+          latestAttempt: sql<number>`max(${submissionAttemps.numberAttemp})`,
+        })
+        .from(submissionAttemps)
+        .where(
+          and(
+            eq(submissionAttemps.examEventId, Number(examEventId)),
+            eq(submissionAttemps.userId, userId),
+          ),
+        );
+
+      // 3. get codeGroupId based on how many times user already take
+      const nextAttempt = (latestAttempt ?? 0) + 1;
+      if (nextAttempt > 4) {
+        throw new Error("Kesempatan perbaikan ujian anda sudah habis.");
+      }
+
+      // 4. get selectedExam based on user number of submission attempt
+      let selectedExam: string = "";
+
+      if (nextAttempt > 1) {
+        const rows = await tx
+          .select({ retakeExam: submissionAttemps.retakeExam })
+          .from(submissionAttemps)
+          .where(
+            and(
+              eq(submissionAttemps.numberAttemp, nextAttempt - 1),
+              eq(submissionAttemps.examEventId, Number(examEventId)),
+              eq(submissionAttemps.userId, userId),
+            ),
+          );
+        const selectedExamForRetakeExam = rows
+          .map((data) => data.retakeExam)
+          .filter((exam) => exam && exam.length > 0)
+          .toString();
+        selectedExam = selectedExamForRetakeExam;
+      } else {
+        const [{ selectedExamForFirstTimeExam }] = await tx
+          .select({
+            selectedExamForFirstTimeExam: codeGroups.selectedExam,
+          })
+          .from(examEvents)
+          .leftJoin(
+            codeGroups,
+            eq(examEvents.codeGroupRegulerId, codeGroups.id),
+          )
+          .leftJoin(
+            examRegistrations,
+            eq(examRegistrations.examEventId, examEvents.id),
+          )
+          .where(
+            and(
+              eq(examEvents.id, Number(examEventId)),
+              eq(examRegistrations.userId, userId),
+            ),
+          );
+        selectedExam = selectedExamForFirstTimeExam ?? "";
+      }
+
+      return selectedExam;
+    });
+
+    return { selectedExams: transactionResult };
+  } catch (error) {
+    console.error(error);
+    return { error: "Kesempatan ujian sudah habis." };
+  }
+}
+
+export async function getExamThatNeedDummyData(examEventId: number) {
+  try {
+    // TODO: get the examValue
+    const [row] = await db
+      .selectDistinct({
+        selectedExams: codeGroups.selectedExam,
+      })
+      .from(examEvents)
+      .leftJoin(codeGroups, eq(examEvents.codeGroupRegulerId, codeGroups.id))
+      .where(eq(examEvents.id, examEventId));
+
+    const exams = [
+      "2 out of 5 campuran kopi",
+      "2 out of 5 kopi pure",
+      "identifikasi",
+    ];
+
+    const filteredExams = row.selectedExams
+      ?.split(",")
+      .filter((examName) => exams.some((exam) => exam === examName));
+
+    if (!filteredExams) {
+      return {
+        error: "Tidak ditemukan ujian yang membutuhkan jawaban tambahan.",
+      };
+    }
+
+    return filteredExams.map((exam) => ({
+      examName: exam,
+    }));
+  } catch (error) {
+    console.error(error);
+    return { error: "Gagal mendapatkan data daftar ujian" };
+  }
+}
+
+export async function addSampleExamAnswer(
+  examEventId: number,
+  sample: string,
+  examName: string,
+) {
+  try {
+    const results = await db
+      .insert(sampleExamAnswer)
+      .values({ value: sample, examEventId, examName });
+
+    return { rowsAffected: results.rowsAffected };
+  } catch (error) {
+    console.error(error);
+    return { error: "Gagal mendapatkan data daftar ujian" };
+  }
+}
+
+export async function getSampleExamAnswer(
+  examEventId: number,
+  examName: string,
+) {
+  try {
+    const rows = await db
+      .select()
+      .from(sampleExamAnswer)
+      .where(
+        and(
+          eq(sampleExamAnswer.examEventId, examEventId),
+          eq(sampleExamAnswer.examName, examName),
+        ),
+      );
+
+    return rows.map((row) => row.value);
+  } catch (error) {
+    console.error(error);
+    return { error: "Gagal mendapatkan data daftar ujian" };
+  }
+}
+
+export async function deleteSampleExamAnswer(
+  examEventId: number,
+  examName: string,
+  value: string,
+) {
+  try {
+    const rows = await db
+      .delete(sampleExamAnswer)
+      .where(
+        and(
+          eq(sampleExamAnswer.examEventId, examEventId),
+          eq(sampleExamAnswer.examName, examName),
+          eq(sampleExamAnswer.value, value),
+        ),
+      );
+
+    return { rowsAffected: rows.rowsAffected };
+  } catch (error) {
+    console.error(error);
+    return { error: "Gagal mendapatkan data daftar ujian" };
   }
 }
