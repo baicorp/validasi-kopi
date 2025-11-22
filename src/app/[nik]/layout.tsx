@@ -15,9 +15,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <SignOutButton />
         </div>
       </section>
-      <section className="pt-4 px-4 lg:px-10 h-[calc(100dvh_-_136px)]">
-        {children}
-      </section>
+      <section className="mt-4 px-4 lg:px-10">{children}</section>
     </main>
   );
 }
