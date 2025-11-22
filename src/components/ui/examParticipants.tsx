@@ -11,19 +11,17 @@ import { Checkbox } from "./checkbox";
 import Loading from "../skeleton/loading";
 import { Participants } from "@/lib/types";
 import { LoaderCircle } from "lucide-react";
+import { useParams } from "next/navigation";
 import { useDebounce } from "@/hooks/use-debounce";
 import { getAllEmployees } from "@/actions/employees";
 import { assignUser } from "@/actions/examRegistrations";
 
 export default function ExamParticipants({
-  examEventId,
   listParticipant,
-  totalParticipants,
 }: {
-  examEventId: number;
   listParticipant: Participants[];
-  totalParticipants: number;
 }) {
+  const { id } = useParams<{ id: string }>();
   const [input, setInput] = useState("");
   const [isLoad, setIsload] = useState(false);
   const searchInput = useDebounce(input);
@@ -33,9 +31,21 @@ export default function ExamParticipants({
 
   const {
     data: employees,
-    isLoading: isLoadingEmployees,
-    error: errorEmployees,
+    isLoading,
+    error,
   } = useSWR(searchInput, () => getAllEmployees(1, searchInput));
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  if (error || employees?.error) {
+    return (
+      <ErrorComp
+        error={employees?.error || "Gagal mendapatkan data karyawan"}
+      />
+    );
+  }
 
   function handleCheckChange(
     employee: Participants,
@@ -54,7 +64,7 @@ export default function ExamParticipants({
 
   async function handleSaveParticipant() {
     setIsload(true);
-    const result = await assignUser(participants, examEventId);
+    const result = await assignUser(participants, Number(id));
     if ("error" in result) {
       toast.error(result.error);
       setIsload(false);
@@ -65,11 +75,9 @@ export default function ExamParticipants({
   }
 
   return (
-    <>
+    <div>
       <div>
-        <p className="font-semibold">
-          DAFTAR PESERTA ({participants.length}/{totalParticipants})
-        </p>
+        <p className="font-semibold">DAFTAR PESERTA ({participants.length})</p>
         <p className="text-muted-foreground mb-1">
           Masukkan daftar peserta yang mengikuti ujian ini
         </p>
@@ -81,13 +89,7 @@ export default function ExamParticipants({
         />
         {input && (
           <div className="mt-2 py-4  bg-white border rounded-lg shadow px-6">
-            {isLoadingEmployees ? (
-              <div className="flex justify-center">
-                <Loading />
-              </div>
-            ) : errorEmployees ? (
-              <ErrorComp error={errorEmployees} />
-            ) : employees?.data?.length === 0 ? (
+            {employees?.data?.length === 0 ? (
               <p className="text-muted-foreground text-center text-sm">
                 Karyawan tidak ditemukn
               </p>
@@ -124,13 +126,14 @@ export default function ExamParticipants({
         )}
       </div>
       {participants.length !== 0 && (
-        <>
+        <div className="space-y-2 mt-2">
           <div className="grid grid-cols-3 gap-2">
             {participants.map((participant) => (
               <ExamParticipantItem
                 key={participant.username}
                 name={participant.name}
                 username={participant.username}
+                department={participant.department}
               />
             ))}
           </div>
@@ -142,18 +145,20 @@ export default function ExamParticipants({
             Simpan
             {isLoad && <LoaderCircle className="animate-spin" />}
           </Button>
-        </>
+        </div>
       )}
-    </>
+    </div>
   );
 }
 
 function ExamParticipantItem({
   username,
   name,
+  department,
 }: {
   username: string;
   name: string;
+  department: string | null;
 }) {
   return (
     <div className="flex flex-col p-2.5 rounded-md border shadow">
@@ -161,7 +166,7 @@ function ExamParticipantItem({
       <div className="flex gap-2 items-center text-muted-foreground">
         <p className="font-mono text-sm">{username}</p>
         <span>•</span>
-        <p className="text-sm">QC</p>
+        <p className="text-sm">{department}</p>
       </div>
     </div>
   );
