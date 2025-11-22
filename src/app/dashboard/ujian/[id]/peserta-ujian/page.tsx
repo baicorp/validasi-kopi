@@ -2,10 +2,10 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import ErrorComp from "@/components/ui/error";
 import Loading from "@/components/skeleton/loading";
-import { getExamEventById } from "@/actions/examEvents";
 import ExamParticipants from "@/components/ui/examParticipants";
 import { validateSessionServer } from "@/actions/validateSession";
 import { getAllRegisteredUser } from "@/actions/examRegistrations";
+import ExamDummyAnswerInput from "@/components/ui/examDummyAnswerInput";
 
 export default async function page({
   params,
@@ -21,8 +21,9 @@ export default async function page({
 
   return (
     <div>
-      <div className="px-6 py-4 border rounded-lg space-y-2">
-        <Suspense key={id} fallback={<Loading />}>
+      <div className="px-6 py-4 border rounded-lg space-y-6">
+        <DummyExamValues eventId={Number(id)} />
+        <Suspense fallback={<Loading />}>
           <Participants eventId={Number(id)} />
         </Suspense>
       </div>
@@ -31,20 +32,14 @@ export default async function page({
 }
 
 async function Participants({ eventId }: { eventId: number }) {
-  const [examEvent, registeredUsers] = await Promise.all([
-    getExamEventById(eventId),
-    getAllRegisteredUser(eventId),
-  ]);
+  const registeredUsers = await getAllRegisteredUser(eventId);
 
-  if ("error" in examEvent) return <ErrorComp error={examEvent.error} />;
   if ("error" in registeredUsers)
     return <ErrorComp error={registeredUsers.error} />;
 
-  return (
-    <ExamParticipants
-      examEventId={examEvent.id}
-      listParticipant={registeredUsers}
-      totalParticipants={examEvent.totalParticipants}
-    />
-  );
+  return <ExamParticipants listParticipant={registeredUsers} />;
+}
+
+async function DummyExamValues({ eventId }: { eventId: number }) {
+  return <ExamDummyAnswerInput examEventId={eventId} />;
 }
