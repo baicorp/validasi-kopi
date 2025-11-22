@@ -42,7 +42,9 @@ export default function EventItem({
       </div>
       <div className="p-5 flex flex-col gap-2">
         <Link href={`ujian/${id}/peserta-ujian`}>
-          <p className="font-medium">{toTitleCase(examEventName)}</p>
+          <p className="font-medium line-clamp-2 overflow-ellipsis">
+            {toTitleCase(examEventName)}
+          </p>
         </Link>
         <div>
           <p className="text-muted-foreground mb-1">Daftar ujian</p>
