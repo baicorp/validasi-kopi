@@ -1,11 +1,15 @@
 "use server";
 
 import { db } from "@/db";
+import {
+  examEvents,
+  examRegistrations,
+  submissionAttemps,
+} from "@/db/schema/examEvents";
 import { codeGroups } from "@/db/schema";
 import { revalidatePath } from "next/cache";
-import { and, desc, eq, gte, like, lte, sql } from "drizzle-orm";
-import { examEvents, examRegistrations } from "@/db/schema/examEvents";
 import { isValidRole, validateSessionServer } from "./validateSession";
+import { and, desc, eq, gte, inArray, like, lte, sql } from "drizzle-orm";
 
 export async function addExamEvent(formData: FormData) {
   const eventName = (formData.get("event-name") as string).trim();
@@ -130,10 +134,11 @@ export async function getActiveExamEvent() {
   try {
     const currentDateTime = new Date().toISOString();
 
-    // get current user username (nik)
+    // 1. get current user username (nik)
     const session = await validateSessionServer();
     const userId = session.user.id;
 
+    // 2. get all active exams
     const rows = await db
       .select({
         examEventId: examEvents.id,
@@ -141,7 +146,6 @@ export async function getActiveExamEvent() {
         examStart: examEvents.examStart,
         examEnd: examEvents.examEnd,
         selectedExam: codeGroups.selectedExam,
-        codeGroupId: codeGroups.id,
       })
       .from(examRegistrations)
       .innerJoin(examEvents, eq(examRegistrations.examEventId, examEvents.id))
@@ -154,7 +158,59 @@ export async function getActiveExamEvent() {
         ),
       );
 
-    return rows;
+    // 3. find latest attempt of each founded exam
+    const listExamEventId = rows.map((row) => row.examEventId);
+    const latestAttempts = db
+      .select({
+        examEventId: submissionAttemps.examEventId,
+        maxAttempt: sql<number>`max(${submissionAttemps.numberAttemp})`.as(
+          "maxAttempt",
+        ),
+      })
+      .from(submissionAttemps)
+      .where(eq(submissionAttemps.userId, userId))
+      .groupBy(submissionAttemps.examEventId)
+      .as("latestAttempts");
+
+    const latestAttemptRows = await db
+      .select({
+        examEventId: submissionAttemps.examEventId,
+        numberAttempt: submissionAttemps.numberAttemp,
+        retakeExam: submissionAttemps.retakeExam,
+      })
+      .from(submissionAttemps)
+      .innerJoin(
+        latestAttempts,
+        and(
+          eq(submissionAttemps.examEventId, latestAttempts.examEventId),
+          eq(submissionAttemps.numberAttemp, latestAttempts.maxAttempt),
+        ),
+      )
+      .where(
+        and(
+          inArray(submissionAttemps.examEventId, listExamEventId),
+          eq(submissionAttemps.userId, userId),
+        ),
+      );
+
+    // 4. add numberAttempt and retakeExam filed to the active exam event data
+    const completeData = rows.map((row) => {
+      const foundAttempt = latestAttemptRows.find(
+        (attempt) => attempt.examEventId === row.examEventId,
+      );
+      return {
+        ...row,
+        numberAttempt: foundAttempt ? foundAttempt.numberAttempt : 0,
+        retakeExam: latestAttemptRows
+          .filter(
+            (data) => row.examEventId === data.examEventId && data.retakeExam,
+          )
+          .map((data) => data.retakeExam)
+          .toString(),
+      };
+    });
+
+    return completeData;
   } catch (error) {
     console.error(error);
     return { error: "Gagal mendapatkan data ujian aktif." };
