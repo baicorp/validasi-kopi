@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { eq } from "drizzle-orm";
-import { user } from "@/db/schema/auth";
+import { departments, user } from "@/db/schema/auth";
 import { Participants } from "@/lib/types";
 import { getExamEventById } from "./examEvents";
 import { isValidRole } from "./validateSession";
@@ -20,9 +20,11 @@ export async function getAllRegisteredUser(examEventId: number) {
         id: user.id,
         username: user.username,
         name: user.name,
+        department: departments.departmentName,
       })
       .from(examRegistrations)
       .innerJoin(user, eq(examRegistrations.userId, user.id))
+      .leftJoin(departments, eq(user.departmentId, departments.id))
       .where(eq(examRegistrations.examEventId, examEventId));
 
     return rows;

@@ -22,6 +22,7 @@ export type Participants = {
   id: string;
   username: string;
   name: string;
+  department: string | null;
 };
 
 export type ExamDataDetails = InsertCodeGroups & {
