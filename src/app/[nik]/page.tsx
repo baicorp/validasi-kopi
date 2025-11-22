@@ -78,9 +78,7 @@ async function ActiveExamEvent({ nik }: { nik: string }) {
                   </div>
                 </div>
                 <div>
-                  <p className="text-muted-foreground mb-1">
-                    Ujian yang dipilih
-                  </p>
+                  <p className="text-muted-foreground mb-1">Daftar ujian</p>
                   <div className="flex items-center flex-wrap gap-2">
                     {event.selectedExam?.split(",").map((exam) => (
                       <Badge key={exam} variant="secondary">
@@ -89,10 +87,43 @@ async function ActiveExamEvent({ nik }: { nik: string }) {
                     ))}
                   </div>
                 </div>
+                {event.numberAttempt > 0 && (
+                  <div>
+                    <p className="text-muted-foreground mb-1">Status</p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {event.retakeExam ? (
+                        <>
+                          <span className="text-sm text-red-500">
+                            Mengulang ({event.numberAttempt - 1} / 3)
+                          </span>
+                          <span> : </span>
+                          {event.retakeExam.split(",").map((exam) => (
+                            <Badge key={exam} variant={"secondary"}>
+                              {exam}
+                            </Badge>
+                          ))}
+                        </>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded-md text-xs bg-green-500 text-white">
+                          SELESAI
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
-              <Link href={`${nik}/ujian/${event.examEventId}`} className="mt-4">
-                <Button className="w-full">Mulai ujian</Button>
-              </Link>
+              {(event.numberAttempt === 0 ||
+                (event.numberAttempt < 4 && event.retakeExam)) && (
+                <Link
+                  href={`${nik}/ujian/${event.examEventId}`}
+                  className="mt-4"
+                >
+                  <Button className="w-full">
+                    Mulai ujian{" "}
+                    {event.numberAttempt > 0 && event.retakeExam && "ulang"}
+                  </Button>
+                </Link>
+              )}
             </div>
           );
         })
