@@ -54,15 +54,19 @@ async function ExamEventDetails({ examEventId }: { examEventId: string }) {
       <div className="grid grid-cols-3">
         <div className="space-y-2 justify-self-start">
           <Label className="text-muted-foreground">TANGGAL / WAKTU UJIAN</Label>
-          <div className="flex gap-2 items-center text-sm">
-            <p>Mulai :</p>
-            <Calendar className="w-4 h-4" />
-            <p>{formatLocalTime(examEvent.examStart)}</p>
-          </div>
-          <div className="flex gap-2 items-center text-sm">
-            <p>Selesai : </p>
-            <Calendar className="w-4 h-4" />
-            <p>{formatLocalTime(examEvent.examEnd)}</p>
+          <div className="grid grid-cols-[auto_auto_1fr] gap-x-3 gap-y-1 text-sm">
+            <p>Mulai</p>
+            <span> : </span>
+            <div className="flex gap-2 items-center">
+              <Calendar className="w-4 h-4" />
+              <p>{formatLocalTime(examEvent.examStart)}</p>
+            </div>
+            <p>Selesai</p>
+            <span> : </span>
+            <div className="flex gap-2 items-center">
+              <Calendar className="w-4 h-4" />
+              <p>{formatLocalTime(examEvent.examEnd)}</p>
+            </div>
           </div>
         </div>
         <div className="space-y-2 justify-self-center">
