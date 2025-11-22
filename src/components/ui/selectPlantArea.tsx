@@ -17,20 +17,36 @@ export default function SelectPlantArea({
 }: {
   defaultValue?: string;
 }) {
-  const { data: plantAreas, isLoading } = useSWR("plant-area", getPlantAreas);
+  const {
+    data: plantAreas,
+    isLoading,
+    error,
+  } = useSWR("plant-area", () => getPlantAreas());
 
-  if (plantAreas === undefined || "error" in plantAreas) {
-    return <p>Data Not found</p>;
+  if (isLoading) {
+    return (
+      <Select name="employee-plant-area" disabled>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Loading..." />
+        </SelectTrigger>
+      </Select>
+    );
+  }
+
+  if (error || !plantAreas || "error" in plantAreas) {
+    return (
+      <Select name="employee-plant-area" disabled>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Gagal mendapatkan data" />
+        </SelectTrigger>
+      </Select>
+    );
   }
 
   return (
     <Select name="employee-plant-area" defaultValue={defaultValue} required>
       <SelectTrigger className="w-full">
-        {isLoading ? (
-          <SelectValue placeholder="Loading..." />
-        ) : (
-          <SelectValue placeholder="Pilih area pabrik" />
-        )}
+        <SelectValue placeholder="Pilih area pabrik" />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>

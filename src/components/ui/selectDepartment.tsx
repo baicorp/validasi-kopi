@@ -17,23 +17,36 @@ export default function SelectDepartment({
 }: {
   defaultValue?: string;
 }) {
-  const { data: departmentData, isLoading } = useSWR(
-    "departments",
-    getDepartments,
-  );
+  const {
+    data: departmentData,
+    isLoading,
+    error,
+  } = useSWR("departments", () => getDepartments());
 
-  if (departmentData === undefined || "error" in departmentData) {
-    return <p>Data Not found</p>;
+  if (isLoading) {
+    return (
+      <Select name="employee-department" disabled>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Loading..." />
+        </SelectTrigger>
+      </Select>
+    );
+  }
+
+  if (error || !departmentData || "error" in departmentData) {
+    return (
+      <Select name="employee-department" disabled>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Gagal mendapatkan data" />
+        </SelectTrigger>
+      </Select>
+    );
   }
 
   return (
     <Select name="employee-department" defaultValue={defaultValue} required>
       <SelectTrigger className="w-full">
-        {isLoading ? (
-          <SelectValue placeholder="Loading..." />
-        ) : (
-          <SelectValue placeholder="Pilih departemen" />
-        )}
+        <SelectValue placeholder="Pilih departemen" />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>

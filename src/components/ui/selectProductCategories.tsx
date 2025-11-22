@@ -17,13 +17,30 @@ export default function SelectProductCategories({
 }: {
   defaultValue?: string;
 }) {
-  const { data: listKategori } = useSWR(
-    "listCategory",
-    getAllProductCategories,
-  );
+  const {
+    data: categories,
+    isLoading,
+    error,
+  } = useSWR("productCategories", () => getAllProductCategories());
 
-  if (listKategori === undefined || "error" in listKategori) {
-    return <p>Data Not found</p>;
+  if (isLoading) {
+    return (
+      <Select name="product-category" disabled>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Loading..." />
+        </SelectTrigger>
+      </Select>
+    );
+  }
+
+  if (error || !categories || "error" in categories) {
+    return (
+      <Select name="product-category" disabled>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Gagal mendapatkan data" />
+        </SelectTrigger>
+      </Select>
+    );
   }
 
   return (
@@ -34,7 +51,7 @@ export default function SelectProductCategories({
       <SelectContent>
         <SelectGroup>
           <SelectLabel>kategori</SelectLabel>
-          {listKategori.map((category, index) => (
+          {categories.map((category, index) => (
             <SelectItem key={index} value={category.id.toString()}>
               {category.categoryName}
             </SelectItem>
