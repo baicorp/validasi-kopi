@@ -203,7 +203,7 @@ export async function submitExam(
   }
 }
 
-export async function getLatestExamResult(examEventId: number) {
+export async function getUserLatestExamResult(examEventId: number) {
   try {
     // 1. get userId
     const user = await validateSessionServer();
@@ -252,7 +252,7 @@ export async function getLatestExamResult(examEventId: number) {
   }
 }
 
-export async function getLatestExamAttemptNumber(examEventId: number) {
+export async function getUserLatestExamAttemptNumber(examEventId: number) {
   try {
     // 1. get userId
     const user = await validateSessionServer();

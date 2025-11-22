@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/table";
 import { toTitleCase } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { getLatestExamResult } from "@/actions/examSubmissions";
+import { getUserLatestExamResult } from "@/actions/examSubmissions";
 
 export default async function Page({
   params,
@@ -17,7 +17,7 @@ export default async function Page({
   params: Promise<{ id: string; nik: string }>;
 }) {
   const { id, nik } = await params;
-  const data = await getLatestExamResult(Number(id));
+  const data = await getUserLatestExamResult(Number(id));
   if ("error" in data) {
     return <pre className="text-sm">{JSON.stringify(data, null, 2)}</pre>;
   }

@@ -13,5 +13,5 @@ export default async function page({
 
   const { id } = await params;
 
-  return <p>hasil ujian page ({id})</p>;
+  return <p>hasil ujian page</p>;
 }

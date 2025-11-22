@@ -16,7 +16,7 @@ import SelectIntensity from "@/components/ui/selectIntensity";
 import SelectTasteInten from "@/components/ui/selectTasteInten";
 import SelectProductName from "@/components/ui/selectProductName";
 import { validateSessionServer } from "@/actions/validateSession";
-import { getLatestExamAttemptNumber } from "@/actions/examSubmissions";
+import { getUserLatestExamAttemptNumber } from "@/actions/examSubmissions";
 
 export default async function Page({
   params,
@@ -97,7 +97,7 @@ async function CurrentAttempt({
   examEventId: string;
   variant?: "default" | "next";
 }) {
-  const result = await getLatestExamAttemptNumber(Number(examEventId));
+  const result = await getUserLatestExamAttemptNumber(Number(examEventId));
 
   if ("error" in result) {
     return <ErrorComp error={result.error} />;
