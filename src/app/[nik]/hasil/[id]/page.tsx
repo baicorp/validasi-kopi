@@ -45,15 +45,19 @@ export default async function Page({
         <TableBody>
           {data.map((invoice) => (
             <TableRow key={invoice.id}>
-              <TableCell className="font-medium">
+              <TableCell className="font-medium py-4">
                 {toTitleCase(invoice.examName ?? "")}
               </TableCell>
-              <TableCell className="pl-9">{invoice.numberAttempt}</TableCell>
-              <TableCell>{invoice.grade}</TableCell>
-              <TableCell
-                className={`text-center font-bold ${invoice.retake ? "text-red-400" : "text-green-500"}`}
-              >
-                {invoice.retake ? "MENGULANG" : "LOLOS"}
+              <TableCell className="pl-9 py-4">
+                {invoice.numberAttempt}
+              </TableCell>
+              <TableCell className="py-4">{invoice.grade}</TableCell>
+              <TableCell className="text-center py-4">
+                <span
+                  className={`text-sm rounded-md px-3 p-1 ${invoice.retake ? "text-red-600 bg-red-100 border border-red-200" : "text-green-600 bg-green-100 border border-green-200"}`}
+                >
+                  {invoice.retake ? "MENGULANG" : "LOLOS"}
+                </span>
               </TableCell>
             </TableRow>
           ))}
