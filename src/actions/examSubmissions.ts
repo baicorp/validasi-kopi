@@ -10,10 +10,10 @@ import {
 import { Answer } from "@/lib/types";
 import { getAllExams } from "./exams";
 import { getExamsId } from "@/lib/utils";
-import { codeGroups, codes, exams } from "@/db/schema";
 import { evaluateAnswers } from "@/lib/evaluateAnswer";
-import { validateSessionServer } from "./validateSession";
 import { and, eq, InferInsertModel, or, sql } from "drizzle-orm";
+import { isValidRole, validateSessionServer } from "./validateSession";
+import { codeGroups, codes, departments, exams, user } from "@/db/schema";
 
 export async function submitExam(
   submittedExamData: Answer[],
@@ -280,4 +280,291 @@ export async function getUserLatestExamAttemptNumber(examEventId: number) {
     console.error(error);
     return { error: "Gagal mendapatkan attempt number." };
   }
+}
+
+export async function getSubmissionSummary(examEventId: string) {
+  try {
+    // 1. check if the person is admin
+    const isValid = await isValidRole("admin");
+    if (!isValid) {
+      return { error: "401 : Anda tidak memiliki izin." };
+    }
+
+    // 2. get latest submission
+    const rows = await db
+      .select({
+        id: examSubmissions.id,
+        username: user.username,
+        name: user.name,
+        departments: departments.departmentName,
+        examName: exams.examName,
+        numberAttempt: submissionAttemps.numberAttemp,
+        code: examSubmissions.code,
+        value: examSubmissions.value,
+        addValue: examSubmissions.additionalValue,
+      })
+      .from(examSubmissions)
+      .leftJoin(
+        submissionAttemps,
+        eq(examSubmissions.submissionAttemptId, submissionAttemps.id),
+      )
+      .leftJoin(user, eq(submissionAttemps.userId, user.id))
+      .leftJoin(departments, eq(user.departmentId, departments.id))
+      .leftJoin(exams, eq(submissionAttemps.examId, exams.id))
+      .where(eq(examSubmissions.examEventId, Number(examEventId)));
+
+    const groupByNumberAttempt = Object.groupBy(rows, (row) => {
+      if (!row.numberAttempt) {
+        throw Error("Number attempt bernilai null");
+      }
+      return row.numberAttempt;
+    });
+
+    return groupByNumberAttempt;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+      return { error: error.message };
+    }
+    return { error: "Gagal mendapatkan rangkuman hasil ujian." };
+  }
+}
+
+export async function getSubmissionAttemptSummary(examEventId: string) {
+  try {
+    // 1. check if the person is admin
+    const isValid = await isValidRole("admin");
+    if (!isValid) {
+      return { error: "401 : Anda tidak memiliki izin." };
+    }
+
+    // get selectedExams data
+    const [{ selectedExams }] = await db
+      .select({ selectedExams: codeGroups.selectedExam })
+      .from(examEvents)
+      .leftJoin(codeGroups, eq(examEvents.codeGroupRegulerId, codeGroups.id))
+      .where(eq(examEvents.id, Number(examEventId)));
+
+    if (!selectedExams) {
+      return { error: "Daftar ujian tidak ditemukan." };
+    }
+
+    // get submission attempt summary
+    const rows = await db
+      .select({
+        id: submissionAttemps.id,
+        userId: user.id,
+        username: user.username,
+        name: user.name,
+        departments: departments.departmentName,
+        examName: exams.examName,
+        numberAttempt: submissionAttemps.numberAttemp,
+        grade: submissionAttemps.grade,
+      })
+      .from(submissionAttemps)
+      .leftJoin(user, eq(submissionAttemps.userId, user.id))
+      .leftJoin(departments, eq(user.departmentId, departments.id))
+      .leftJoin(exams, eq(submissionAttemps.examId, exams.id))
+      .where(eq(submissionAttemps.examEventId, Number(examEventId)));
+
+    const groupName = normalizeExamSubmissions(rows, selectedExams);
+
+    return { selectedExams, rowData: groupName };
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+      return { error: error.message };
+    }
+    return { error: "Gagal mendapatkan rangkuman hasil ujian." };
+  }
+}
+
+export interface SubmissionRow {
+  id: number;
+  userId: string | null;
+  username: string | null;
+  name: string | null;
+  departments: string | null;
+  examName: string | null;
+  numberAttempt: number;
+  grade: number | null;
+}
+
+export interface NormalizedExamData {
+  userId: string;
+  username: string;
+  name: string;
+  departments: string | null;
+  // Dynamic keys for grades: ex:'identifikasi_1'
+  [key: string]: string | number | null;
+}
+
+function normalizeExamSubmissions(
+  rows: SubmissionRow[],
+  selectedExams: string,
+): NormalizedExamData[] {
+  // 1. Parse the selectedExams string into an array of expected exam names
+  const examTypes = selectedExams.split(",").map((exam) => exam.trim());
+
+  // 2. Initialize a Map to group the data by userId (which must be a non-null string)
+  const normalizedDataMap = new Map<string, NormalizedExamData>();
+
+  // 3. Process each row
+  for (const row of rows) {
+    const {
+      userId,
+      username,
+      name,
+      departments,
+      examName,
+      numberAttempt,
+      grade,
+    } = row;
+
+    // A submission cannot be grouped or mapped without a valid user ID or exam name.
+    if (
+      userId === null ||
+      username === null ||
+      name === null ||
+      examName === null
+    ) {
+      throw Error(`Terdapat data null yang seharusnya tidak ada.`);
+    }
+
+    // Ensure the examName is one of the expected types for the event
+    if (!examTypes.includes(examName)) {
+      throw Error(`${examName} tidak ada dalam list (${examTypes})`);
+    }
+
+    // Initialize the user's data entry if it doesn't exist
+    if (!normalizedDataMap.has(userId)) {
+      const initialEntry: NormalizedExamData = {
+        userId,
+        username,
+        name,
+        departments,
+      };
+
+      // Pre-fill all 4 expected attempt columns for all selected exam types with null
+      for (const type of examTypes) {
+        for (let i = 1; i <= 4; i++) {
+          initialEntry[`${type}_${i}`] = null;
+        }
+      }
+      normalizedDataMap.set(userId, initialEntry);
+    }
+
+    // Get the current user's entry
+    const userData = normalizedDataMap.get(userId)!;
+
+    // Check if the attempt number is within the expected range (1 to 4)
+    if (numberAttempt >= 1 && numberAttempt <= 4) {
+      // Construct the dynamic key and assign the grade (which can be null)
+      const key = `${examName}_${numberAttempt}`;
+      userData[key] = grade;
+    } else {
+      throw Error("Terdapat user dengan number attempt < 1 && > 4 ");
+    }
+  }
+
+  // 4. Convert the Map values back to an array
+  const results = Array.from(normalizedDataMap.values());
+
+  return calculateExamResultsWithCompletionCheck(results, examTypes);
+}
+
+function calculateExamResultsWithCompletionCheck(
+  normalizedData: NormalizedExamData[],
+  examTypes: string[],
+): NormalizedExamData[] {
+  const PASSING_THRESHOLD = 70;
+  const NUM_ATTEMPTS = 4;
+
+  const resultsWithCalculations: NormalizedExamData[] = [];
+
+  for (const item of normalizedData) {
+    const sumOfBestGrades = 0;
+    let bestGradeMetCount = 0; // Counts exams where best grade >= 70
+    let maxAttemptsMetCount = 0; // Counts exams where 4 attempts were made
+
+    // Storage for the best grade found for each exam to calculate the average later
+    const bestGrades: (number | null)[] = [];
+
+    // 1. Check Completion Criteria
+    for (const examType of examTypes) {
+      let bestGradeForExam: number | null = null;
+      let attemptCount = 0;
+
+      // Find the best grade and total attempts across the 4 slots
+      for (let i = 1; i <= NUM_ATTEMPTS; i++) {
+        const key = `${examType}_${i}`;
+        const currentGrade = item[key] as number | null;
+
+        if (currentGrade !== null) {
+          attemptCount++;
+          // Find the best grade
+          if (bestGradeForExam === null || currentGrade > bestGradeForExam) {
+            bestGradeForExam = currentGrade;
+          }
+        }
+      }
+
+      // Store the best grade for calculation later, regardless of completion status
+      bestGrades.push(bestGradeForExam);
+
+      // Check if the best grade meets the passing threshold (Criterion 1)
+      if (bestGradeForExam !== null && bestGradeForExam >= PASSING_THRESHOLD) {
+        bestGradeMetCount++;
+      }
+
+      // Check if max attempts were submitted (Criterion 2)
+      if (attemptCount === NUM_ATTEMPTS) {
+        maxAttemptsMetCount++;
+      }
+    }
+
+    // 2. Determine if Completion State is reached
+    const hasPassedAll = bestGradeMetCount === examTypes.length;
+    const hasMaxedAttempts = maxAttemptsMetCount === examTypes.length;
+
+    // The calculation is performed ONLY if either condition is met
+    if (hasPassedAll || hasMaxedAttempts) {
+      // 3. Calculate Average Grade (using the best grade found for each exam)
+      let sumOfFinalGrades = 0;
+      let gradesUsedInAverage = 0;
+
+      for (const grade of bestGrades) {
+        if (grade !== null) {
+          sumOfFinalGrades += grade;
+          gradesUsedInAverage++;
+        }
+      }
+
+      let averageGradeValue = 0;
+      if (examTypes.length > 0) {
+        // The average is calculated based on the sum of the best grade for each exam
+        // divided by the total number of required exam types (which is 3).
+        averageGradeValue = sumOfFinalGrades / examTypes.length;
+      }
+
+      // 4. Set the calculated fields
+      item.averageGrade = averageGradeValue.toFixed(2);
+
+      if (averageGradeValue >= PASSING_THRESHOLD) {
+        item.result = "LULUS";
+      } else {
+        item.result = "TIDAK LULUS";
+      }
+    } else {
+      item.averageGrade = null;
+      item.result = null;
+    }
+    // 5. If the completion state is not met, the fields are naturally omitted or left as defaults
+    // depending on how the initial object was built. Since the prompt implies adding them,
+    // they will be missing here if the condition is false.
+
+    resultsWithCalculations.push(item);
+  }
+
+  return resultsWithCalculations;
 }
