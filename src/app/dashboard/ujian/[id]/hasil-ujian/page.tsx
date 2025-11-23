@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import ExportSummary from "@/components/ui/exportSummary";
 
 export default async function page({
   params,
@@ -34,8 +35,14 @@ export default async function page({
   return (
     <div className="space-y-4">
       <p className="text-center font-semibold text-lg">Rangkuman Hasil Ujian</p>
+      <div className="flex justify-end">
+        <ExportSummary
+          listExams={results.selectedExams.split(",")}
+          data={results.rowData}
+        />
+      </div>
       <CustomTable data={results} />
-      {/*<pre className="text-sm">{JSON.stringify(results, null, 2)}</pre>*/}
+      <pre>{JSON.stringify(results, null, 2)}</pre>
     </div>
   );
 }
