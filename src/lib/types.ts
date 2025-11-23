@@ -39,6 +39,7 @@ export type Answer = {
   code: string;
   value: string;
   additionalValue?: string;
+  attemptNumber?: number;
 };
 
 export type AnswerWithResult = Answer & {

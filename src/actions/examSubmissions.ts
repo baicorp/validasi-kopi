@@ -108,6 +108,7 @@ export async function submitExam(
         ...data,
         code: data.code ? data.code : "",
         value: data.value ? data.value : "",
+        attemptNumber: nextAttempt,
       }));
 
       const normalizedPairs = submittedExamData.map((data) => ({

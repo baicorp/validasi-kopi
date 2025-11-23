@@ -61,12 +61,22 @@ function evaluateIdentification(
     };
   });
 
+  const attemptNumber = userAnswers[0].attemptNumber;
   const codeScore = 20;
-  const grade =
-    answerResults.filter((data) => data.result === "correct").length *
-    codeScore;
+  const totalCorrectCode = answerResults.filter(
+    (data) => data.result === "correct",
+  ).length;
+  const grade = totalCorrectCode * codeScore;
 
-  return { examName: examNameTarget, answerResults, grade };
+  return {
+    examName: examNameTarget,
+    answerResults,
+    grade: calculateFinalGrade({
+      attemptNumber,
+      grade,
+      totalWrongCode: answerResults.length - totalCorrectCode,
+    }),
+  };
 }
 
 function evaluateTriangle(
@@ -114,10 +124,8 @@ function evaluateSkoring(
 ): EvaluatedResult {
   const examNameTarget = "skoring";
 
-  const userList = userAnswers.filter((a) =>
-    a.examName.includes(examNameTarget),
-  );
-  const dbList = dbAnswers.filter((a) => a.examName.includes(examNameTarget));
+  const userList = userAnswers.filter((a) => a.examName === examNameTarget);
+  const dbList = dbAnswers.filter((a) => a.examName === examNameTarget);
 
   // FIXME : this implementation is not quite right yet
   // Mapping rules in a single object for clarity
@@ -144,12 +152,22 @@ function evaluateSkoring(
     return { ...user, result: isCorrect ? "correct" : "wrong" };
   });
 
+  const attemptNumber = userAnswers[0].attemptNumber;
   const codeScore = 20;
-  const grade =
-    answerResults.filter((data) => data.result === "correct").length *
-    codeScore;
+  const totalCorrectCode = answerResults.filter(
+    (data) => data.result === "correct",
+  ).length;
+  const grade = totalCorrectCode * codeScore;
 
-  return { examName: examNameTarget, answerResults, grade };
+  return {
+    examName: examNameTarget,
+    answerResults,
+    grade: calculateFinalGrade({
+      attemptNumber,
+      grade,
+      totalWrongCode: answerResults.length - totalCorrectCode,
+    }),
+  };
 }
 
 function evaluateTwoOutOfFive(
@@ -192,24 +210,35 @@ function evaluateTwoOutOfFive(
     (data) => data.examName === "2 out of 5 pure",
   );
 
+  const attemptNumber = userAnswers[0].attemptNumber;
   const codeScore = 20;
-  const gradeCreamer =
-    twoOutOfFiveCreamer.filter((data) => data.result === "correct").length *
-    codeScore;
-  const gradePure =
-    twoOutOfFivePure.filter((data) => data.result === "correct").length *
-    codeScore;
+  const totalCorrectCodeCreamer = twoOutOfFiveCreamer.filter(
+    (data) => data.result === "correct",
+  ).length;
+  const gradeCreamer = totalCorrectCodeCreamer * codeScore;
+  const totalCorrectCodePure = twoOutOfFivePure.filter(
+    (data) => data.result === "correct",
+  ).length;
+  const gradePure = totalCorrectCodePure * codeScore;
 
   return [
     {
       examName: "2 out of 5 creamer",
       answerResults: twoOutOfFiveCreamer,
-      grade: gradeCreamer,
+      grade: calculateFinalGrade({
+        attemptNumber,
+        grade: gradeCreamer,
+        totalWrongCode: twoOutOfFiveCreamer.length - totalCorrectCodeCreamer,
+      }),
     },
     {
       examName: "2 out of 5 pure",
       answerResults: twoOutOfFivePure,
-      grade: gradePure,
+      grade: calculateFinalGrade({
+        attemptNumber,
+        grade: gradePure,
+        totalWrongCode: twoOutOfFivePure.length - totalCorrectCodePure,
+      }),
     },
   ];
 }
@@ -260,13 +289,22 @@ function evaluateTresholdSingle(
     },
   );
 
+  const attemptNumber = userAnswers[0].attemptNumber;
   const codeScore = 8.33;
-  const grade =
-    answerResults.filter(
-      (data) => data.result === "correct" || data.result === "partial",
-    ).length * codeScore;
+  const totalCorrectOrPartialCode = answerResults.filter(
+    (data) => data.result === "correct" || data.result === "partial",
+  ).length;
+  const grade = totalCorrectOrPartialCode * codeScore;
 
-  return { examName: examNameTarget, answerResults, grade };
+  return {
+    examName: examNameTarget,
+    answerResults,
+    grade: calculateFinalGrade({
+      attemptNumber,
+      grade,
+      totalWrongCode: answerResults.length - totalCorrectOrPartialCode,
+    }),
+  };
 }
 
 function evaluateTresholdMix(
@@ -274,14 +312,14 @@ function evaluateTresholdMix(
   dbAnswers: Answer[],
 ): EvaluatedResult {
   const examNameTarget = "treshold mix";
-  const userTresholdSingleList = userAnswers.filter(
+  const userTresholdSingleMix = userAnswers.filter(
     (answer) => answer.examName === examNameTarget,
   );
   const dbTresholdSingleList = dbAnswers.filter(
     (answer) => answer.examName === examNameTarget,
   );
 
-  const answerResults: AnswerWithResult[] = userTresholdSingleList.map(
+  const answerResults: AnswerWithResult[] = userTresholdSingleMix.map(
     (user) => {
       // correct => if all taste and intensity all correct
       const isCorrect = dbTresholdSingleList.some((correct) => {
@@ -329,14 +367,58 @@ function evaluateTresholdMix(
     },
   );
 
+  const attemptNumber = userAnswers[0].attemptNumber;
   const correctCodeScore = 20;
   const partialCodeScore = 10;
-  let grade =
-    answerResults.filter((data) => data.result === "correct").length *
-    correctCodeScore;
-  grade +=
-    answerResults.filter((data) => data.result === "partial").length *
-    partialCodeScore;
+  const totalCorrectCode = answerResults.filter(
+    (data) => data.result === "correct",
+  ).length;
+  const totalPartialCode = answerResults.filter(
+    (data) => data.result === "partial",
+  ).length;
 
-  return { examName: examNameTarget, answerResults, grade };
+  let grade = totalCorrectCode * correctCodeScore;
+  grade += totalPartialCode * partialCodeScore;
+
+  return {
+    examName: examNameTarget,
+    answerResults,
+    grade: calculateFinalGrade({
+      attemptNumber,
+      grade,
+      totalWrongCode: answerResults.length - totalCorrectCode,
+    }),
+  };
+}
+
+function calculateFinalGrade({
+  grade,
+  totalWrongCode,
+  attemptNumber,
+}: {
+  grade: number;
+  totalWrongCode: number;
+  attemptNumber: number | undefined;
+}) {
+  if (!attemptNumber) {
+    throw Error("Jawaban yang dikumpulkan tidak memiliki attempt number");
+  }
+  let minusPoint = 0;
+  switch (attemptNumber) {
+    case 2: // retake 1
+      minusPoint = 10;
+      break;
+    case 3: // retake 2
+      minusPoint = 20;
+      break;
+    case 4: // retake 3
+      minusPoint = 30;
+      break;
+    default:
+      minusPoint = 0;
+      break;
+  }
+
+  const finalGrade = grade - totalWrongCode * minusPoint;
+  return finalGrade < 0 ? 0 : finalGrade;
 }
