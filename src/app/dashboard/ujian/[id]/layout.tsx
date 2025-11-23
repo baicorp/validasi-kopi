@@ -18,6 +18,7 @@ export default async function Layout({
       <section>
         <div className="flex gap-3 my-3">
           <Link href={`peserta-ujian`}>Peserta ujian</Link>
+          <Link href={`rekap-jawaban`}>Rekap jawaban</Link>
           <Link href={`hasil-ujian`}>Hasil ujian</Link>
         </div>
         <Suspense fallback={<Loading />}>
