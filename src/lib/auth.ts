@@ -26,11 +26,11 @@ export const auth = betterAuth({
         required: true,
       },
       departmentId: {
-        type: "number",
+        type: "string",
         required: true,
       },
       plantAreaId: {
-        type: "number",
+        type: "string",
         required: true,
       },
     },

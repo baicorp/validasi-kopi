@@ -5,57 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1763199542454,
-      "tag": "0000_high_freak",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1763370971143,
-      "tag": "0001_brief_lockjaw",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1763387177724,
-      "tag": "0002_parallel_alex_power",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1763457427965,
-      "tag": "0003_dear_lizard",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1763607398755,
-      "tag": "0004_deep_the_twelve",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "6",
-      "when": 1763608112376,
-      "tag": "0005_loving_shotgun",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "6",
-      "when": 1763610576044,
-      "tag": "0006_even_proemial_gods",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "6",
-      "when": 1763708311203,
-      "tag": "0007_good_gertrude_yorkes",
+      "when": 1763887816421,
+      "tag": "0000_absent_robin_chapel",
       "breakpoints": true
     }
   ]

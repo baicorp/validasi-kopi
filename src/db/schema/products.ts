@@ -1,9 +1,12 @@
 import { sql } from "drizzle-orm";
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 // product_categories
 export const productCategories = sqliteTable("product_categories", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID())
+    .notNull(),
   categoryName: text("category_name").unique().notNull(),
   createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
   updatedAt: text("updated_at")
@@ -13,11 +16,14 @@ export const productCategories = sqliteTable("product_categories", {
 
 // products
 export const products = sqliteTable("products", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID())
+    .notNull(),
   productName: text("product_name").unique().notNull(),
-  productCategoryId: integer("product_category_id")
+  productCategoryId: text("product_category_id")
     .notNull()
-    .references(() => productCategories.id),
+    .references(() => productCategories.id, { onDelete: "cascade" }),
   createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
   updatedAt: text("updated_at")
     .default(sql`(CURRENT_TIMESTAMP)`)

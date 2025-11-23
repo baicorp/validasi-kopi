@@ -4,7 +4,10 @@ import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
 
 // code_groups
 export const codeGroups = sqliteTable("code_groups", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID())
+    .notNull(),
   groupName: text("group_name").notNull(),
   selectedExam: text("selected_exam").notNull(),
   totalParticipants: integer("total_participants").notNull().default(0),
@@ -16,14 +19,17 @@ export const codeGroups = sqliteTable("code_groups", {
 
 // codes
 export const codes = sqliteTable("codes", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID())
+    .notNull(),
   code: text("code").notNull(),
   value: text("value").notNull(),
   additionalValue: text("additional_value"),
-  examId: integer("exam_id")
+  examId: text("exam_id")
     .notNull()
     .references(() => exams.id),
-  codeGroupId: integer("code_group_id")
+  codeGroupId: text("code_group_id")
     .notNull()
     .references(() => codeGroups.id, { onDelete: "cascade" }),
   createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),

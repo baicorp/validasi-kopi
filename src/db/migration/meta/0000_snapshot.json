@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "62f38268-7562-4a7d-9600-33b8cccdaf05",
+  "id": "010873d5-b664-4f16-ac38-ffb2cdf7ae1c",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "account": {
@@ -125,10 +125,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "department_name": {
           "name": "department_name",
@@ -173,10 +173,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "plant_area_name": {
           "name": "plant_area_name",
@@ -419,14 +419,14 @@
         },
         "department_id": {
           "name": "department_id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
         "plant_area_id": {
           "name": "plant_area_id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -459,7 +459,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
         "user_plant_area_id_plant_areas_id_fk": {
@@ -472,7 +472,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
@@ -539,10 +539,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "group_name": {
           "name": "group_name",
@@ -594,10 +594,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "code": {
           "name": "code",
@@ -613,16 +613,23 @@
           "notNull": true,
           "autoincrement": false
         },
+        "additional_value": {
+          "name": "additional_value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "exam_id": {
           "name": "exam_id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
         "code_group_id": {
           "name": "code_group_id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -682,7 +689,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": true,
           "notNull": true,
           "autoincrement": false
@@ -710,14 +717,14 @@
         },
         "code_group_reguler_id": {
           "name": "code_group_reguler_id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
         "code_group_retake_id": {
           "name": "code_group_retake_id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -777,7 +784,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": true,
           "notNull": true,
           "autoincrement": false
@@ -791,7 +798,7 @@
         },
         "exam_event_id": {
           "name": "exam_event_id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -838,7 +845,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -851,7 +858,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": true,
           "notNull": true,
           "autoincrement": false
@@ -863,9 +870,9 @@
           "notNull": true,
           "autoincrement": false
         },
-        "exam_submission_id": {
-          "name": "exam_submission_id",
-          "type": "integer",
+        "submission_attempt_id": {
+          "name": "submission_attempt_id",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -889,17 +896,17 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "exam_submission_notes_exam_submission_id_exam_submissions_id_fk": {
-          "name": "exam_submission_notes_exam_submission_id_exam_submissions_id_fk",
+        "exam_submission_notes_submission_attempt_id_submission_attemps_id_fk": {
+          "name": "exam_submission_notes_submission_attempt_id_submission_attemps_id_fk",
           "tableFrom": "exam_submission_notes",
-          "tableTo": "exam_submissions",
+          "tableTo": "submission_attemps",
           "columnsFrom": [
-            "exam_submission_id"
+            "submission_attempt_id"
           ],
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -912,7 +919,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": true,
           "notNull": true,
           "autoincrement": false
@@ -931,37 +938,23 @@
           "notNull": true,
           "autoincrement": false
         },
-        "user_id": {
-          "name": "user_id",
+        "additional_value": {
+          "name": "additional_value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "result": {
+          "name": "result",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "exam_id": {
-          "name": "exam_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "exam_event_id": {
-          "name": "exam_event_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "code_group_id": {
-          "name": "code_group_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "submissionAttemp": {
-          "name": "submissionAttemp",
-          "type": "integer",
+        "submission_attempt_id": {
+          "name": "submission_attempt_id",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -985,22 +978,166 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "exam_submissions_user_id_user_id_fk": {
-          "name": "exam_submissions_user_id_user_id_fk",
+        "exam_submissions_submission_attempt_id_submission_attemps_id_fk": {
+          "name": "exam_submissions_submission_attempt_id_submission_attemps_id_fk",
           "tableFrom": "exam_submissions",
-          "tableTo": "user",
+          "tableTo": "submission_attemps",
           "columnsFrom": [
-            "user_id"
+            "submission_attempt_id"
           ],
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "sample_exam_answer": {
+      "name": "sample_exam_answer",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
         },
-        "exam_submissions_exam_id_exams_id_fk": {
-          "name": "exam_submissions_exam_id_exams_id_fk",
-          "tableFrom": "exam_submissions",
+        "value": {
+          "name": "value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "exam_event_id": {
+          "name": "exam_event_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "exam_name": {
+          "name": "exam_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "(CURRENT_TIMESTAMP)"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "(CURRENT_TIMESTAMP)"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "sample_exam_answer_exam_event_id_exam_events_id_fk": {
+          "name": "sample_exam_answer_exam_event_id_exam_events_id_fk",
+          "tableFrom": "sample_exam_answer",
+          "tableTo": "exam_events",
+          "columnsFrom": [
+            "exam_event_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "submission_attemps": {
+      "name": "submission_attemps",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "number_attemp": {
+          "name": "number_attemp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "grade": {
+          "name": "grade",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "retake_exam": {
+          "name": "retake_exam",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "exam_id": {
+          "name": "exam_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "exam_event_id": {
+          "name": "exam_event_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "(CURRENT_TIMESTAMP)"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "(CURRENT_TIMESTAMP)"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "submission_attemps_exam_id_exams_id_fk": {
+          "name": "submission_attemps_exam_id_exams_id_fk",
+          "tableFrom": "submission_attemps",
           "tableTo": "exams",
           "columnsFrom": [
             "exam_id"
@@ -1011,12 +1148,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "exam_submissions_exam_event_id_exam_events_id_fk": {
-          "name": "exam_submissions_exam_event_id_exam_events_id_fk",
-          "tableFrom": "exam_submissions",
-          "tableTo": "exam_events",
+        "submission_attemps_user_id_user_id_fk": {
+          "name": "submission_attemps_user_id_user_id_fk",
+          "tableFrom": "submission_attemps",
+          "tableTo": "user",
           "columnsFrom": [
-            "exam_event_id"
+            "user_id"
           ],
           "columnsTo": [
             "id"
@@ -1024,17 +1161,17 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "exam_submissions_code_group_id_code_groups_id_fk": {
-          "name": "exam_submissions_code_group_id_code_groups_id_fk",
-          "tableFrom": "exam_submissions",
-          "tableTo": "code_groups",
+        "submission_attemps_exam_event_id_exam_events_id_fk": {
+          "name": "submission_attemps_exam_event_id_exam_events_id_fk",
+          "tableFrom": "submission_attemps",
+          "tableTo": "exam_events",
           "columnsFrom": [
-            "code_group_id"
+            "exam_event_id"
           ],
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -1047,10 +1184,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "category_name": {
           "name": "category_name",
@@ -1082,90 +1219,15 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "exam_sessions": {
-      "name": "exam_sessions",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "session_name": {
-          "name": "session_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "start_time": {
-          "name": "start_time",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "end_time": {
-          "name": "end_time",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "code_group_id": {
-          "name": "code_group_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": "(CURRENT_TIMESTAMP)"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": "(CURRENT_TIMESTAMP)"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "exam_sessions_code_group_id_code_groups_id_fk": {
-          "name": "exam_sessions_code_group_id_code_groups_id_fk",
-          "tableFrom": "exam_sessions",
-          "tableTo": "code_groups",
-          "columnsFrom": [
-            "code_group_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
     "exams": {
       "name": "exams",
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "exam_name": {
           "name": "exam_name",
@@ -1176,7 +1238,7 @@
         },
         "exam_category_id": {
           "name": "exam_category_id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -1210,7 +1272,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -1223,10 +1285,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "category_name": {
           "name": "category_name",
@@ -1271,10 +1333,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "product_name": {
           "name": "product_name",
@@ -1285,7 +1347,7 @@
         },
         "product_category_id": {
           "name": "product_category_id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -1327,7 +1389,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
