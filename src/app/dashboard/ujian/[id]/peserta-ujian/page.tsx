@@ -22,16 +22,16 @@ export default async function page({
   return (
     <div>
       <div className="px-6 py-4 border rounded-lg space-y-6">
-        <DummyExamValues eventId={Number(id)} />
+        <DummyExamValues eventId={id} />
         <Suspense fallback={<Loading />}>
-          <Participants eventId={Number(id)} />
+          <Participants eventId={id} />
         </Suspense>
       </div>
     </div>
   );
 }
 
-async function Participants({ eventId }: { eventId: number }) {
+async function Participants({ eventId }: { eventId: string }) {
   const registeredUsers = await getAllRegisteredUser(eventId);
 
   if ("error" in registeredUsers)
@@ -40,6 +40,6 @@ async function Participants({ eventId }: { eventId: number }) {
   return <ExamParticipants listParticipant={registeredUsers} />;
 }
 
-async function DummyExamValues({ eventId }: { eventId: number }) {
+async function DummyExamValues({ eventId }: { eventId: string }) {
   return <ExamDummyAnswerInput examEventId={eventId} />;
 }

@@ -18,7 +18,7 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 export default function ExamDummyAnswerInput({
   examEventId,
 }: {
-  examEventId: number;
+  examEventId: string;
 }) {
   const { data, isLoading, error } = useSWR(examEventId.toString(), () =>
     getExamThatNeedDummyData(examEventId),
@@ -49,7 +49,7 @@ function FormDummy({
   examName,
   examEventId,
 }: {
-  examEventId: number;
+  examEventId: string;
   examName: string;
 }) {
   const { data, isLoading, error } = useSWR(examName, () =>
@@ -153,7 +153,7 @@ function DummyItem({
 }: {
   value: string;
   examName: string;
-  examEventId: number;
+  examEventId: string;
   setList: Dispatch<SetStateAction<string[]>>;
 }) {
   const [deleteIsLoad, setDeleteIsLoad] = useState(false);

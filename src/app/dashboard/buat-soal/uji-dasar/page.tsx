@@ -75,14 +75,14 @@ export default function Page() {
       <section>
         <form className="flex flex-col gap-6" onSubmit={handleGenerateCode}>
           <div className="flex flex-col gap-6 md:flex-row md:gap-6 lg:gap-8">
-            {selectedExam.includes("2 out of 5 campuran kopi") && (
+            {selectedExam.includes("2 out of 5 creamer") && (
               <div className="basis-full">
-                <TwoOutOfFive variant="campuran kopi" />
+                <TwoOutOfFive variant="creamer" />
               </div>
             )}
-            {selectedExam.includes("2 out of 5 kopi pure") && (
+            {selectedExam.includes("2 out of 5 pure") && (
               <div className="basis-full">
-                <TwoOutOfFive variant="kopi pure" />
+                <TwoOutOfFive variant="pure" />
               </div>
             )}
           </div>
@@ -108,14 +108,14 @@ export default function Page() {
   );
 }
 
-function TwoOutOfFive({ variant }: { variant: "campuran kopi" | "kopi pure" }) {
+function TwoOutOfFive({ variant }: { variant: "creamer" | "pure" }) {
   return (
     <div className="flex flex-col gap-2">
       <div>
         <div className="flex items-center gap-2">
           <Label
             className="font-medium"
-            htmlFor={variant === "kopi pure" ? "include-pure" : ""}
+            htmlFor={variant === "pure" ? "include-pure" : ""}
           >
             2 Out of 5 {toTitleCase(variant)}
           </Label>
@@ -133,9 +133,9 @@ function TwoOutOfFive({ variant }: { variant: "campuran kopi" | "kopi pure" }) {
                 // IMPORTANT: ensure this name matches basicExam in constant.ts
                 // replace all space with "-" and end with "-values"
                 name={
-                  variant === "campuran kopi"
-                    ? "2-out-of-5-campuran-kopi-values"
-                    : "2-out-of-5-kopi-pure-values"
+                  variant === "creamer"
+                    ? "2-out-of-5-creamer-values"
+                    : "2-out-of-5-pure-values"
                 }
                 placeholder={`Produk untuk nilai ${nilai}`}
                 required

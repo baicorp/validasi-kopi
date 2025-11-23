@@ -5,7 +5,7 @@ import {
   examEvents,
   examRegistrations,
   sampleExamAnswer,
-  submissionAttemps,
+  submissionAttempts,
 } from "@/db/schema/examEvents";
 import { shuffle } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
@@ -53,8 +53,8 @@ export async function addExamEvent(formData: FormData) {
 
     const newEvent = await db.insert(examEvents).values({
       examEventName: eventName,
-      codeGroupRegulerId: Number(codeGroupExam[0]),
-      codeGroupRetakeId: Number(codeGroupExam[1]),
+      codeGroupRegulerId: codeGroupExam[0],
+      codeGroupRetakeId: codeGroupExam[1],
       examStart,
       examEnd,
     });
@@ -73,7 +73,7 @@ export async function addExamEvent(formData: FormData) {
   }
 }
 
-export async function updateExamEvent(formData: FormData, examEventId: number) {
+export async function updateExamEvent(formData: FormData, examEventId: string) {
   const eventName = (formData.get("event-name") as string).trim();
   const eventStartDate = formData.get("event-start-date") as string;
   const eventStartTime = formData.get("event-start-time") as string;
@@ -164,34 +164,34 @@ export async function getActiveExamEvent() {
     const listExamEventId = rows.map((row) => row.examEventId);
     const latestAttempts = db
       .select({
-        examEventId: submissionAttemps.examEventId,
-        maxAttempt: sql<number>`max(${submissionAttemps.numberAttemp})`.as(
+        examEventId: submissionAttempts.examEventId,
+        maxAttempt: sql<number>`max(${submissionAttempts.numberAttemp})`.as(
           "maxAttempt",
         ),
       })
-      .from(submissionAttemps)
-      .where(eq(submissionAttemps.userId, userId))
-      .groupBy(submissionAttemps.examEventId)
+      .from(submissionAttempts)
+      .where(eq(submissionAttempts.userId, userId))
+      .groupBy(submissionAttempts.examEventId)
       .as("latestAttempts");
 
     const latestAttemptRows = await db
       .select({
-        examEventId: submissionAttemps.examEventId,
-        numberAttempt: submissionAttemps.numberAttemp,
-        retakeExam: submissionAttemps.retakeExam,
+        examEventId: submissionAttempts.examEventId,
+        numberAttempt: submissionAttempts.numberAttemp,
+        retakeExam: submissionAttempts.retakeExam,
       })
-      .from(submissionAttemps)
+      .from(submissionAttempts)
       .innerJoin(
         latestAttempts,
         and(
-          eq(submissionAttemps.examEventId, latestAttempts.examEventId),
-          eq(submissionAttemps.numberAttemp, latestAttempts.maxAttempt),
+          eq(submissionAttempts.examEventId, latestAttempts.examEventId),
+          eq(submissionAttempts.numberAttemp, latestAttempts.maxAttempt),
         ),
       )
       .where(
         and(
-          inArray(submissionAttemps.examEventId, listExamEventId),
-          eq(submissionAttemps.userId, userId),
+          inArray(submissionAttempts.examEventId, listExamEventId),
+          eq(submissionAttempts.userId, userId),
         ),
       );
 
@@ -219,7 +219,7 @@ export async function getActiveExamEvent() {
   }
 }
 
-export async function getExamEventById(examEventId: number) {
+export async function getExamEventById(examEventId: string) {
   try {
     const rows = await db
       .select({
@@ -316,16 +316,14 @@ export async function getListValuesFromExamName(
         .rightJoin(codeGroups, eq(examEvents.codeGroupRegulerId, codeGroups.id))
         .leftJoin(codes, eq(codes.codeGroupId, codeGroups.id))
         .leftJoin(exams, eq(codes.examId, exams.id))
-        .where(
-          and(eq(examEvents.id, Number(eventId)), eq(exams.examName, examName)),
-        );
+        .where(and(eq(examEvents.id, eventId), eq(exams.examName, examName)));
 
       const getSampleValue = tx
         .selectDistinct({ value: sampleExamAnswer.value })
         .from(sampleExamAnswer)
         .where(
           and(
-            eq(sampleExamAnswer.examEventId, Number(eventId)),
+            eq(sampleExamAnswer.examEventId, eventId),
             eq(sampleExamAnswer.examName, examName),
           ),
         );
@@ -356,7 +354,7 @@ export async function getExamInputFormBasedOnSelectedExamForm(
     const session = await validateSessionServer();
     const userId = session.user.id;
 
-    const validExams = await getExamEventById(Number(examEventId));
+    const validExams = await getExamEventById(examEventId);
     if ("error" in validExams) {
       return { error: validExams.error };
     }
@@ -365,13 +363,13 @@ export async function getExamInputFormBasedOnSelectedExamForm(
       // 2. get latestAttempt number
       const [{ latestAttempt }] = await tx
         .select({
-          latestAttempt: sql<number>`max(${submissionAttemps.numberAttemp})`,
+          latestAttempt: sql<number>`max(${submissionAttempts.numberAttemp})`,
         })
-        .from(submissionAttemps)
+        .from(submissionAttempts)
         .where(
           and(
-            eq(submissionAttemps.examEventId, Number(examEventId)),
-            eq(submissionAttemps.userId, userId),
+            eq(submissionAttempts.examEventId, examEventId),
+            eq(submissionAttempts.userId, userId),
           ),
         );
 
@@ -386,13 +384,13 @@ export async function getExamInputFormBasedOnSelectedExamForm(
 
       if (nextAttempt > 1) {
         const rows = await tx
-          .select({ retakeExam: submissionAttemps.retakeExam })
-          .from(submissionAttemps)
+          .select({ retakeExam: submissionAttempts.retakeExam })
+          .from(submissionAttempts)
           .where(
             and(
-              eq(submissionAttemps.numberAttemp, nextAttempt - 1),
-              eq(submissionAttemps.examEventId, Number(examEventId)),
-              eq(submissionAttemps.userId, userId),
+              eq(submissionAttempts.numberAttemp, nextAttempt - 1),
+              eq(submissionAttempts.examEventId, examEventId),
+              eq(submissionAttempts.userId, userId),
             ),
           );
         const selectedExamForRetakeExam = rows
@@ -416,7 +414,7 @@ export async function getExamInputFormBasedOnSelectedExamForm(
           )
           .where(
             and(
-              eq(examEvents.id, Number(examEventId)),
+              eq(examEvents.id, examEventId),
               eq(examRegistrations.userId, userId),
             ),
           );
@@ -433,7 +431,7 @@ export async function getExamInputFormBasedOnSelectedExamForm(
   }
 }
 
-export async function getExamThatNeedDummyData(examEventId: number) {
+export async function getExamThatNeedDummyData(examEventId: string) {
   try {
     // TODO: get the examValue
     const [row] = await db
@@ -444,11 +442,7 @@ export async function getExamThatNeedDummyData(examEventId: number) {
       .leftJoin(codeGroups, eq(examEvents.codeGroupRegulerId, codeGroups.id))
       .where(eq(examEvents.id, examEventId));
 
-    const exams = [
-      "2 out of 5 campuran kopi",
-      "2 out of 5 kopi pure",
-      "identifikasi",
-    ];
+    const exams = ["2 out of 5 creamer", "2 out of 5 pure", "identifikasi"];
 
     const filteredExams = row.selectedExams
       ?.split(",")
@@ -470,7 +464,7 @@ export async function getExamThatNeedDummyData(examEventId: number) {
 }
 
 export async function addSampleExamAnswer(
-  examEventId: number,
+  examEventId: string,
   sample: string,
   examName: string,
 ) {
@@ -487,7 +481,7 @@ export async function addSampleExamAnswer(
 }
 
 export async function getSampleExamAnswer(
-  examEventId: number,
+  examEventId: string,
   examName: string,
 ) {
   try {
@@ -509,7 +503,7 @@ export async function getSampleExamAnswer(
 }
 
 export async function deleteSampleExamAnswer(
-  examEventId: number,
+  examEventId: string,
   examName: string,
   value: string,
 ) {

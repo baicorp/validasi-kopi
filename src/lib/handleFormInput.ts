@@ -18,7 +18,7 @@ function getInputFromSelectedExam(formData: FormData, selectedExam: string[]) {
   // get all exam data based on selectedExam
   for (const exam of selectedExam) {
     const examLowerCase = exam.toLowerCase();
-    // transform the examName from "2 out of 5 kopi pure" to "2-out-of-5-kopi-pure"
+    // transform the examName from "2 out of 5 pure" to "2-out-of-5-pure"
     // and add "-values" at the end, this is important to get input form data
     const examValues = formData.getAll(
       `${examLowerCase.replaceAll(" ", "-")}-values`,

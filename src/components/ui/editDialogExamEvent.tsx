@@ -24,7 +24,7 @@ export default function EditDialogExamEvent({
   examDefaultDateEnd,
   examDefaultTimeEnd,
 }: {
-  eventId: number;
+  eventId: string;
 } & ExamEventFormInputProps) {
   const [isLoad, setIsLoad] = useState(false);
   const [open, setOpen] = useState(false);

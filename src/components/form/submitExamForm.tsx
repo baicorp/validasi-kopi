@@ -109,8 +109,8 @@ function getTriangleInput(formData: FormData) {
 }
 
 function getTwoOutOfFiveInput(formData: FormData) {
-  const examNamePure = "2 out of 5 kopi pure";
-  const examNameMix = "2 out of 5 campuran kopi";
+  const examNamePure = "2 out of 5 pure";
+  const examNameMix = "2 out of 5 creamer";
   const inputValues = ["beda", "beda", "beda", "sama", "sama"];
   const userAnswer: Answer[] = [];
 

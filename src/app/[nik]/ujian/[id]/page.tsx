@@ -58,7 +58,7 @@ export default async function Page({
 }
 
 async function ExamFormInfo({ examEventId }: { examEventId: string }) {
-  const result = await getExamEventById(Number(examEventId));
+  const result = await getExamEventById(examEventId);
 
   if ("error" in result) {
     return <ErrorComp error={result.error} />;
@@ -97,7 +97,7 @@ async function CurrentAttempt({
   examEventId: string;
   variant?: "default" | "next";
 }) {
-  const result = await getUserLatestExamAttemptNumber(Number(examEventId));
+  const result = await getUserLatestExamAttemptNumber(examEventId);
 
   if ("error" in result) {
     return <ErrorComp error={result.error} />;
@@ -117,9 +117,9 @@ function InputForm({
   examName: string;
 }) {
   switch (examName) {
-    case "2 out of 5 campuran kopi":
+    case "2 out of 5 creamer":
       return <TwoOutOfFive examEventId={examEventId} examName={examName} />;
-    case "2 out of 5 kopi pure":
+    case "2 out of 5 pure":
       return <TwoOutOfFive examEventId={examEventId} examName={examName} />;
     case "treshold single":
       return <TresholdSingleForm />;

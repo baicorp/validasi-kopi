@@ -7,7 +7,7 @@ export type InsertCodes = InferInsertModel<typeof codes>;
 export type InsertCodeGroups = InferInsertModel<typeof codeGroups>;
 
 export type RawExamsData = {
-  id?: number;
+  id?: string;
   examCategoryName?: string;
   groupName: string;
   selectedExam: string;

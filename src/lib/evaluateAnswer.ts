@@ -186,10 +186,10 @@ function evaluateTwoOutOfFive(
   });
 
   const twoOutOfFiveCreamer = answerResults.filter(
-    (data) => data.examName === "2 out of 5 campuran kopi",
+    (data) => data.examName === "2 out of 5 creamer",
   );
   const twoOutOfFivePure = answerResults.filter(
-    (data) => data.examName === "2 out of 5 kopi pure",
+    (data) => data.examName === "2 out of 5 pure",
   );
 
   const codeScore = 20;
@@ -202,12 +202,12 @@ function evaluateTwoOutOfFive(
 
   return [
     {
-      examName: "2 out of 5 campuran kopi",
+      examName: "2 out of 5 creamer",
       answerResults: twoOutOfFiveCreamer,
       grade: gradeCreamer,
     },
     {
-      examName: "2 out of 5 kopi pure",
+      examName: "2 out of 5 pure",
       answerResults: twoOutOfFivePure,
       grade: gradePure,
     },

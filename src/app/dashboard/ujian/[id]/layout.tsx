@@ -31,7 +31,7 @@ export default async function Layout({
 }
 
 async function ExamEventDetails({ examEventId }: { examEventId: string }) {
-  const examEvent = await getExamEventById(Number(examEventId));
+  const examEvent = await getExamEventById(examEventId);
 
   if ("error" in examEvent) {
     return <ErrorComp error={examEvent.error} />;

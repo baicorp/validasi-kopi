@@ -5,7 +5,7 @@ import {
   examEvents,
   examRegistrations,
   examSubmissions,
-  submissionAttemps,
+  submissionAttempts,
 } from "@/db/schema/examEvents";
 import { Answer } from "@/lib/types";
 import { getAllExams } from "./exams";
@@ -26,18 +26,21 @@ export async function submitExam(
 
     // 2. get all exams data from db
     const examsData = await getAllExams();
+    if (!examsData) {
+      return { error: "Gagal mendapatkan daftar nama ujian" };
+    }
 
     const transactionResult = await db.transaction(async (tx) => {
       // 3. check how many time user already submit exam
       const [{ latestAttempt }] = await tx
         .select({
-          latestAttempt: sql<number>`max(${submissionAttemps.numberAttemp})`,
+          latestAttempt: sql<number>`max(${submissionAttempts.numberAttemp})`,
         })
-        .from(submissionAttemps)
+        .from(submissionAttempts)
         .where(
           and(
-            eq(submissionAttemps.examEventId, Number(examEventId)),
-            eq(submissionAttemps.userId, userId),
+            eq(submissionAttempts.examEventId, examEventId),
+            eq(submissionAttempts.userId, userId),
           ),
         );
 
@@ -65,23 +68,27 @@ export async function submitExam(
         )
         .where(
           and(
-            eq(examEvents.id, Number(examEventId)),
+            eq(examEvents.id, examEventId),
             eq(examRegistrations.userId, userId),
           ),
         );
+
+      if (!codeGroupId || !selectedExamForFirstTimeExam) {
+        throw Error("Gagal mendapatkan codeGroupId dan daftar ujian");
+      }
 
       // 5. get selectedExam based on user number of submission attempt
       let selectedExam: string = "";
 
       if (nextAttempt > 1) {
         const rows = await tx
-          .select({ retakeExam: submissionAttemps.retakeExam })
-          .from(submissionAttemps)
+          .select({ retakeExam: submissionAttempts.retakeExam })
+          .from(submissionAttempts)
           .where(
             and(
-              eq(submissionAttemps.numberAttemp, nextAttempt - 1),
-              eq(submissionAttemps.examEventId, Number(examEventId)),
-              eq(submissionAttemps.userId, userId),
+              eq(submissionAttempts.numberAttemp, nextAttempt - 1),
+              eq(submissionAttempts.examEventId, examEventId),
+              eq(submissionAttempts.userId, userId),
             ),
           );
         const selectedExamForRetakeExam = rows
@@ -124,41 +131,50 @@ export async function submitExam(
         })
         .from(codes)
         .leftJoin(exams, eq(codes.examId, exams.id))
-        .where(
-          and(eq(codes.codeGroupId, Number(codeGroupId)), or(...orConditions)),
-        );
+        .where(and(eq(codes.codeGroupId, codeGroupId), or(...orConditions)));
 
       // 8. evaluate answer list by comparing userAnswerList and dbAnswerList.
       // then give result either "correct" | "partial" | "wrong"
       // @ts-expect-error correct answer actually work (null and undefined)
       const results = evaluateAnswers(submittedExamData, dbAnswerList);
 
-      // 9. insert submissionAttemps data
-      const submissionAttempsInsertValues: InferInsertModel<
-        typeof submissionAttemps
-      >[] = results.map((data) => ({
-        numberAttemp: nextAttempt,
-        examEventId: Number(examEventId),
-        userId,
-        examId: getExamsId(data.examName, examsData!),
-        grade: data.grade,
-        retakeExam: data.grade < 70 ? data.examName : "",
-      }));
-      await tx.insert(submissionAttemps).values(submissionAttempsInsertValues);
+      // 9. insert submissionAttempts data
+      const submissionAttemptsInsertValues: InferInsertModel<
+        typeof submissionAttempts
+      >[] = results.map((data) => {
+        const examId = getExamsId(data.examName, examsData);
+        if (!examId) {
+          throw Error("ID ujian tidak ditemukan.");
+        }
+        return {
+          numberAttemp: nextAttempt,
+          examEventId,
+          userId,
+          examId,
+          grade: data.grade,
+          retakeExam: data.grade < 70 ? data.examName : "",
+        };
+      });
+      await tx
+        .insert(submissionAttempts)
+        .values(submissionAttemptsInsertValues);
 
-      // 10. get submissionAttemps inserted rows data
+      // 10. get submissionAttempts inserted rows data
       const insertedRows = await tx
-        .select({ id: submissionAttemps.id, examId: submissionAttemps.examId })
-        .from(submissionAttemps)
+        .select({
+          id: submissionAttempts.id,
+          examId: submissionAttempts.examId,
+        })
+        .from(submissionAttempts)
         .where(
           and(
-            eq(submissionAttemps.examEventId, Number(examEventId)),
-            eq(submissionAttemps.numberAttemp, nextAttempt),
+            eq(submissionAttempts.examEventId, examEventId),
+            eq(submissionAttempts.numberAttemp, nextAttempt),
           ),
         );
 
       // 11. insert examSubmissions data
-      const attemptMap = new Map<number, number>();
+      const attemptMap = new Map<string, string>();
       for (const row of insertedRows) {
         attemptMap.set(row.examId, row.id);
       }
@@ -166,7 +182,10 @@ export async function submitExam(
       const examSubmissionsInsertValues: InferInsertModel<
         typeof examSubmissions
       >[] = results.flatMap((data) => {
-        const examId = getExamsId(data.examName, examsData!);
+        const examId = getExamsId(data.examName, examsData);
+        if (!examId) {
+          throw Error("ID ujian tidak ditemukan.");
+        }
         const submissionAttemptId = attemptMap.get(examId);
 
         if (!submissionAttemptId) {
@@ -203,7 +222,7 @@ export async function submitExam(
   }
 }
 
-export async function getUserLatestExamResult(examEventId: number) {
+export async function getUserLatestExamResult(examEventId: string) {
   try {
     // 1. get userId
     const user = await validateSessionServer();
@@ -212,13 +231,13 @@ export async function getUserLatestExamResult(examEventId: number) {
     // 2. get latest submission
     const [{ latestAttempt }] = await db
       .select({
-        latestAttempt: sql<number>`max(${submissionAttemps.numberAttemp})`,
+        latestAttempt: sql<number>`max(${submissionAttempts.numberAttemp})`,
       })
-      .from(submissionAttemps)
+      .from(submissionAttempts)
       .where(
         and(
-          eq(submissionAttemps.examEventId, Number(examEventId)),
-          eq(submissionAttemps.userId, userId),
+          eq(submissionAttempts.examEventId, examEventId),
+          eq(submissionAttempts.userId, userId),
         ),
       );
 
@@ -229,19 +248,19 @@ export async function getUserLatestExamResult(examEventId: number) {
     // 3. get all latest attempt data
     const rows = await db
       .select({
-        id: submissionAttemps.id,
+        id: submissionAttempts.id,
         examName: exams.examName,
-        numberAttempt: submissionAttemps.numberAttemp,
-        grade: submissionAttemps.grade,
-        retake: submissionAttemps.retakeExam,
+        numberAttempt: submissionAttempts.numberAttemp,
+        grade: submissionAttempts.grade,
+        retake: submissionAttempts.retakeExam,
       })
-      .from(submissionAttemps)
-      .leftJoin(exams, eq(exams.id, submissionAttemps.examId))
+      .from(submissionAttempts)
+      .leftJoin(exams, eq(exams.id, submissionAttempts.examId))
       .where(
         and(
-          eq(submissionAttemps.examEventId, Number(examEventId)),
-          eq(submissionAttemps.userId, userId),
-          eq(submissionAttemps.numberAttemp, latestAttempt),
+          eq(submissionAttempts.examEventId, examEventId),
+          eq(submissionAttempts.userId, userId),
+          eq(submissionAttempts.numberAttemp, latestAttempt),
         ),
       );
 
@@ -252,7 +271,7 @@ export async function getUserLatestExamResult(examEventId: number) {
   }
 }
 
-export async function getUserLatestExamAttemptNumber(examEventId: number) {
+export async function getUserLatestExamAttemptNumber(examEventId: string) {
   try {
     // 1. get userId
     const user = await validateSessionServer();
@@ -261,13 +280,13 @@ export async function getUserLatestExamAttemptNumber(examEventId: number) {
     // 2. get latest submission
     const [{ latestAttempt }] = await db
       .select({
-        latestAttempt: sql<number>`max(${submissionAttemps.numberAttemp})`,
+        latestAttempt: sql<number>`max(${submissionAttempts.numberAttemp})`,
       })
-      .from(submissionAttemps)
+      .from(submissionAttempts)
       .where(
         and(
-          eq(submissionAttemps.examEventId, Number(examEventId)),
-          eq(submissionAttemps.userId, userId),
+          eq(submissionAttempts.examEventId, examEventId),
+          eq(submissionAttempts.userId, userId),
         ),
       );
 
@@ -298,20 +317,20 @@ export async function getSubmissionSummary(examEventId: string) {
         name: user.name,
         departments: departments.departmentName,
         examName: exams.examName,
-        numberAttempt: submissionAttemps.numberAttemp,
+        numberAttempt: submissionAttempts.numberAttemp,
         code: examSubmissions.code,
         value: examSubmissions.value,
         addValue: examSubmissions.additionalValue,
       })
       .from(examSubmissions)
       .leftJoin(
-        submissionAttemps,
-        eq(examSubmissions.submissionAttemptId, submissionAttemps.id),
+        submissionAttempts,
+        eq(examSubmissions.submissionAttemptId, submissionAttempts.id),
       )
-      .leftJoin(user, eq(submissionAttemps.userId, user.id))
+      .leftJoin(user, eq(submissionAttempts.userId, user.id))
       .leftJoin(departments, eq(user.departmentId, departments.id))
-      .leftJoin(exams, eq(submissionAttemps.examId, exams.id))
-      .where(eq(examSubmissions.examEventId, Number(examEventId)));
+      .leftJoin(exams, eq(submissionAttempts.examId, exams.id))
+      .where(eq(submissionAttempts.examEventId, examEventId));
 
     const groupByNumberAttempt = Object.groupBy(rows, (row) => {
       if (!row.numberAttempt) {
@@ -343,7 +362,7 @@ export async function getSubmissionAttemptSummary(examEventId: string) {
       .select({ selectedExams: codeGroups.selectedExam })
       .from(examEvents)
       .leftJoin(codeGroups, eq(examEvents.codeGroupRegulerId, codeGroups.id))
-      .where(eq(examEvents.id, Number(examEventId)));
+      .where(eq(examEvents.id, examEventId));
 
     if (!selectedExams) {
       return { error: "Daftar ujian tidak ditemukan." };
@@ -352,20 +371,20 @@ export async function getSubmissionAttemptSummary(examEventId: string) {
     // get submission attempt summary
     const rows = await db
       .select({
-        id: submissionAttemps.id,
+        id: submissionAttempts.id,
         userId: user.id,
         username: user.username,
         name: user.name,
         departments: departments.departmentName,
         examName: exams.examName,
-        numberAttempt: submissionAttemps.numberAttemp,
-        grade: submissionAttemps.grade,
+        numberAttempt: submissionAttempts.numberAttemp,
+        grade: submissionAttempts.grade,
       })
-      .from(submissionAttemps)
-      .leftJoin(user, eq(submissionAttemps.userId, user.id))
+      .from(submissionAttempts)
+      .leftJoin(user, eq(submissionAttempts.userId, user.id))
       .leftJoin(departments, eq(user.departmentId, departments.id))
-      .leftJoin(exams, eq(submissionAttemps.examId, exams.id))
-      .where(eq(submissionAttemps.examEventId, Number(examEventId)));
+      .leftJoin(exams, eq(submissionAttempts.examId, exams.id))
+      .where(eq(submissionAttempts.examEventId, examEventId));
 
     const groupName = normalizeExamSubmissions(rows, selectedExams);
 
@@ -380,7 +399,7 @@ export async function getSubmissionAttemptSummary(examEventId: string) {
 }
 
 export interface SubmissionRow {
-  id: number;
+  id: string;
   userId: string | null;
   username: string | null;
   name: string | null;

@@ -13,7 +13,7 @@ export async function addGeneratedCodes(data: ExamDataDetails) {
     return { error: "Daftar soal kosong." };
   }
 
-  let codeGroupId: number;
+  let codeGroupId: string;
 
   try {
     const isValid = await isValidRole("admin");
@@ -42,13 +42,19 @@ export async function addGeneratedCodes(data: ExamDataDetails) {
 
       // data to insert in codes table
       codeGroupId = rowCodeGroups[0].id;
-      const codesToInsert: InsertCodes[] = data.rowExamsData.map((row) => ({
-        code: row.code,
-        value: row.value,
-        additionalValue: row.additionalValue,
-        examId: getExamsId(row.examName, rowExams),
-        codeGroupId,
-      }));
+      const codesToInsert: InsertCodes[] = data.rowExamsData.map((row) => {
+        const examId = getExamsId(row.examName, rowExams);
+        if (!examId) {
+          throw Error("ID ujian tidak ditemukan.");
+        }
+        return {
+          code: row.code,
+          value: row.value,
+          additionalValue: row.additionalValue,
+          examId,
+          codeGroupId,
+        };
+      });
 
       const row = await tx.insert(codes).values(codesToInsert);
       if (row.rowsAffected === 0) {
@@ -66,15 +72,20 @@ export async function addGeneratedCodes(data: ExamDataDetails) {
   }
 }
 
-export async function deleteGeneratedCode(id: string) {
-  const numbId = Number(id);
+export async function deleteGeneratedCode(codeGroupId: string) {
   try {
     const isValid = await isValidRole("admin");
     if (!isValid) {
       return { error: "401 : Anda tidak memiliki izin." };
     }
 
-    await db.delete(codeGroups).where(eq(codeGroups.id, numbId));
+    const result = await db
+      .delete(codeGroups)
+      .where(eq(codeGroups.id, codeGroupId));
+
+    if (result.rowsAffected === 0) {
+      return { error: "Gagal menghapus, kode mungkin sedang digunakan." };
+    }
     revalidatePath("/dashboard/list-soal");
   } catch (error) {
     console.error(error);
@@ -85,8 +96,6 @@ export async function deleteGeneratedCode(id: string) {
 export async function getTableData(
   codeGroupId: string,
 ): Promise<ExamDataDetails | { error: string }> {
-  const groupId = parseInt(codeGroupId.trim());
-
   try {
     const isValid = await isValidRole("admin");
     if (!isValid) {
@@ -109,7 +118,7 @@ export async function getTableData(
       .innerJoin(codeGroups, eq(codes.codeGroupId, codeGroups.id))
       .innerJoin(exams, eq(exams.id, codes.examId))
       .innerJoin(examCategories, eq(exams.examCategoryId, examCategories.id))
-      .where(eq(codeGroups.id, groupId));
+      .where(eq(codeGroups.id, codeGroupId));
 
     return {
       groupName: rows[0].groupName,

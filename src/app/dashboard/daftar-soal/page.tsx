@@ -91,7 +91,7 @@ function CodeGroupItem({
   totalParticipants,
   createdAt,
 }: {
-  id: number;
+  id: string;
   groupName: string;
   selectedExam: string;
   totalParticipants: number;

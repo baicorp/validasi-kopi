@@ -17,7 +17,7 @@ export default async function Page({
   params: Promise<{ id: string; nik: string }>;
 }) {
   const { id, nik } = await params;
-  const data = await getUserLatestExamResult(Number(id));
+  const data = await getUserLatestExamResult(id);
   if ("error" in data) {
     return <pre className="text-sm">{JSON.stringify(data, null, 2)}</pre>;
   }

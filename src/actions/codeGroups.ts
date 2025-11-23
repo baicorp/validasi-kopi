@@ -86,7 +86,7 @@ export async function getCodeGroupsForExam() {
   }
 }
 
-export async function getCodeGroupById(codeGroupId: number) {
+export async function getCodeGroupById(codeGroupId: string) {
   try {
     const isValid = await isValidRole("admin");
     if (!isValid) {

@@ -64,7 +64,7 @@ export default function ExamParticipants({
 
   async function handleSaveParticipant() {
     setIsload(true);
-    const result = await assignUser(participants, Number(id));
+    const result = await assignUser(participants, id);
     if ("error" in result) {
       toast.error(result.error);
       setIsload(false);

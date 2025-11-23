@@ -177,13 +177,13 @@ function ListProduk({ productCategory }: { productCategory: string }) {
   const { data: products, isLoading } = useSWR(productCategory, () =>
     getProductsByCategory(productCategory),
   );
-  const [selectedProduct, setSelectedProduct] = useState<number[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<string[]>([]);
 
   useEffect(() => {
     setSelectedProduct([]);
   }, [productCategory]);
 
-  const toggleSelect = (id: number) => {
+  const toggleSelect = (id: string) => {
     setSelectedProduct((prev) =>
       prev.includes(id)
         ? prev.filter((productId) => productId !== id)

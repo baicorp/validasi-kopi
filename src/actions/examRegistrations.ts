@@ -8,7 +8,7 @@ import { getExamEventById } from "./examEvents";
 import { isValidRole } from "./validateSession";
 import { examRegistrations } from "@/db/schema/examEvents";
 
-export async function getAllRegisteredUser(examEventId: number) {
+export async function getAllRegisteredUser(examEventId: string) {
   try {
     const isValid = await isValidRole("admin");
     if (!isValid) {
@@ -36,7 +36,7 @@ export async function getAllRegisteredUser(examEventId: number) {
 
 export async function assignUser(
   listParticipant: Participants[],
-  eventId: number,
+  eventId: string,
 ) {
   try {
     const isValid = await isValidRole("admin");

@@ -16,8 +16,8 @@ import SelectedCodeGroupCardSkeleton from "../skeleton/selectedCodeGroupCardSkel
 
 export interface ExamEventFormInputProps {
   eventName?: string;
-  codeGroupReguler?: number;
-  codeGroupRetake?: number;
+  codeGroupReguler?: string;
+  codeGroupRetake?: string;
   examDefaultDateStart?: Date;
   examDefaultDateEnd?: Date;
   examDefaultTimeStart?: string;
@@ -86,7 +86,7 @@ export default function ExamEventForm({
   );
 }
 
-function SelectedCodeGroupCard({ codeGroupId }: { codeGroupId: number }) {
+function SelectedCodeGroupCard({ codeGroupId }: { codeGroupId: string }) {
   const {
     data: codeGroup,
     isLoading,

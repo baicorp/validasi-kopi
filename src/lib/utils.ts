@@ -51,13 +51,13 @@ export function formatRawExamsData(rows: RawExamsData[]) {
 
 export function getExamsId(
   examName: string,
-  exams: { id: number; examName: string }[],
-): number {
+  exams: { id: string; examName: string }[],
+): string | undefined {
   for (const exam of exams) {
     if (exam.examName.toLowerCase() === examName.toLowerCase()) return exam.id;
   }
 
-  return -1;
+  return undefined;
 }
 
 export function toTitleCase(str: string) {

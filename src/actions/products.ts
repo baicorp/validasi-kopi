@@ -28,7 +28,7 @@ export async function addProduct(formData: FormData) {
         .where(
           and(
             eq(sql`lower(${products.productName})`, productName.toLowerCase()),
-            eq(products.productCategoryId, parseInt(productCategoryId)),
+            eq(products.productCategoryId, productCategoryId),
           ),
         );
 
@@ -40,7 +40,7 @@ export async function addProduct(formData: FormData) {
 
       const result = await tx.insert(products).values({
         productName: productName,
-        productCategoryId: Number(productCategoryId),
+        productCategoryId: productCategoryId,
       });
 
       return result.rows;
@@ -64,8 +64,7 @@ export async function getAllProduct(
 
   const conditions = [];
   if (search) conditions.push(like(products.productName, `%${search}%`));
-  if (categoryId)
-    conditions.push(eq(products.productCategoryId, Number(categoryId)));
+  if (categoryId) conditions.push(eq(products.productCategoryId, categoryId));
 
   try {
     const isValid = await isValidRole("admin");
@@ -108,8 +107,6 @@ export async function getAllProduct(
 }
 
 export async function getProductsByCategory(productId: string) {
-  const id = parseInt(productId.trim());
-
   try {
     const isValid = await isValidRole("admin");
     if (!isValid) {
@@ -119,16 +116,16 @@ export async function getProductsByCategory(productId: string) {
     return await db
       .select()
       .from(products)
-      .where(eq(products.productCategoryId, id));
+      .where(eq(products.productCategoryId, productId));
   } catch (error) {
     console.error(error);
     return {
-      error: `Gagal mengambil data produk dengan id kategori ${id}, Database bermasalah.`,
+      error: `Gagal mengambil data produk dengan id kategori ${productId}, Database bermasalah.`,
     };
   }
 }
 
-export async function updateProduct(productId: number, formData: FormData) {
+export async function updateProduct(productId: string, formData: FormData) {
   const productName = (formData.get("product-name") as string).trim();
   const productCategoryId = (formData.get("product-category") as string).trim();
 
@@ -146,7 +143,7 @@ export async function updateProduct(productId: number, formData: FormData) {
       .update(products)
       .set({
         productName: productName,
-        productCategoryId: parseInt(productCategoryId),
+        productCategoryId: productCategoryId,
       })
       .where(eq(products.id, productId));
 
@@ -159,14 +156,13 @@ export async function updateProduct(productId: number, formData: FormData) {
 }
 
 export async function deleteProduct(id: string) {
-  const strId = Number(id);
   try {
     const isValid = await isValidRole("admin");
     if (!isValid) {
       return { error: "401 : Anda tidak memiliki izin." };
     }
 
-    await db.delete(products).where(eq(products.id, strId));
+    await db.delete(products).where(eq(products.id, id));
     revalidatePath("/dashboard/produk");
   } catch (error) {
     console.error(error);

@@ -29,7 +29,7 @@ export default function EditDialogProduct({
 
     const formData = new FormData(e.currentTarget);
     try {
-      const result = await updateProduct(Number(productId), formData);
+      const result = await updateProduct(productId, formData);
       if ("error" in result) {
         toast.error(result.error);
         return;
