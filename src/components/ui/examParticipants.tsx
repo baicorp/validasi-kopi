@@ -35,10 +35,6 @@ export default function ExamParticipants({
     error,
   } = useSWR(searchInput, () => getAllEmployees(1, searchInput));
 
-  if (isLoading) {
-    return <Loading />;
-  }
-
   if (error || employees?.error) {
     return (
       <ErrorComp
@@ -89,7 +85,9 @@ export default function ExamParticipants({
         />
         {input && (
           <div className="mt-2 py-4  bg-white border rounded-lg shadow px-6">
-            {employees?.data?.length === 0 ? (
+            {isLoading ? (
+              <Loading />
+            ) : employees?.data?.length === 0 ? (
               <p className="text-muted-foreground text-center text-sm">
                 Karyawan tidak ditemukn
               </p>
