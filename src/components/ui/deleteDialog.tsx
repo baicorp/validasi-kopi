@@ -15,18 +15,25 @@ import { FormEvent, useState } from "react";
 import { LoaderCircle } from "lucide-react";
 import { DropdownMenuItem } from "./dropdown-menu";
 
+type DeleteAction = (id: string) => Promise<
+  | {
+      error: string;
+    }
+  | undefined
+>;
+
 export default function DeleteDialog({
+  id,
   variant = "default",
+  data,
   dialogTitle,
   deleteFnAction,
-  idProduk,
-  namaProduk,
 }: {
+  id: string;
   variant?: "default" | "dropDown";
+  data: string;
   dialogTitle: string;
-  deleteFnAction: (id: string) => Promise<void>;
-  idProduk: string;
-  namaProduk: string;
+  deleteFnAction: DeleteAction;
 }) {
   const [isLoad, setIsLoad] = useState(false);
   const [open, setOpen] = useState(false);
@@ -36,7 +43,7 @@ export default function DeleteDialog({
     setIsLoad(true);
 
     try {
-      await deleteFnAction(idProduk);
+      await deleteFnAction(id);
       setOpen(false);
     } catch (e) {
       if (e instanceof Error) {
@@ -65,7 +72,7 @@ export default function DeleteDialog({
         </DialogHeader>
         <form onSubmit={handleDelete} className="flex flex-col gap-4">
           <p>
-            Yakin Hapus <span className="font-bold">{namaProduk}</span>
+            Yakin Hapus <span className="font-bold">{data}</span>
           </p>
           <div className="flex gap-2 mt-4">
             <DialogClose asChild>

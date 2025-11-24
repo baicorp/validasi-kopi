@@ -1,24 +1,48 @@
-export type SoalUjiClientStructure = {
-  tipeUjian: string;
-  soal: Record<string, string[][]>[];
-  totalKode: number;
+import { formatRawExamsData } from "./utils";
+import { InferInsertModel } from "drizzle-orm";
+import { codeGroups, codes } from "@/db/schema";
+
+export type InsertCodes = InferInsertModel<typeof codes>;
+
+export type InsertCodeGroups = InferInsertModel<typeof codeGroups>;
+
+export type RawExamsData = {
+  id?: string;
+  examCategoryName?: string;
+  groupName: string;
+  selectedExam: string;
+  totalParticipants: number;
+  code: string;
+  value: string;
+  additionalValue?: string | null;
+  examName: string;
 };
 
-// export type JenisUjiType = "uji dasar" | "uji produk";
+export type Participants = {
+  id: string;
+  username: string;
+  name: string;
+  department: string | null;
+};
 
-interface SoalUjiDBStructure {
-  kode: string;
-  nilai: string;
-  sessionUuid: string;
-  sessionName: string;
-}
+export type ExamDataDetails = InsertCodeGroups & {
+  rowExamsData: RawExamsData[];
+  formatedExamsData: ReturnType<typeof formatRawExamsData>;
+};
 
-export interface SoalUjiDBStructureInsert extends SoalUjiDBStructure {
-  namaUjianId: number;
-}
+export type SearchParams = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
 
-export interface SoalUjiDBStructureRead extends SoalUjiDBStructure {
-  id: number;
-  namaUjian: string;
-  jenisUjian: string;
-}
+export type Answer = {
+  examName: string;
+  code: string;
+  value: string;
+  additionalValue?: string;
+  attemptNumber?: number;
+  note?: string;
+};
+
+export type AnswerWithResult = Answer & {
+  result: "correct" | "partial" | "wrong";
+};

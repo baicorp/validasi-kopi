@@ -4,11 +4,10 @@ import {
   FileText,
   FilePlus,
   Coffee,
-  LogOut,
   ChevronRight,
-  LoaderCircle,
   HeartHandshake,
-  TestTubes,
+  User,
+  BookCheck,
 } from "lucide-react";
 import {
   Sidebar,
@@ -24,18 +23,17 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { toast } from "sonner";
-import { cn } from "@/lib/utils"; // shadcn helper
+import { cn } from "@/lib/utils";
 import { useState } from "react";
-import { authClient } from "@/lib/authClient";
-import { Button } from "@/components/ui/button";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
+import SignOutButton from "@/components/ui/signOutBtn";
 import { Breadcrumbs } from "@/components/ui/breadcrumbList";
 
 const sidebarMenu = [
+  { url: "/dashboard/ujian", menu: "Ujian", icon: BookCheck },
+  { url: "/dashboard/daftar-soal", menu: "Daftar Soal", icon: FileText },
   { url: "/dashboard/produk", menu: "Produk", icon: Coffee },
-  { url: "/dashboard/rasa-mix", menu: "Rasa Mix", icon: TestTubes },
-  { url: "/dashboard/list-soal", menu: "List Soal", icon: FileText },
+  { url: "/dashboard/karyawan", menu: "Karyawan", icon: User },
 ];
 
 const collapsibleSidebarMenu = [
@@ -57,7 +55,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild className="mt-2.5">
-                <Link href="/dashboard/produk">
+                <Link href="/dashboard/ujian">
                   <HeartHandshake />
                   <span className="text-base font-semibold">
                     Quality Assurance.
@@ -111,15 +109,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </SidebarGroup>
         </SidebarFooter>
       </Sidebar>
-
-      {/* Main content */}
-      <main className="px-12 py-4 w-full">
-        <div className="flex items-center gap-2 mb-4">
+      <main className="basis-full py-4">
+        <section className="flex items-center gap-2 px-3 lg:px-8">
           <SidebarTrigger />
           <div className="bg-border w-0.5 h-3.5 mr-1" />
           <Breadcrumbs />
-        </div>
-        {children}
+        </section>
+        <div className="flex flex-col gap-4 px-4 lg:px-10 pb-4">{children}</div>
       </main>
     </SidebarProvider>
   );
@@ -216,36 +212,5 @@ function CollapsibleMenu({ Icon, menu, subMenu }: CollapsibleMenuData) {
         </SidebarMenu>
       )}
     </>
-  );
-}
-
-function SignOutButton() {
-  const [isLoad, setIsLoad] = useState(false);
-  const router = useRouter();
-
-  return (
-    <Button
-      disabled={isLoad}
-      className="flex gap-3 hover:border cursor-pointer w-full"
-      onClick={async () => {
-        await authClient.signOut({
-          fetchOptions: {
-            onRequest: () => setIsLoad(true),
-            onSuccess: () => {
-              setIsLoad(false);
-              router.replace("/sign-in");
-            },
-            onError: (ctx) => {
-              setIsLoad(false);
-              toast.error(ctx.error.message);
-            },
-          },
-        });
-      }}
-    >
-      <LogOut />
-      <span>Keluar</span>
-      {isLoad && <LoaderCircle className="animate-spin" />}
-    </Button>
   );
 }
