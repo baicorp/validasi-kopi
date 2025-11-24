@@ -30,7 +30,7 @@ export default async function Page({ searchParams }: SearchParams) {
   const session = await validateSessionServer();
 
   if (session.user.role !== "admin") {
-    redirect(`/user/${session.user.username}`);
+    redirect(`/${session.user.username}`);
   }
 
   const currentPage = ((await searchParams).page as string) ?? "1";

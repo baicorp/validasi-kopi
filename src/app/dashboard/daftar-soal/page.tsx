@@ -17,7 +17,7 @@ import CodeGroupsSkeleton from "@/components/skeleton/codeGroupsSkeleton";
 export default async function Page({ searchParams }: SearchParams) {
   const session = await validateSessionServer();
   if (session.user.role !== "admin") {
-    redirect(`/user/${session.user.username}`);
+    redirect(`/${session.user.username}`);
   }
 
   const search = (await searchParams).q as string;

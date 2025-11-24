@@ -23,7 +23,7 @@ export default function Page() {
     const redirectUrl =
       data.data.user.role === "admin"
         ? "/dasrboard/ujian"
-        : `/user/${data.data.user.username}`;
+        : `/${data.data.user.username}`;
     router.replace(redirectUrl);
   }
 

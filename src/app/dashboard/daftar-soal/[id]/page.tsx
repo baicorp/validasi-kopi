@@ -17,7 +17,7 @@ export default async function Page({
 }) {
   const session = await validateSessionServer();
   if (session.user.role !== "admin") {
-    redirect(`/user/${session.user.username}`);
+    redirect(`/${session.user.username}`);
   }
 
   const { id } = await params;

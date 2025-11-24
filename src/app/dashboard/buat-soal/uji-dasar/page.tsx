@@ -24,7 +24,7 @@ export default function Page() {
   const router = useRouter();
   const { data: session } = useSWR("session", validateSessionClient);
   if (session?.data && session.data.user.role !== "admin") {
-    router.replace(`/user/${session.data.user.username}`);
+    router.replace(`/${session.data.user.username}`);
   }
 
   const [selectedExam, setSelectedExam] = useState<string[]>([]);
