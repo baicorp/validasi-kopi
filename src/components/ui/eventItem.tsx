@@ -47,7 +47,7 @@ export default function EventItem({
               examDefaultTimeStart={examTimeStart}
               examDefaultTimeEnd={examTimeEnd}
             />
-            <DeleteDialogExamEvent eventId={id} eventName={examEventName          } />
+            <DeleteDialogExamEvent eventId={id} eventName={examEventName} />
           </div>
         </div>
         <div>
@@ -78,14 +78,14 @@ export default function EventItem({
           <div className="flex items-center gap-3 flex-wrap">
             <Link
               href={`daftar-soal/${codeGroupRegulerId}`}
-              className="flex gap-1 items-center text-blue-700"
+              className="flex gap-1 items-center text-blue-700 hover:underline hover:decoration-wavy"
             >
               <span className="text-sm">Soal reguler</span>
               <ExternalLink className="w-3 h-3" />
             </Link>
             <Link
               href={`daftar-soal/${codeGroupRetakeId}`}
-              className="flex gap-1 items-center text-blue-700"
+              className="flex gap-1 items-center text-blue-700 hover:underline hover:decoration-wavy"
             >
               <span className="text-sm">Soal mengulang</span>
               <ExternalLink className="w-3 h-3" />
