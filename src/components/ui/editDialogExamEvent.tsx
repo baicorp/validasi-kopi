@@ -8,7 +8,6 @@ import {
   DialogTrigger,
 } from "./dialog";
 import { toast } from "sonner";
-import { Button } from "./button";
 import { SquarePen } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { updateExamEvent } from "@/actions/examEvents";
@@ -53,10 +52,10 @@ export default function EditDialogExamEvent({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">
-          <SquarePen />
+        <div className="cursor-pointer flex items-center gap-2 rounded-sm px-2 py-1 border shadow text-sm self-start">
+          <SquarePen className="w-3 h-3" />
           <span>Edit</span>
-        </Button>
+        </div>
       </DialogTrigger>
       <DialogContent className="w-96">
         <DialogHeader>

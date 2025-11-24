@@ -6,6 +6,7 @@ import { Clock, ExternalLink } from "lucide-react";
 import { formatLocalTime } from "@/lib/datetimeFormat";
 import EditDialogExamEvent from "./editDialogExamEvent";
 import { getAllExamEvents } from "@/actions/examEvents";
+import DeleteDialogExamEvent from "./deleteExamEvent";
 
 type GetAllExamEventsResult = Awaited<ReturnType<typeof getAllExamEvents>>;
 type ExamEventItem = NonNullable<GetAllExamEventsResult["data"]>[number];
@@ -27,25 +28,28 @@ export default function EventItem({
   const examTimeEnd = to24Hour(examDateEnd);
 
   return (
-    <div className="rounded-lg overflow-hidden border shadow relative flex flex-col justify-between">
-      <div className="absolute right-4 top-4">
-        <EditDialogExamEvent
-          eventId={id}
-          eventName={examEventName}
-          codeGroupReguler={codeGroupRegulerId ?? undefined}
-          codeGroupRetake={codeGroupRetakeId ?? undefined}
-          examDefaultDateStart={examDateStart}
-          examDefaultDateEnd={examDateEnd}
-          examDefaultTimeStart={examTimeStart}
-          examDefaultTimeEnd={examTimeEnd}
-        />
-      </div>
+    <div className="rounded-lg overflow-hidden border shadow flex flex-col justify-between">
       <div className="p-5 flex flex-col gap-2">
-        <Link href={`ujian/${id}/peserta-ujian`}>
-          <p className="font-medium line-clamp-2 overflow-ellipsis">
-            {toTitleCase(examEventName)}
-          </p>
-        </Link>
+        <div className="flex justify-between">
+          <Link href={`ujian/${id}/peserta-ujian`}>
+            <p className="font-medium line-clamp-2 overflow-ellipsis">
+              {toTitleCase(examEventName)}
+            </p>
+          </Link>
+          <div className="flex flex-col gap-1">
+            <EditDialogExamEvent
+              eventId={id}
+              eventName={examEventName}
+              codeGroupReguler={codeGroupRegulerId ?? undefined}
+              codeGroupRetake={codeGroupRetakeId ?? undefined}
+              examDefaultDateStart={examDateStart}
+              examDefaultDateEnd={examDateEnd}
+              examDefaultTimeStart={examTimeStart}
+              examDefaultTimeEnd={examTimeEnd}
+            />
+            <DeleteDialogExamEvent eventId={id} eventName={examEventName          } />
+          </div>
+        </div>
         <div>
           <p className="text-muted-foreground mb-1">Daftar ujian</p>
           <div className="flex flex-wrap gap-1">

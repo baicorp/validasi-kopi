@@ -132,6 +132,27 @@ export async function updateExamEvent(formData: FormData, examEventId: string) {
   }
 }
 
+export async function deleteExamEvent(examEventId: string) {
+  try {
+    const isValid = await isValidRole("admin");
+    if (!isValid) {
+      return { error: "401 : Anda tidak memiliki izin." };
+    }
+
+    const result = await db
+      .delete(examEvents)
+      .where(eq(examEvents.id, examEventId));
+
+    revalidatePath("/dashboard/ujian");
+    return result.rows;
+  } catch (error) {
+    if (error instanceof Error) {
+      return { error: error.message };
+    }
+    return { error: "Gagal menghapus acara ujian" };
+  }
+}
+
 export async function getActiveExamEvent() {
   try {
     const currentDateTime = new Date().toISOString();
