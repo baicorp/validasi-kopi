@@ -86,10 +86,11 @@ function getSkoringInput(formData: FormData) {
   const examName = "skoring";
   const inputValues = ["1.5", "2", "3", "4", "5"];
   const userAnswer: Answer[] = [];
+  const note = formData.get(`${examName}-note`) as string;
 
   inputValues.forEach((value) => {
     const code = formData.get(`${examName}-${value}`) as string;
-    userAnswer.push({ examName, code, value });
+    userAnswer.push({ examName, code, value, note });
   });
 
   return userAnswer;
@@ -99,10 +100,11 @@ function getTriangleInput(formData: FormData) {
   const examName = "triangle";
   const inputValues = ["beda", "sama", "sama"];
   const userAnswer: Answer[] = [];
+  const note = formData.get(`${examName}-note`) as string;
 
   inputValues.forEach((value) => {
     const code = formData.get(`${examName}-${value}`) as string;
-    userAnswer.push({ examName, code, value });
+    userAnswer.push({ examName, code, value, note });
   });
 
   return userAnswer;

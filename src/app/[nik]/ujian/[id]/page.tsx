@@ -7,6 +7,8 @@ import { Calendar } from "lucide-react";
 import { redirect } from "next/navigation";
 import ErrorComp from "@/components/ui/error";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import Loading from "@/components/skeleton/loading";
 import SelectTaste from "@/components/ui/selectTaste";
 import { formatLocalTime } from "@/lib/datetimeFormat";
@@ -263,6 +265,9 @@ function TriangleForm() {
           <GenericInput key={index} examName="triangle" value={value} />
         ))}
       </div>
+      <div className="mt-4">
+        <InputNote examName="triangle" />
+      </div>
     </div>
   );
 }
@@ -276,6 +281,9 @@ function SkoringForm() {
         {values.map((value, index) => (
           <GenericInput key={index} examName="skoring" value={value} />
         ))}
+      </div>
+      <div className="mt-4">
+        <InputNote examName="skoring" />
       </div>
     </div>
   );
@@ -292,6 +300,19 @@ function GenericInput({
     <div className="bg-card text-card-foreground shadow-sm border rounded-lg p-1 flex flex-col justify-between">
       <p className="p-2 font-medium text-center">{value}</p>
       <Input type="number" name={`${examName}-${value}`} placeholder="kode" />
+    </div>
+  );
+}
+
+function InputNote({ examName }: { examName: string }) {
+  return (
+    <div className="space-y-2">
+      <Label className="ml-1">Keterangan</Label>
+      <Textarea
+        name={`${examName}-note`}
+        placeholder="Masukkan Keterangan jawaban (wajib di isi)"
+        required
+      />
     </div>
   );
 }

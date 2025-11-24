@@ -40,6 +40,7 @@ export type Answer = {
   value: string;
   additionalValue?: string;
   attemptNumber?: number;
+  note?: string;
 };
 
 export type AnswerWithResult = Answer & {

@@ -4,6 +4,7 @@ import { db } from "@/db";
 import {
   examEvents,
   examRegistrations,
+  examSubmissionNotes,
   examSubmissions,
   submissionAttempts,
 } from "@/db/schema/examEvents";
@@ -109,6 +110,7 @@ export async function submitExam(
         code: data.code ? data.code : "",
         value: data.value ? data.value : "",
         attemptNumber: nextAttempt,
+        note: data.note ? data.note : "",
       }));
 
       const normalizedPairs = submittedExamData.map((data) => ({
@@ -139,7 +141,9 @@ export async function submitExam(
       // @ts-expect-error correct answer actually work (null and undefined)
       const results = evaluateAnswers(submittedExamData, dbAnswerList);
 
-      // 9. insert submissionAttempts data
+      // 9. insert submissionAttempts data and submissionNote if available;
+      const submissionNoteData: InferInsertModel<typeof examSubmissionNotes>[] =
+        [];
       const submissionAttemptsInsertValues: InferInsertModel<
         typeof submissionAttempts
       >[] = results.map((data) => {
@@ -147,7 +151,15 @@ export async function submitExam(
         if (!examId) {
           throw Error("ID ujian tidak ditemukan.");
         }
+        const submissionAttemptId = crypto.randomUUID();
+
+        if (data.note) {
+          // this data for insert examSubmissionNotes
+          submissionNoteData.push({ submissionAttemptId, note: data.note });
+        }
+
         return {
+          id: submissionAttemptId,
           numberAttemp: nextAttempt,
           examEventId,
           userId,
@@ -159,6 +171,8 @@ export async function submitExam(
       await tx
         .insert(submissionAttempts)
         .values(submissionAttemptsInsertValues);
+
+      await tx.insert(examSubmissionNotes).values(submissionNoteData);
 
       // 10. get submissionAttempts inserted rows data
       const insertedRows = await tx
@@ -185,7 +199,7 @@ export async function submitExam(
       >[] = results.flatMap((data) => {
         const examId = getExamsId(data.examName, examsData);
         if (!examId) {
-          throw Error("ID ujian tidak ditemukan.");
+          throw Error(`ID ujian ${data.examName} tidak ditemukan.`);
         }
         const submissionAttemptId = attemptMap.get(examId);
 
@@ -196,15 +210,11 @@ export async function submitExam(
         }
 
         return data.answerResults.map((result) => ({
-          userId,
+          submissionAttemptId,
           code: result.code,
           value: result.value,
           additionalValue: result.additionalValue,
           result: result.result,
-          examId: getExamsId(result.examName, examsData!),
-          examEventId: Number(examEventId),
-          codeGroupId: codeGroupId!,
-          submissionAttemptId,
         }));
       });
       await tx.insert(examSubmissions).values(examSubmissionsInsertValues);
@@ -218,7 +228,10 @@ export async function submitExam(
 
     return transactionResult;
   } catch (error) {
-    console.error(error);
+    if (error instanceof Error) {
+      console.error(error);
+      return { error: error.message };
+    }
     return { error: "Gagal mengumpulkan jawaban" };
   }
 }

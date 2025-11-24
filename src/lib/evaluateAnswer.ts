@@ -4,6 +4,7 @@ type EvaluatedResult = {
   examName: string;
   answerResults: AnswerWithResult[];
   grade: number;
+  note?: string;
 };
 
 export function evaluateAnswers(
@@ -109,13 +110,17 @@ function evaluateTriangle(
     };
   });
 
+  const note = answerResults[0].note;
+  if (!note) {
+    throw Error(`Tidak ditemukan note untuk ujian ${examNameTarget}.`);
+  }
   const codeScore = 100;
   const grade =
     answerResults.filter(
       (data) => data.value === "beda" && data.result === "correct",
     ).length * codeScore;
 
-  return { examName: examNameTarget, answerResults, grade };
+  return { examName: examNameTarget, answerResults, grade, note };
 }
 
 function evaluateSkoring(
@@ -152,6 +157,10 @@ function evaluateSkoring(
     return { ...user, result: isCorrect ? "correct" : "wrong" };
   });
 
+  const note = answerResults[0].note;
+  if (!note) {
+    throw Error(`Tidak ditemukan note untuk ujian ${examNameTarget}.`);
+  }
   const attemptNumber = userAnswers[0].attemptNumber;
   const codeScore = 20;
   const totalCorrectCode = answerResults.filter(
@@ -167,6 +176,7 @@ function evaluateSkoring(
       grade,
       totalWrongCode: answerResults.length - totalCorrectCode,
     }),
+    note,
   };
 }
 
