@@ -334,25 +334,81 @@ export async function getSubmissionSummary(examEventId: string) {
         code: examSubmissions.code,
         value: examSubmissions.value,
         addValue: examSubmissions.additionalValue,
+        note: examSubmissionNotes.note,
       })
       .from(examSubmissions)
       .leftJoin(
         submissionAttempts,
         eq(examSubmissions.submissionAttemptId, submissionAttempts.id),
       )
+      .leftJoin(
+        examSubmissionNotes,
+        eq(submissionAttempts.id, examSubmissionNotes.submissionAttemptId),
+      )
       .leftJoin(user, eq(submissionAttempts.userId, user.id))
       .leftJoin(departments, eq(user.departmentId, departments.id))
       .leftJoin(exams, eq(submissionAttempts.examId, exams.id))
       .where(eq(submissionAttempts.examEventId, examEventId));
 
-    const groupByNumberAttempt = Object.groupBy(rows, (row) => {
-      if (!row.numberAttempt) {
-        throw Error("Number attempt bernilai null");
+    const result: Record<
+      string,
+      {
+        [examName: string]: {
+          [participant: string]: {
+            list: Array<{
+              code: string;
+              value: string;
+              addValue: string | null;
+            }>;
+            note: string | null;
+          };
+        };
       }
-      return row.numberAttempt;
-    });
+    > = {};
 
-    return groupByNumberAttempt;
+    for (const row of rows) {
+      if (!row.numberAttempt) throw Error("Number attempt bernilai null");
+      if (!row.examName) throw Error("Nama ujian tidak ditemukan");
+      if (!row.name) throw Error("Nama peserta tidak ditemukan");
+
+      const attempt = row.numberAttempt.toString();
+      const examName = row.examName;
+      const participant = row.name;
+
+      result[attempt] ??= {};
+      result[attempt][examName] ??= {};
+
+      if (!result[attempt][examName][participant]) {
+        result[attempt][examName][participant] = {
+          list: [],
+          note: row.note ?? null,
+        };
+      }
+
+      result[attempt][examName][participant].list.push({
+        code: row.code,
+        value: row.value,
+        addValue: row.addValue,
+      });
+    }
+
+    const results = Object.entries(result).map(([attempt, examGroup]) => ({
+      numberAttempt: attempt,
+      examSubmissions: Object.entries(examGroup).map(
+        ([examName, participantGroup]) => ({
+          examName,
+          submissions: Object.entries(participantGroup).map(
+            ([participantName, { list, note }]) => ({
+              participantName,
+              list,
+              note,
+            }),
+          ),
+        }),
+      ),
+    }));
+
+    return results;
   } catch (error) {
     if (error instanceof Error) {
       console.error(error.message);
