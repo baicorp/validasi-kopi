@@ -42,7 +42,6 @@ export default async function page({
         />
       </div>
       <CustomTable data={results} />
-      <pre>{JSON.stringify(results, null, 2)}</pre>
     </div>
   );
 }

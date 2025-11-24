@@ -265,7 +265,6 @@ export async function getUserLatestExamResult(examEventId: string) {
         id: submissionAttempts.id,
         examName: exams.examName,
         numberAttempt: submissionAttempts.numberAttemp,
-        grade: submissionAttempts.grade,
         retake: submissionAttempts.retakeExam,
       })
       .from(submissionAttempts)
