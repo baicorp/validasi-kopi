@@ -57,7 +57,7 @@ export const examRegistrations = sqliteTable("exam_registrations", {
     .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
 });
 
-export const submissionAttempts = sqliteTable("submission_attemps", {
+export const submissionAttempts = sqliteTable("submission_attempts", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID())
