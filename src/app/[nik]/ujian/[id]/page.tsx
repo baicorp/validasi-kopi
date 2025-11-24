@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 import ErrorComp from "@/components/ui/error";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Callout from "@/components/ui/callout";
 import { Textarea } from "@/components/ui/textarea";
 import Loading from "@/components/skeleton/loading";
 import SelectTaste from "@/components/ui/selectTaste";
@@ -151,6 +152,15 @@ function TwoOutOfFive({
   return (
     <div className="p-2 border rounded-lg space-y-2">
       <p className="font-medium">{examName}</p>
+      <Callout>
+        <p>
+          Di hadapan Anda terdapat 5 sampel,{" "}
+          <span className="font-bold">2 sampel yang sama</span> dan{" "}
+          <span className="font-bold">3 sampel berbeda</span>. Cicipi sampel
+          secara berurutan. Identifikasikan{" "}
+          <span className="font-bold">sampel mana yang sama.</span>
+        </p>
+      </Callout>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
         {values.map((value, index) => (
           <div
@@ -180,6 +190,21 @@ function TresholdSingleForm() {
   return (
     <div className="p-2 border rounded-lg space-y-2">
       <p className="font-medium">Treshold single</p>
+      <Callout>
+        <p>
+          Di hadapan Anda terdapat 12 sampel. Cicipi secara berurutan.
+          Identifikasi sampel mana yang terdeteksi rasa
+          <span className="font-bold">
+            {" "}
+            asin, manis, pahit, asam, dan tidak berasa
+          </span>{" "}
+          dengan memilih rasa pada pilihan di bawah ini.{" "}
+          <span className="font-bold">
+            Serta pilih intensitas dari rasa tersebut
+          </span>
+          . Angka 1 mewakili intensitas terendah.
+        </p>
+      </Callout>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         {totalInput.map((numb) => (
           <div key={numb} className="p-2 border shadow-sm rounded-lg space-y-2">
@@ -205,6 +230,16 @@ function TresholdMixForm() {
   return (
     <div className="p-2 border rounded-lg space-y-2">
       <p className="font-medium">Treshold mix</p>
+      <Callout>
+        <p>
+          Di hadapan Anda terdapat 5 sampel. Cicipi secara berurutan.
+          <span className="font-bold">
+            Identifikasi kombinasi rasa beserta intensitasnya
+          </span>
+          . Intensitas rasa disesuaikan dengan sample uji threshold yang
+          diberikan sebelumnya.
+        </p>
+      </Callout>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         {totalInput.map((numb) => (
           <div key={numb} className="p-2 border shadow-sm rounded-lg space-y-2">
@@ -230,6 +265,13 @@ function IdentifikasiForm({ examEventId }: { examEventId: string }) {
   return (
     <div className="p-2 border rounded-lg space-y-2">
       <p className="font-medium">Identifikasi</p>
+      <Callout>
+        <p>
+          Di hadapan Anda terdapat 5 sampel. Cicipi sampel secara beruntun.
+          Identifikasi <span className="font-bold">masing-masing sampel</span>{" "}
+          dengan memilih <span className="font-bold">nama sampelnya</span>.
+        </p>
+      </Callout>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
         {totalInput.map((numb) => (
           <div key={numb} className="p-2 border shadow-sm rounded-lg space-y-2">
@@ -258,6 +300,15 @@ function TriangleForm() {
   return (
     <div className="p-2 border rounded-lg space-y-2">
       <p className="font-medium">Triangle</p>
+      <Callout>
+        <p>
+          Di hadapan Anda terdapat 3 sampel.{" "}
+          <span className="font-bold">2 sampel sama</span> dan{" "}
+          <span className="font-bold">1 sampel berbeda.</span> Cicipi sampel
+          secara berurutan. Identifikasi{" "}
+          <span className="font-bold">sampel mana yang berbeda.</span>
+        </p>
+      </Callout>
       <div className="grid grid-cols-3 gap-2">
         {values.map((value, index) => (
           <GenericInput key={index} examName="triangle" value={value} />
@@ -275,6 +326,16 @@ function SkoringForm() {
   return (
     <div className="p-2 border rounded-lg space-y-2">
       <p className="font-medium">Skoring</p>
+      <Callout>
+        <p>
+          Di hadapan Anda terdapat 5 sampel. Cicipi sampel secara beruntun.
+          <span className="font-bold">
+            {" "}
+            Identifikasi sampel dari yang paling kurang mantap (skor 1) hinnga
+            sampel yang paling mantap (skor 5).
+          </span>
+        </p>
+      </Callout>
       <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
         {values.map((value, index) => (
           <GenericInput key={index} examName="skoring" value={value} />
