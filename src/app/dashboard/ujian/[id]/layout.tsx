@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { Badge } from "@/components/ui/badge";
 import ErrorComp from "@/components/ui/error";
 import { Label } from "@/components/ui/label";
-import { Calendar, Clock } from "lucide-react";
+import { Calendar, Clock, ExternalLink } from "lucide-react";
 import Loading from "@/components/skeleton/loading";
 import { getExamEventById } from "@/actions/examEvents";
 import { formatLocalTime, getDurationString } from "@/lib/datetimeFormat";
@@ -52,7 +52,7 @@ async function ExamEventDetails({ examEventId }: { examEventId: string }) {
           ))}
         </div>
       </div>
-      <div className="grid grid-cols-3">
+      <div className="grid grid-cols-4">
         <div className="space-y-2 justify-self-start">
           <Label className="text-muted-foreground">TANGGAL / WAKTU UJIAN</Label>
           <div className="grid grid-cols-[auto_auto_1fr] gap-x-3 gap-y-1 text-sm">
@@ -75,6 +75,25 @@ async function ExamEventDetails({ examEventId }: { examEventId: string }) {
           <div className="flex gap-2 items-center">
             <Clock className="w-4 h-4" />
             <p>{getDurationString(examEvent.examStart, examEvent.examEnd)}</p>
+          </div>
+        </div>
+        <div className="space-y-2 justify-self-center">
+          <Label className="text-muted-foreground">LINK BANK SOAL</Label>
+          <div className="flex flex-col">
+            <Link
+              href={`daftar-soal/${examEvent.codeGroupRegulerId}`}
+              className="flex gap-1 items-center text-blue-700 hover:underline hover:decoration-wavy"
+            >
+              <span className="text-sm">Soal reguler</span>
+              <ExternalLink className="w-3 h-3" />
+            </Link>
+            <Link
+              href={`daftar-soal/${examEvent.codeGroupRetakeId}`}
+              className="flex gap-1 items-center text-blue-700 hover:underline hover:decoration-wavy"
+            >
+              <span className="text-sm">Soal mengulang</span>
+              <ExternalLink className="w-3 h-3" />
+            </Link>
           </div>
         </div>
         <div className="space-y-2 justify-self-end">
