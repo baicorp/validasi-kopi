@@ -71,10 +71,10 @@ async function ExamFormInfo({ examEventId }: { examEventId: string }) {
       <p>Nama ujian</p>
       <span> : </span>
       <p>{result.examEventName}</p>
-      <p>Kesempatan</p>
+      <p>Keterangan</p>
       <span> : </span>
       <Suspense fallback={<span>...</span>}>
-        <CurrentAttempt examEventId={examEventId} variant="next" />
+        <AttemptDescription examEventId={examEventId} />
       </Suspense>
       <p>Mulai</p>
       <span> : </span>
@@ -92,21 +92,19 @@ async function ExamFormInfo({ examEventId }: { examEventId: string }) {
   );
 }
 
-async function CurrentAttempt({
-  examEventId,
-  variant = "default",
-}: {
-  examEventId: string;
-  variant?: "default" | "next";
-}) {
+async function AttemptDescription({ examEventId }: { examEventId: string }) {
   const result = await getUserLatestExamAttemptNumber(examEventId);
 
   if ("error" in result) {
     return <ErrorComp error={result.error} />;
   }
-  return (
+  const currentAttempt = result.latestAttempt + 1;
+
+  return currentAttempt === 1 ? (
+    <span>Ujian Reguler</span>
+  ) : (
     <span>
-      {variant === "next" ? result.latestAttempt + 1 : result.latestAttempt} / 4
+      Ujian mengulang <span>({currentAttempt - 1} / 3)</span>
     </span>
   );
 }
