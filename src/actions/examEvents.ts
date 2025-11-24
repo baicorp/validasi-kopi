@@ -431,6 +431,37 @@ export async function getExamInputFormBasedOnSelectedExamForm(
   }
 }
 
+export async function getExamValueFromExamEvent(
+  examName: string,
+  examEventId: string,
+) {
+  try {
+    const rows = await db
+      .selectDistinct({
+        value: codes.value,
+        addValue: codes.additionalValue,
+      })
+      .from(codes)
+      .leftJoin(codeGroups, eq(codes.codeGroupId, codeGroups.id))
+      .leftJoin(examEvents, eq(examEvents.codeGroupRegulerId, codeGroups.id))
+      .leftJoin(exams, eq(codes.examId, exams.id))
+      .where(and(eq(exams.examName, examName), eq(examEvents.id, examEventId)));
+
+    const valueWithAddValue = rows.map((data) =>
+      data.addValue ? `${data.value} ${data.addValue}` : data.value,
+    );
+
+    return valueWithAddValue.sort();
+  } catch (error) {
+    if (error instanceof Error) {
+      return { error: error.message };
+    }
+    return {
+      error: `Gagal mendapatkan daftar jawaban untuk ujian ${examName}`,
+    };
+  }
+}
+
 export async function getExamThatNeedDummyData(examEventId: string) {
   try {
     // TODO: get the examValue
