@@ -81,14 +81,14 @@ async function ExamEventDetails({ examEventId }: { examEventId: string }) {
           <Label className="text-muted-foreground">LINK BANK SOAL</Label>
           <div className="flex flex-col">
             <Link
-              href={`daftar-soal/${examEvent.codeGroupRegulerId}`}
+              href={`/dashboard/daftar-soal/${examEvent.codeGroupRegulerId}`}
               className="flex gap-1 items-center text-blue-700 hover:underline hover:decoration-wavy"
             >
               <span className="text-sm">Soal reguler</span>
               <ExternalLink className="w-3 h-3" />
             </Link>
             <Link
-              href={`daftar-soal/${examEvent.codeGroupRetakeId}`}
+              href={`/dashboard/daftar-soal/${examEvent.codeGroupRetakeId}`}
               className="flex gap-1 items-center text-blue-700 hover:underline hover:decoration-wavy"
             >
               <span className="text-sm">Soal mengulang</span>
