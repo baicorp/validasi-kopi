@@ -314,7 +314,10 @@ export async function getUserLatestExamAttemptNumber(examEventId: string) {
   }
 }
 
-export async function getSubmissionSummary(examEventId: string) {
+export async function getSubmissionSummary(
+  examEventId: string,
+  numberAttempt: number,
+) {
   try {
     // 1. check if the person is admin
     const isValid = await isValidRole("admin");
@@ -330,9 +333,9 @@ export async function getSubmissionSummary(examEventId: string) {
         name: user.name,
         departments: departments.departmentName,
         examName: exams.examName,
-        numberAttempt: submissionAttempts.numberAttemp,
         code: examSubmissions.code,
         value: examSubmissions.value,
+        result: examSubmissions.result,
         addValue: examSubmissions.additionalValue,
         note: examSubmissionNotes.note,
       })
@@ -348,67 +351,75 @@ export async function getSubmissionSummary(examEventId: string) {
       .leftJoin(user, eq(submissionAttempts.userId, user.id))
       .leftJoin(departments, eq(user.departmentId, departments.id))
       .leftJoin(exams, eq(submissionAttempts.examId, exams.id))
-      .where(eq(submissionAttempts.examEventId, examEventId));
+      .where(
+        and(
+          eq(submissionAttempts.examEventId, examEventId),
+          eq(submissionAttempts.numberAttemp, numberAttempt),
+        ),
+      );
 
-    const result: Record<
+    const examMap = new Map<
       string,
       {
-        [examName: string]: {
-          [participant: string]: {
-            list: Array<{
+        submission: Map<
+          string,
+          {
+            list: {
               code: string;
               value: string;
               addValue: string | null;
-            }>;
+              result: string;
+            }[];
             note: string | null;
-          };
-        };
+          }
+        >;
       }
-    > = {};
+    >();
 
     for (const row of rows) {
-      if (!row.numberAttempt) throw Error("Number attempt bernilai null");
-      if (!row.examName) throw Error("Nama ujian tidak ditemukan");
-      if (!row.name) throw Error("Nama peserta tidak ditemukan");
+      if (!row.examName) throw new Error("Exam name not found");
+      if (!row.name) throw new Error("Participant name not found");
 
-      const attempt = row.numberAttempt.toString();
-      const examName = row.examName;
-      const participant = row.name;
+      let examGroup = examMap.get(row.examName);
 
-      result[attempt] ??= {};
-      result[attempt][examName] ??= {};
-
-      if (!result[attempt][examName][participant]) {
-        result[attempt][examName][participant] = {
-          list: [],
-          note: row.note ?? null,
+      if (!examGroup) {
+        examGroup = {
+          submission: new Map(),
         };
+        examMap.set(row.examName, examGroup);
       }
 
-      result[attempt][examName][participant].list.push({
+      let participant = examGroup.submission.get(row.name);
+
+      if (!participant) {
+        participant = {
+          list: [],
+          note: row.note ?? null, // participant-level note
+        };
+        examGroup.submission.set(row.name, participant);
+      }
+
+      participant.list.push({
         code: row.code,
         value: row.value,
         addValue: row.addValue,
+        result: row.result,
       });
     }
 
-    const results = Object.entries(result).map(([attempt, examGroup]) => ({
-      numberAttempt: attempt,
-      examSubmissions: Object.entries(examGroup).map(
-        ([examName, participantGroup]) => ({
-          examName,
-          submissions: Object.entries(participantGroup).map(
-            ([participantName, { list, note }]) => ({
-              participantName,
-              list,
-              note,
-            }),
-          ),
+    const finalData = Array.from(examMap, ([examName, examGroup]) => ({
+      examName,
+      submission: Array.from(
+        examGroup.submission,
+        ([participantName, { list, note }]) => ({
+          participantName,
+          list,
+          note,
         }),
       ),
     }));
 
-    return results;
+    return finalData;
   } catch (error) {
     if (error instanceof Error) {
       console.error(error.message);

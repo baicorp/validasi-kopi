@@ -1,23 +1,11 @@
 import { redirect } from "next/navigation";
+import UserAnswerList from "@/components/ui/userAnswerListItem";
 import { validateSessionServer } from "@/actions/validateSession";
-import { getSubmissionSummary } from "@/actions/examSubmissions";
-import ErrorComp from "@/components/ui/error";
 
-export default async function page({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function page() {
   const session = await validateSessionServer();
   if (session.user.role !== "admin") {
     redirect(`/${session.user.username}`);
-  }
-
-  const { id } = await params;
-  const results = await getSubmissionSummary(id);
-
-  if ("error" in results) {
-    return <ErrorComp error={results.error} />;
   }
 
   return (
@@ -25,7 +13,7 @@ export default async function page({
       <p className="text-center font-semibold text-lg">
         Rangkuman Jawaban Ujian
       </p>
-      <pre className="text-sm">{JSON.stringify(results, null, 2)}</pre>
+      <UserAnswerList />
     </div>
   );
 }
