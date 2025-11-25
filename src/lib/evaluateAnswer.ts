@@ -110,10 +110,8 @@ function evaluateTriangle(
     };
   });
 
-  const note = answerResults[0].note;
-  if (!note) {
-    throw Error(`Tidak ditemukan note untuk ujian ${examNameTarget}.`);
-  }
+  // prevent errors when triangle is not part of the submission”
+  const note = answerResults[0]?.note ?? "";
   const codeScore = 100;
   const grade =
     answerResults.filter(
@@ -199,10 +197,8 @@ function evaluateSkoring(
     totalWrong = totalWrongDesc;
   }
 
-  const note = answerResults[0].note;
-  if (!note) {
-    throw Error(`Tidak ditemukan note untuk ujian ${examNameTarget}.`);
-  }
+  // prevent errors when skoring is not part of the submission
+  const note = answerResults[0]?.note ?? "";
   const attemptNumber = userAnswers[0].attemptNumber;
   const codeScore = 20;
   const grade = totalCorrect * codeScore;
