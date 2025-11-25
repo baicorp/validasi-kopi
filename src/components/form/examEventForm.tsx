@@ -51,7 +51,7 @@ export default function ExamEventForm({
         />
       </div>
       <div className="space-y-2">
-        <Label>Soal ujian</Label>
+        <Label>Pilih soal untuk ujian reguler</Label>
         {codeGroupReguler ? (
           <SelectedCodeGroupCard codeGroupId={codeGroupReguler} />
         ) : (
@@ -59,7 +59,7 @@ export default function ExamEventForm({
         )}
       </div>
       <div className="space-y-2">
-        <Label>Soal ujian ulangan</Label>
+        <Label>Pilih soal untuk ujian mengulang (1-3)</Label>
         {codeGroupRetake ? (
           <SelectedCodeGroupCard codeGroupId={codeGroupRetake} />
         ) : (
