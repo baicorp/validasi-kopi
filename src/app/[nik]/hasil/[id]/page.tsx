@@ -56,7 +56,11 @@ export default async function Page({
                   <span
                     className={`text-sm rounded-md px-3 p-1 ${invoice.retake ? "text-red-600 bg-red-100 border border-red-200" : "text-green-600 bg-green-100 border border-green-200"}`}
                   >
-                    {invoice.retake ? "MENGULANG" : "LOLOS"}
+                    {invoice.retake
+                      ? invoice.numberAttempt === 4
+                        ? "MENGULANG (HABIS)"
+                        : "MENGULANG"
+                      : "LOLOS"}
                   </span>
                 </TableCell>
               </TableRow>
