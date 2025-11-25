@@ -62,7 +62,7 @@ export const submissionAttempts = sqliteTable("submission_attempts", {
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID())
     .notNull(),
-  numberAttemp: integer("number_attemp").notNull(),
+  numberAttempt: integer("number_attempt").notNull(),
   grade: integer("grade").notNull(),
   retakeExam: text("retake_exam"),
   examId: text("exam_id")

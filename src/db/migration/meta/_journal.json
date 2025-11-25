@@ -15,6 +15,13 @@
       "when": 1763964170089,
       "tag": "0001_silky_professor_monster",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1764087574305,
+      "tag": "0002_fluffy_tarantula",
+      "breakpoints": true
     }
   ]
 }

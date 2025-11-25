@@ -186,7 +186,7 @@ export async function getActiveExamEvent() {
     const latestAttempts = db
       .select({
         examEventId: submissionAttempts.examEventId,
-        maxAttempt: sql<number>`max(${submissionAttempts.numberAttemp})`.as(
+        maxAttempt: sql<number>`max(${submissionAttempts.numberAttempt})`.as(
           "maxAttempt",
         ),
       })
@@ -198,7 +198,7 @@ export async function getActiveExamEvent() {
     const latestAttemptRows = await db
       .select({
         examEventId: submissionAttempts.examEventId,
-        numberAttempt: submissionAttempts.numberAttemp,
+        numberAttempt: submissionAttempts.numberAttempt,
         retakeExam: submissionAttempts.retakeExam,
       })
       .from(submissionAttempts)
@@ -206,7 +206,7 @@ export async function getActiveExamEvent() {
         latestAttempts,
         and(
           eq(submissionAttempts.examEventId, latestAttempts.examEventId),
-          eq(submissionAttempts.numberAttemp, latestAttempts.maxAttempt),
+          eq(submissionAttempts.numberAttempt, latestAttempts.maxAttempt),
         ),
       )
       .where(
@@ -384,7 +384,7 @@ export async function getExamInputFormBasedOnSelectedExamForm(
       // 2. get latestAttempt number
       const [{ latestAttempt }] = await tx
         .select({
-          latestAttempt: sql<number>`max(${submissionAttempts.numberAttemp})`,
+          latestAttempt: sql<number>`max(${submissionAttempts.numberAttempt})`,
         })
         .from(submissionAttempts)
         .where(
@@ -409,7 +409,7 @@ export async function getExamInputFormBasedOnSelectedExamForm(
           .from(submissionAttempts)
           .where(
             and(
-              eq(submissionAttempts.numberAttemp, nextAttempt - 1),
+              eq(submissionAttempts.numberAttempt, nextAttempt - 1),
               eq(submissionAttempts.examEventId, examEventId),
               eq(submissionAttempts.userId, userId),
             ),

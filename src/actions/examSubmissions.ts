@@ -35,7 +35,7 @@ export async function submitExam(
       // 3. check how many time user already submit exam
       const [{ latestAttempt }] = await tx
         .select({
-          latestAttempt: sql<number>`max(${submissionAttempts.numberAttemp})`,
+          latestAttempt: sql<number>`max(${submissionAttempts.numberAttempt})`,
         })
         .from(submissionAttempts)
         .where(
@@ -87,7 +87,7 @@ export async function submitExam(
           .from(submissionAttempts)
           .where(
             and(
-              eq(submissionAttempts.numberAttemp, nextAttempt - 1),
+              eq(submissionAttempts.numberAttempt, nextAttempt - 1),
               eq(submissionAttempts.examEventId, examEventId),
               eq(submissionAttempts.userId, userId),
             ),
@@ -192,7 +192,7 @@ export async function submitExam(
 
         return {
           id: submissionAttemptId,
-          numberAttemp: nextAttempt,
+          numberAttempt: nextAttempt,
           examEventId,
           userId,
           examId,
@@ -216,7 +216,7 @@ export async function submitExam(
         .where(
           and(
             eq(submissionAttempts.examEventId, examEventId),
-            eq(submissionAttempts.numberAttemp, nextAttempt),
+            eq(submissionAttempts.numberAttempt, nextAttempt),
           ),
         );
 
@@ -277,7 +277,7 @@ export async function getUserLatestExamResult(examEventId: string) {
     // 2. get latest submission
     const [{ latestAttempt }] = await db
       .select({
-        latestAttempt: sql<number>`max(${submissionAttempts.numberAttemp})`,
+        latestAttempt: sql<number>`max(${submissionAttempts.numberAttempt})`,
       })
       .from(submissionAttempts)
       .where(
@@ -296,7 +296,7 @@ export async function getUserLatestExamResult(examEventId: string) {
       .select({
         id: submissionAttempts.id,
         examName: exams.examName,
-        numberAttempt: submissionAttempts.numberAttemp,
+        numberAttempt: submissionAttempts.numberAttempt,
         retake: submissionAttempts.retakeExam,
       })
       .from(submissionAttempts)
@@ -305,7 +305,7 @@ export async function getUserLatestExamResult(examEventId: string) {
         and(
           eq(submissionAttempts.examEventId, examEventId),
           eq(submissionAttempts.userId, userId),
-          eq(submissionAttempts.numberAttemp, latestAttempt),
+          eq(submissionAttempts.numberAttempt, latestAttempt),
         ),
       );
 
@@ -325,7 +325,7 @@ export async function getUserLatestExamAttemptNumber(examEventId: string) {
     // 2. get latest submission
     const [{ latestAttempt }] = await db
       .select({
-        latestAttempt: sql<number>`max(${submissionAttempts.numberAttemp})`,
+        latestAttempt: sql<number>`max(${submissionAttempts.numberAttempt})`,
       })
       .from(submissionAttempts)
       .where(
@@ -386,7 +386,7 @@ export async function getSubmissionSummary(
       .where(
         and(
           eq(submissionAttempts.examEventId, examEventId),
-          eq(submissionAttempts.numberAttemp, numberAttempt),
+          eq(submissionAttempts.numberAttempt, numberAttempt),
         ),
       );
 
@@ -489,7 +489,7 @@ export async function getSubmissionAttemptSummary(examEventId: string) {
         name: user.name,
         departments: departments.departmentName,
         examName: exams.examName,
-        numberAttempt: submissionAttempts.numberAttemp,
+        numberAttempt: submissionAttempts.numberAttempt,
         grade: submissionAttempts.grade,
       })
       .from(submissionAttempts)
