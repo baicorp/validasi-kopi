@@ -173,10 +173,10 @@ function UserAnswerCodeValueItem({
       className={`border rounded-md text-sm w-fi  ${result === "wrong" && "bg-red-100"}`}
     >
       <p className="px-3 pt-2 pb-1 bg-muted font-medium text-center">
-        {headerValue.trim() ? headerValue : "tidak di isi"}
+        {headerValue.trim() ? headerValue : "tidak diisi"}
       </p>
       <Separator />
-      <p className="px-3 py-1 text-center">{code ? code : "kosong"}</p>
+      <p className="px-3 py-1 text-center">{code ? code : "tidak diisi"}</p>
     </div>
   );
 }
