@@ -45,10 +45,10 @@ async function ExamEventDetails({ examEventId }: { examEventId: string }) {
   return (
     <div className="space-y-6 border rounded-lg px-6 py-4">
       <div>
-        <p className="text-lg font-semibold">
-          <span>{examEvent.examEventName}</span>
-          <span className="text-muted-foreground"> (# {examEvent.id})</span>
-        </p>
+        <p className="text-lg font-semibold">{examEvent.examEventName}</p>
+        <span className="text-sm text-muted-foreground">
+          ID UJIAN : {examEvent.id}
+        </span>
         <div className="flex flex-wrap gap-1.5">
           {examEvent.selectedExams?.split(",")?.map((exam) => (
             <Badge variant={"secondary"} key={exam}>
@@ -57,8 +57,8 @@ async function ExamEventDetails({ examEventId }: { examEventId: string }) {
           ))}
         </div>
       </div>
-      <div className="grid grid-cols-4">
-        <div className="space-y-2 justify-self-start">
+      <div className="flex flex-wrap justify-between gap-4">
+        <div className="space-y-2">
           <Label className="text-muted-foreground">TANGGAL / WAKTU UJIAN</Label>
           <div className="grid grid-cols-[auto_auto_1fr] gap-x-3 gap-y-1 text-sm">
             <p>Mulai</p>
@@ -75,14 +75,14 @@ async function ExamEventDetails({ examEventId }: { examEventId: string }) {
             </div>
           </div>
         </div>
-        <div className="space-y-2 justify-self-center">
+        <div className="space-y-2">
           <Label className="text-muted-foreground">LAMA PENGERJAAN</Label>
           <div className="flex gap-2 items-center">
             <Clock className="w-4 h-4" />
             <p>{getDurationString(examEvent.examStart, examEvent.examEnd)}</p>
           </div>
         </div>
-        <div className="space-y-2 justify-self-center">
+        <div className="space-y-2">
           <Label className="text-muted-foreground">LINK BANK SOAL</Label>
           <div className="flex flex-col">
             <Link
@@ -101,7 +101,7 @@ async function ExamEventDetails({ examEventId }: { examEventId: string }) {
             </Link>
           </div>
         </div>
-        <div className="space-y-2 justify-self-end">
+        <div className="space-y-2">
           <Label className="text-muted-foreground">KUOTA PESERTA UJIAN</Label>
           <div>
             <p>{examEvent.totalParticipants} Orang</p>
