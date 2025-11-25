@@ -42,17 +42,17 @@ export default function DeleteDialog({
     e.preventDefault();
     setIsLoad(true);
 
-    try {
-      await deleteFnAction(id);
+    const result = await deleteFnAction(id);
+
+    if (result?.error) {
+      toast.error(result.error);
       setOpen(false);
-    } catch (e) {
-      if (e instanceof Error) {
-        toast.error(e.message);
-      }
-      toast.error("Gagal hapus produk.");
-    } finally {
       setIsLoad(false);
+      return;
     }
+
+    setOpen(false);
+    setIsLoad(false);
   }
 
   return (

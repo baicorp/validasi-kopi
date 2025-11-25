@@ -79,16 +79,14 @@ export async function deleteGeneratedCode(codeGroupId: string) {
       return { error: "401 : Anda tidak memiliki izin." };
     }
 
-    const result = await db
-      .delete(codeGroups)
-      .where(eq(codeGroups.id, codeGroupId));
+    await db.delete(codeGroups).where(eq(codeGroups.id, codeGroupId));
 
-    if (result.rowsAffected === 0) {
-      return { error: "Gagal menghapus, kode mungkin sedang digunakan." };
-    }
     revalidatePath("/dashboard/list-soal");
   } catch (error) {
-    console.error(error);
+    if (error instanceof Error) {
+      console.error(error.message);
+      return { error: "Gagal menghapus soal. Soal mungkin digunakan." };
+    }
     return { error: "Gagal menghapus soal. Database bermasalah." };
   }
 }
