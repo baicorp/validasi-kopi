@@ -3,9 +3,10 @@ import { Suspense } from "react";
 import { Badge } from "@/components/ui/badge";
 import ErrorComp from "@/components/ui/error";
 import { Label } from "@/components/ui/label";
-import { Calendar, Clock, ExternalLink } from "lucide-react";
+import InteractiveLink from "@/components/ui/link";
 import Loading from "@/components/skeleton/loading";
 import { getExamEventById } from "@/actions/examEvents";
+import { Calendar, Clock, ExternalLink } from "lucide-react";
 import { formatLocalTime, getDurationString } from "@/lib/datetimeFormat";
 
 export default async function Layout({
@@ -16,10 +17,14 @@ export default async function Layout({
   return (
     <>
       <section>
-        <div className="flex gap-3 my-3">
-          <Link href={`peserta-ujian`}>Peserta ujian</Link>
-          <Link href={`rekap-jawaban`}>Rekap jawaban</Link>
-          <Link href={`hasil-ujian`}>Hasil ujian</Link>
+        <div className="flex rounded-lg p-1 bg-accent w-fit my-3">
+          <InteractiveLink href={"peserta-ujian"}>
+            Peserta ujian
+          </InteractiveLink>
+          <InteractiveLink href={`rekap-jawaban`}>
+            Rekap jawaban
+          </InteractiveLink>
+          <InteractiveLink href={`hasil-ujian`}>Hasil ujian</InteractiveLink>
         </div>
         <Suspense fallback={<Loading />}>
           <ExamEventDetails examEventId={id} />
