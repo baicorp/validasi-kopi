@@ -52,7 +52,7 @@ export default function SelectProductCategories({
         <SelectGroup>
           <SelectLabel>kategori</SelectLabel>
           {categories.map((category, index) => (
-            <SelectItem key={index} value={category.id.toString()}>
+            <SelectItem key={index} value={category.id}>
               {category.categoryName}
             </SelectItem>
           ))}

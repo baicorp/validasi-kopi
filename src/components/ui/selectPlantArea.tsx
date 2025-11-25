@@ -52,7 +52,7 @@ export default function SelectPlantArea({
         <SelectGroup>
           <SelectLabel>Daftar area pabrik</SelectLabel>
           {plantAreas.map((area) => (
-            <SelectItem key={area.id} value={area.id.toString()}>
+            <SelectItem key={area.id} value={area.id}>
               {area.areaName}
             </SelectItem>
           ))}

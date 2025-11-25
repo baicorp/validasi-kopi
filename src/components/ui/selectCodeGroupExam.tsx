@@ -48,7 +48,7 @@ export default function SelectCodeGroupExam() {
         <SelectGroup>
           <SelectLabel>Daftar soal ujian</SelectLabel>
           {codeGroupsExams.map((group) => (
-            <SelectItem key={group.id} value={group.id.toString()}>
+            <SelectItem key={group.id} value={group.id}>
               <span>
                 {group.groupName}{" "}
                 <span className="text-muted-foreground">#{group.id}</span>

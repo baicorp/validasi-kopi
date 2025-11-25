@@ -52,7 +52,7 @@ export default function SelectDepartment({
         <SelectGroup>
           <SelectLabel>Daftar departemen</SelectLabel>
           {departmentData.map((department) => (
-            <SelectItem key={department.id} value={department.id.toString()}>
+            <SelectItem key={department.id} value={department.id}>
               {department.departmentName}
             </SelectItem>
           ))}
