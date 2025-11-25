@@ -113,7 +113,36 @@ export async function submitExam(
         note: data.note ? data.note : "",
       }));
 
-      const normalizedPairs = submittedExamData.map((data) => ({
+      // 7. if selectedExam include skoring, we have to provide additional code value pairs
+      const skoringMap: Record<string, string> = {
+        "1.5": "5",
+        "2": "4",
+        "4": "2",
+        "5": "1.5",
+      };
+
+      const additionalSkoringData: Answer[] = [];
+
+      for (const data of submittedExamData) {
+        if (data.examName !== "skoring") continue;
+
+        const newValue = skoringMap[data.value];
+        if (!newValue) continue;
+
+        additionalSkoringData.push({
+          ...data,
+          value: newValue,
+          code: data.code,
+        });
+      }
+
+      // this submittedExamDataForDbLookUp is only use for database look up
+      const submittedExamDataForDbLookUp = [
+        ...submittedExamData,
+        ...additionalSkoringData,
+      ];
+
+      const normalizedPairs = submittedExamDataForDbLookUp.map((data) => ({
         examName: data.examName.toLowerCase(),
         code: data.code.toLowerCase(),
       }));
