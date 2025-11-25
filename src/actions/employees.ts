@@ -34,8 +34,8 @@ export async function addEmployee(formData: FormData) {
         data: {
           username: nik,
           position,
-          departmentId: Number(department),
-          plantAreaId: Number(plantArea),
+          departmentId: department,
+          plantAreaId: plantArea,
         },
       },
     });
