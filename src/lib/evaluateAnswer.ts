@@ -132,30 +132,72 @@ function evaluateSkoring(
   const userList = userAnswers.filter((a) => a.examName === examNameTarget);
   const dbList = dbAnswers.filter((a) => a.examName === examNameTarget);
 
-  // FIXME : this implementation is not quite right yet
-  // Mapping rules in a single object for clarity
-  const equivalents: Record<string, string[]> = {
-    "1.5": ["1.5", "5"],
-    "5": ["1.5", "5"],
-    "2": ["2", "4"],
-    "4": ["2", "4"],
-    "3": ["3"],
-  };
-
-  const answerResults: AnswerWithResult[] = userList.map((user) => {
-    const acceptedValues = equivalents[user.value] ?? [];
-
-    const isCorrect = dbList.some((correct) => {
-      const nameMatch =
-        correct.examName.toLowerCase() === user.examName.toLowerCase();
-      const codeMatch = correct.code === user.code;
-      const valueMatch = acceptedValues.includes(correct.value);
-
-      return nameMatch && codeMatch && valueMatch;
-    });
-
-    return { ...user, result: isCorrect ? "correct" : "wrong" };
+  const valueOrder = ["1.5", "2", "3", "4", "5"];
+  // create 2D array.
+  // [ '1.5', '1223' ],
+  // [ '2', '1136' ],
+  // [ '3', '8189' ],
+  // [ '4', '7557' ],
+  // [ '5', '9105' ]
+  const answerKeyAsc = valueOrder.map((value) => {
+    const found = dbList.find((data) => data.value == value);
+    return [value, (found && found.code) || ""];
   });
+  const answerKeyDesc = answerKeyAsc.toReversed();
+
+  const answerResultsAsc: AnswerWithResult[] = [];
+  const answerResultsDesc: AnswerWithResult[] = [];
+
+  let totalCorrectAsc = 0;
+  let totalWrongAsc = 0;
+  let totalCorrectDesc = 0;
+  let totalWrongDesc = 0;
+
+  for (let i = 0; i < userList.length; i++) {
+    const code = userList[i].code;
+    if (code === "") {
+      answerResultsAsc.push({ ...userList[i], result: "wrong" });
+      answerResultsDesc.push({ ...userList[i], result: "wrong" });
+
+      totalWrongAsc++;
+      totalWrongDesc++;
+      continue;
+    }
+
+    if (code === answerKeyAsc[i][1]) {
+      answerResultsAsc.push({ ...userList[i], result: "correct" });
+      totalCorrectAsc++;
+    } else {
+      answerResultsAsc.push({ ...userList[i], result: "wrong" });
+      totalWrongAsc++;
+    }
+
+    if (code === answerKeyDesc[i][1]) {
+      totalCorrectDesc++;
+      answerResultsDesc.push({ ...userList[i], result: "correct" });
+    } else {
+      answerResultsDesc.push({ ...userList[i], result: "wrong" });
+      totalWrongDesc++;
+    }
+  }
+
+  let answerResults: AnswerWithResult[] = [];
+  let totalCorrect = 0;
+  let totalWrong = 0;
+
+  if (totalCorrectAsc === totalCorrectDesc) {
+    answerResults = answerResultsAsc;
+    totalCorrect = totalCorrectAsc;
+    totalWrong = totalWrongAsc;
+  } else if (totalCorrectAsc > totalCorrectDesc) {
+    answerResults = answerResultsAsc;
+    totalCorrect = totalCorrectAsc;
+    totalWrong = totalWrongAsc;
+  } else {
+    answerResults = answerResultsDesc;
+    totalCorrect = totalCorrectDesc;
+    totalWrong = totalWrongDesc;
+  }
 
   const note = answerResults[0].note;
   if (!note) {
@@ -163,10 +205,8 @@ function evaluateSkoring(
   }
   const attemptNumber = userAnswers[0].attemptNumber;
   const codeScore = 20;
-  const totalCorrectCode = answerResults.filter(
-    (data) => data.result === "correct",
-  ).length;
-  const grade = totalCorrectCode * codeScore;
+  const grade = totalCorrect * codeScore;
+  console.log("skoring : ", attemptNumber);
 
   return {
     examName: examNameTarget,
@@ -174,7 +214,7 @@ function evaluateSkoring(
     grade: calculateFinalGrade({
       attemptNumber,
       grade,
-      totalWrongCode: answerResults.length - totalCorrectCode,
+      totalWrongCode: totalWrong,
     }),
     note,
   };
