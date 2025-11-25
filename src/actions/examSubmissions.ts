@@ -145,12 +145,15 @@ export async function submitExam(
       const normalizedPairs = submittedExamDataForDbLookUp.map((data) => ({
         examName: data.examName.toLowerCase(),
         code: data.code.toLowerCase(),
+        value: data.value.toLowerCase(),
       }));
 
+      // FIXME: this database lookup is not 100% valid for thresholdMix lookup
       const orConditions = normalizedPairs.map((pair) =>
         and(
           eq(sql`lower(${exams.examName})`, pair.examName),
           eq(sql`lower(${codes.code})`, pair.code),
+          eq(sql`lower(${codes.value})`, pair.value),
         ),
       );
 
