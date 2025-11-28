@@ -66,19 +66,6 @@ export default function EmployeeForm({
         <Label htmlFor="employee-plant-area">Area Pabrik</Label>
         <SelectPlantArea defaultValue={plantAreaId} />
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="employee-password" className="text-muted-foreground">
-          Kata sandi
-        </Label>
-        <Input
-          placeholder="Default password : supersecure"
-          readOnly
-          disabled
-          id="employee-password"
-          name="employee-password"
-          required
-        />
-      </div>
       <Button type="submit" disabled={isLoad} className="ml-auto">
         {username ? "Simpan perubahan" : "Tambahkan karyawan"}
         {isLoad && <LoaderCircle className="animate-spin" />}
