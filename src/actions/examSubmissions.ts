@@ -113,7 +113,15 @@ export async function submitExam(
         note: data.note ? data.note : "",
       }));
 
-      // 7. if selectedExam include skoring, we have to provide additional code value pairs
+      // 7. ensure all codes and product names across exam sections are unique
+      const allInputIsUnique = haveSameValue(submittedExamData);
+      if (!allInputIsUnique) {
+        throw Error(
+          "Kode atau nama produk yang dimasukkan tidak boleh ada duplikasi.",
+        );
+      }
+
+      // 8. if selectedExam include skoring, we have to provide additional code value pairs
       const skoringMap: Record<string, string> = {
         "1.5": "5",
         "2": "4",
@@ -168,12 +176,12 @@ export async function submitExam(
         .leftJoin(exams, eq(codes.examId, exams.id))
         .where(and(eq(codes.codeGroupId, codeGroupId), or(...orConditions)));
 
-      // 8. evaluate answer list by comparing userAnswerList and dbAnswerList.
+      // 9. evaluate answer list by comparing userAnswerList and dbAnswerList.
       // then give result either "correct" | "partial" | "wrong"
       // @ts-expect-error correct answer actually work (null and undefined)
       const results = evaluateAnswers(submittedExamData, dbAnswerList);
 
-      // 9. insert submissionAttempts data and submissionNote if available;
+      // 10. insert submissionAttempts data and submissionNote if available;
       const submissionNoteData: InferInsertModel<typeof examSubmissionNotes>[] =
         [];
       const submissionAttemptsInsertValues: InferInsertModel<
@@ -206,7 +214,7 @@ export async function submitExam(
 
       await tx.insert(examSubmissionNotes).values(submissionNoteData);
 
-      // 10. get submissionAttempts inserted rows data
+      // 11. get submissionAttempts inserted rows data
       const insertedRows = await tx
         .select({
           id: submissionAttempts.id,
@@ -220,7 +228,7 @@ export async function submitExam(
           ),
         );
 
-      // 11. insert examSubmissions data
+      // 12. insert examSubmissions data
       const attemptMap = new Map<string, string>();
       for (const row of insertedRows) {
         attemptMap.set(row.examId, row.id);
@@ -698,4 +706,37 @@ function calculateExamResultsWithCompletionCheck(
   }
 
   return resultsWithCalculations;
+}
+
+function haveSameValue(answers: Answer[]) {
+  if (answers.length === 0) {
+    throw Error("Semua input form harus diisi.");
+  }
+  const uniqueCode = new Set<string>();
+  const uniqueProductName = new Set<string>();
+
+  for (const obj of answers) {
+    const isIdentifikasi = obj.examName === "identifikasi";
+    const isTwoOutOfFive = obj.examName.includes("2 out of 5");
+
+    if (isIdentifikasi || isTwoOutOfFive) {
+      const productValue =
+        (isIdentifikasi ? obj.value : obj.additionalValue) ?? "";
+
+      uniqueProductName.add(productValue);
+    }
+
+    uniqueCode.add(obj.code);
+  }
+
+  const totalCodeCount = answers.length;
+  const totalProductNameCount = answers.filter(
+    (a) => a.examName === "identifikasi" || a.examName.includes("2 out of 5"),
+  ).length;
+
+  const allCodesUnique = uniqueCode.size === totalCodeCount;
+  const allProductNamesUnique =
+    uniqueProductName.size === totalProductNameCount;
+
+  return allCodesUnique && allProductNamesUnique;
 }
