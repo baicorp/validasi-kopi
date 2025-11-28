@@ -6,6 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "rm -f ./node_modules/@libsql/hrana-client/LICENSE && next build --turbopack",
     "start": "next start",
+    "db:studio:dev": "bunx drizzle-kit studio --config=drizzle-dev.config.ts",
+    "db:generate:dev": "bunx drizzle-kit generate --config=drizzle-dev.config.ts",
+    "db:migrate:dev": "bunx drizzle-kit migrate --config=drizzle-dev.config.ts",
     "lint": "eslint"
   },
   "dependencies": {
