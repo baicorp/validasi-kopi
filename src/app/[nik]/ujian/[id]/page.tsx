@@ -311,7 +311,17 @@ function TriangleForm() {
       </Callout>
       <div className="grid grid-cols-3 gap-2">
         {values.map((value, index) => (
-          <GenericInput key={index} examName="triangle" value={value} />
+          <div
+            key={index}
+            className="p-2 border shadow-sm rounded-lg space-y-2"
+          >
+            <p className="font-medium text-center">{value}</p>
+            <Input
+              type="number"
+              name={`triangle-${value}-${index}-code`}
+              placeholder="Kode"
+            />
+          </div>
         ))}
       </div>
       <div className="mt-4">

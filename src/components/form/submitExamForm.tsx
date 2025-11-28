@@ -102,8 +102,8 @@ function getTriangleInput(formData: FormData) {
   const userAnswer: Answer[] = [];
   const note = formData.get(`${examName}-note`) as string;
 
-  inputValues.forEach((value) => {
-    const code = formData.get(`${examName}-${value}`) as string;
+  inputValues.forEach((value, index) => {
+    const code = formData.get(`${examName}-${value}-${index}-code`) as string;
     userAnswer.push({ examName, code, value, note });
   });
 
