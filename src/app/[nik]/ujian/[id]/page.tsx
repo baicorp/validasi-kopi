@@ -269,7 +269,11 @@ function IdentifikasiForm({ examEventId }: { examEventId: string }) {
         <p>
           Di hadapan Anda terdapat 5 sampel. Cicipi sampel secara beruntun.
           Identifikasi <span className="font-bold">masing-masing sampel</span>{" "}
-          dengan memilih <span className="font-bold">nama sampelnya</span>.
+          dengan memilih{" "}
+          <span className="font-bold">
+            nama sampelnya. DILARANG MENULISKAN PRODUK YANG SAMA
+          </span>
+          .
         </p>
       </Callout>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
@@ -376,10 +380,12 @@ function GenericInput({
 function InputNote({ examName }: { examName: string }) {
   return (
     <div className="space-y-2">
-      <Label className="ml-1">Keterangan</Label>
+      <Label className="ml-1">
+        {examName === "triangle" ? "Alasan berbeda" : "Keterangan"}
+      </Label>
       <Textarea
         name={`${examName}-note`}
-        placeholder="Masukkan Keterangan jawaban (wajib di isi)"
+        placeholder={`Masukkan ${examName === "triangle" ? "Alasan berbeda" : "Keterangan jawaban"} (wajib di isi)`}
         required
       />
     </div>
