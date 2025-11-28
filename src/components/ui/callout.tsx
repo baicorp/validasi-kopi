@@ -13,7 +13,7 @@ export default function Callout({
       )}
       {...props}
     >
-      <Info />
+      <Info className="basis-4 shrink-0" />
       {props.children}
     </div>
   );
