@@ -25,11 +25,15 @@ export async function addEmployee(formData: FormData) {
       return { error: "401 : Anda tidak memiliki izin." };
     }
 
+    if (!process.env.USER_DEFAULT_PASSWORD) {
+      return { error: "Tidak dapat membaca user default password." };
+    }
+
     const newEmployee = await auth.api.createUser({
       body: {
         name,
         email: `${nik}@mail.com`,
-        password: "supersecure", // so all user have default password supersecure
+        password: process.env.USER_DEFAULT_PASSWORD!,
         role: "user",
         data: {
           username: nik,
