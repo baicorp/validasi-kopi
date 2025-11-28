@@ -1,15 +1,24 @@
 "use client";
 
-import { FormEvent, ReactNode, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
+import { toast } from "sonner";
+import { Answer } from "@/lib/types";
 import { Button } from "../ui/button";
 import { LoaderCircle } from "lucide-react";
-import { submitExam } from "@/actions/examSubmissions";
+import { FormEvent, ReactNode, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Answer } from "@/lib/types";
-import { toast } from "sonner";
+import { submitExam } from "@/actions/examSubmissions";
 
 export default function SubmitExamForm({ children }: { children: ReactNode }) {
   const [isLoad, setIsLoad] = useState(false);
+  const [open, setOpen] = useState(false);
   const { id, nik } = useParams<{ id: string; nik: string }>();
   const router = useRouter();
 
@@ -24,27 +33,59 @@ export default function SubmitExamForm({ children }: { children: ReactNode }) {
     const result = await submitExam(submitData, id);
     if ("error" in result) {
       toast.error(result.error);
+      setOpen(false);
       setIsLoad(false);
       return;
     }
-    setIsLoad(false);
     router.push(`/${nik}/hasil/${result.examEventId}`);
+    setOpen(false);
+    setIsLoad(false);
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form id="exam-form" onSubmit={handleSubmit}>
       <div className="space-y-4">
         {children}
-        <Button type="submit" disabled={isLoad}>
-          {isLoad ? (
-            <>
-              <span>Mengumpulkan jawaban</span>
-              <LoaderCircle className="animate-spin mr-2" />
-            </>
-          ) : (
-            "Kumpulkan jawaban"
-          )}
-        </Button>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button>Kumpulkan jawaban</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                Apakah Anda yakin ingin mengumpulkan semua jawaban?
+              </DialogTitle>
+              <DialogDescription>
+                Setelah dikumpulkan, Anda tidak dapat mengubah jawaban.
+                Lanjutkan?
+              </DialogDescription>
+              <div className="flex gap-2 mt-4">
+                <Button
+                  variant={"outline"}
+                  className="grow"
+                  onClick={() => setOpen(false)}
+                >
+                  Batalkan
+                </Button>
+                <Button
+                  form="exam-form"
+                  type="submit"
+                  disabled={isLoad}
+                  className="grow"
+                >
+                  {isLoad ? (
+                    <>
+                      <span>Mengumpulkan jawaban</span>
+                      <LoaderCircle className="animate-spin mr-2" />
+                    </>
+                  ) : (
+                    "Kumpulkan jawaban"
+                  )}
+                </Button>
+              </div>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
       </div>
     </form>
   );
