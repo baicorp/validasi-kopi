@@ -11,7 +11,7 @@ export default function SelectTaste({ inputName }: { inputName: string }) {
   const taste = ["asam", "asin", "manis", "pahit", "tidak berasa"];
 
   return (
-    <Select name={inputName}>
+    <Select name={inputName} required>
       <SelectTrigger className="w-full">
         <SelectValue placeholder="Pilih Rasa" />
       </SelectTrigger>

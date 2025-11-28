@@ -51,7 +51,7 @@ export default function SelectProductName({
   }
 
   return (
-    <Select name={inputName}>
+    <Select name={inputName} required>
       <SelectTrigger className="w-full">
         <SelectValue placeholder="Pilih nama produk" />
       </SelectTrigger>

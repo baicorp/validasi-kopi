@@ -11,7 +11,7 @@ export default function SelectIntensity({ inputName }: { inputName: string }) {
   const intensity = ["1", "2", "3"];
 
   return (
-    <Select name={inputName}>
+    <Select name={inputName} required>
       <SelectTrigger className="w-full">
         <SelectValue placeholder="Pilih Intensitas" />
       </SelectTrigger>

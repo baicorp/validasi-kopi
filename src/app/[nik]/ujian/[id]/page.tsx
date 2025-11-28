@@ -172,6 +172,7 @@ function TwoOutOfFive({
               type="number"
               name={`${examName}-${value}-${index}-code`}
               placeholder="Kode"
+              required
             />
             <SelectProductName
               inputName={`${examName}-${value}-${index}-addValue`}
@@ -215,6 +216,7 @@ function TresholdSingleForm() {
               type="number"
               name={`treshold single-${numb}-code`}
               placeholder="Kode"
+              required
             />
             <SelectTaste inputName={`treshold single-${numb}-value`} />
             <SelectIntensity inputName={`treshold single-${numb}-addValue`} />
@@ -250,6 +252,7 @@ function TresholdMixForm() {
               type="number"
               placeholder="Kode"
               name={`treshold mix-${numb}-code`}
+              required
             />
             <SelectTasteInten inputName={`treshold mix-${numb}-value`} />
             <SelectTasteInten inputName={`treshold mix-${numb}-addValue`} />
@@ -286,6 +289,7 @@ function IdentifikasiForm({ examEventId }: { examEventId: string }) {
               type="number"
               name={`identifikasi-${numb}-code`}
               placeholder="Kode"
+              required
             />
             <SelectProductName
               inputName={`identifikasi-${numb}-value`}
@@ -324,6 +328,7 @@ function TriangleForm() {
               type="number"
               name={`triangle-${value}-${index}-code`}
               placeholder="Kode"
+              required
             />
           </div>
         ))}
@@ -372,7 +377,12 @@ function GenericInput({
   return (
     <div className="bg-card text-card-foreground shadow-sm border rounded-lg p-1 flex flex-col justify-between">
       <p className="p-2 font-medium text-center">{value}</p>
-      <Input type="number" name={`${examName}-${value}`} placeholder="kode" />
+      <Input
+        type="number"
+        name={`${examName}-${value}`}
+        placeholder="kode"
+        required
+      />
     </div>
   );
 }

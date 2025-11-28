@@ -12,7 +12,7 @@ export default function SelectTasteInten({ inputName }: { inputName: string }) {
   const data = [...listTresholdSingleValue];
 
   return (
-    <Select name={inputName}>
+    <Select name={inputName} required>
       <SelectTrigger className="w-full">
         <SelectValue placeholder="Pilih Rasa" />
       </SelectTrigger>
