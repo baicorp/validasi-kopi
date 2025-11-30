@@ -1,5 +1,6 @@
 "use client";
 
+import useSWR from "swr";
 import { toast } from "sonner";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -9,21 +10,30 @@ import { authClient } from "@/lib/authClient";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
+export async function validateSessionClient() {
+  return await authClient.getSession();
+}
+
 export default function Page() {
   const [isLoad, setIsLoad] = useState(false);
   const router = useRouter();
+
+  const { data } = useSWR("session", validateSessionClient);
+  if (data?.data?.session) {
+    router.replace("/dasrboard/produk");
+  }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsLoad(true);
 
     const formData = new FormData(e.currentTarget);
-    const username = formData.get("username") as string;
-    const password = formData.get("password") as string;
+    const username = (formData.get("username") as string).trim();
+    const password = (formData.get("password") as string).trim();
 
     if (!username.trim() || !password.trim()) {
       setIsLoad(false);
-      toast.error("Username atau password tidak boleh kosong.");
+      toast.error("Nomor induk karyawan dan kata sandi tidak boleh kosong.");
       return;
     }
 
@@ -34,11 +44,11 @@ export default function Page() {
       });
 
       if (error) {
-        toast.error("Username atau password salah.");
+        toast.error("Nomor induk karyawan atau kata sandi salah.");
         return;
       }
 
-      router.replace("/dashboard/produk");
+      router.replace("/");
     } catch (e) {
       if (e instanceof Error) {
         toast.error(e.message);
@@ -61,11 +71,11 @@ export default function Page() {
         <form onSubmit={handleSubmit}>
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">Nomor Induk Karyawan</Label>
               <Input id="username" name="username" />
             </div>
             <div className="flex flex-col gap-1">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Kata sandi</Label>
               <Input id="password" name="password" type="password" />
             </div>
             <Button type="submit" disabled={isLoad}>
