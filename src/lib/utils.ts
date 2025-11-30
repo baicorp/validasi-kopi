@@ -1,120 +1,63 @@
-import { clsx, type ClassValue } from "clsx";
+import { RawExamsData } from "./types";
 import { twMerge } from "tailwind-merge";
-import {
-  SoalUjiClientStructure,
-  SoalUjiDBStructureInsert,
-  SoalUjiDBStructureRead,
-} from "./types";
+import { clsx, type ClassValue } from "clsx";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatArrKeTJ(listKode: string[]): string[][] {
+export function formatArrToTJ(listKode: string[]): string[][] {
   const jumlahKodePerBaris = 15;
   const listKodeTerformat = [];
   for (let i = 0; i < listKode.length; i += jumlahKodePerBaris) {
     listKodeTerformat.push(listKode.slice(i, i + jumlahKodePerBaris));
   }
-  // ex [[1,2,4,5,6,7,8,9,10,11,12,13,14,15], [...]]. setiap baris 15 kode.
+  // ex: [[1,2,4,5,6,7,8,9,10,11,12,13,14,15], [...]]. each row 15 code.
   return listKodeTerformat;
 }
 
-export function formatToDB(
-  sessionName: string, // biar jelas session_name bisa dikasih parameter
-  data: SoalUjiClientStructure[],
-): SoalUjiDBStructureInsert[] {
-  const sessionUuid = crypto.randomUUID(); // sama untuk semua data
-  const results: SoalUjiDBStructureInsert[] = [];
+export function formatRawExamsData(rows: RawExamsData[]) {
+  // 1. group rows by examName
+  const groupedByExam = Object.groupBy(rows, (item) => item.examName);
 
-  // for (const { tipeUjian, soal } of arrFlatStructure) {
-  for (const { tipeUjian, soal } of data) {
-    const namaUjianId = getIdJenisUjianFromUjianName(tipeUjian);
-    for (const record of soal) {
-      for (const key in record) {
-        const kodeList = record[key].flat(); // buat array 2D jadi 1D
-        for (const kode of kodeList) {
-          results.push({
-            kode,
-            nilai: key,
-            sessionUuid,
-            sessionName: sessionName,
-            namaUjianId,
-          });
-        }
-      }
-    }
-  }
+  const formatedRows = Object.entries(groupedByExam).map(
+    ([examName, group]) => {
+      // 2. group groupedByExam by value
+      const groupedByValueAndAdditionalValue = Object.groupBy(
+        group!,
+        (item) =>
+          item.value +
+          (item.additionalValue ? " & " + item.additionalValue : ""),
+      );
 
-  return results;
-}
+      // 3. get each value with its list of codes
+      const codeValue = Object.entries(groupedByValueAndAdditionalValue).map(
+        ([valueKey, items]) => ({
+          [valueKey]: formatArrToTJ(items!.map((item) => item.code)),
+        }),
+      );
 
-// IMPORTANT!!: cocokkan di database
-function getIdJenisUjianFromUjianName(namaUjian: string): number {
-  switch (namaUjian.toLowerCase()) {
-    case "2 out of 5 campuran kopi":
-      return 1; // id 2 out of 5 campuran kopi
-    case "2 out of 5 kopi pure":
-      return 7; // id 2 out of 5 kopi pure
-    case "treshold single":
-      return 3; // id treshold single
-    case "treshold mix":
-      return 4; // id treshold mix
-    case "identifikasi":
-      return 2; // id identifikasi
-    case "triangle":
-      return 5; // id triangle
-    case "skoring":
-      return 6; // id skoring
-    default:
-      return 0; // return 0 jika nama ujian tidak cocok
-  }
-}
-
-// Fungsi transformasi
-export function transformDataFromDB(
-  data: SoalUjiDBStructureRead[],
-): SoalUjiClientStructure[] {
-  // group by namaUjian
-  const grouped: Record<string, { [nilai: string]: string[] }> = {};
-
-  for (const row of data) {
-    const { namaUjian, nilai, kode } = row;
-
-    if (!grouped[namaUjian]) {
-      grouped[namaUjian] = {};
-    }
-
-    if (!grouped[namaUjian][nilai]) {
-      grouped[namaUjian][nilai] = [];
-    }
-
-    grouped[namaUjian][nilai].push(kode);
-  }
-
-  // transform ke bentuk output
-  return Object.entries(grouped).map(([namaUjian, soalMap]) => {
-    const soalFormatted: Record<string, string[][]>[] = [];
-
-    for (const nilaiKey in soalMap) {
-      const kode2D = formatArrKeTJ(soalMap[nilaiKey]);
-      soalFormatted.push({ [nilaiKey]: kode2D });
-    }
-
-    // hitung total kode
-    const totalKode = Object.values(soalMap).reduce(
-      (sum, arr) => sum + arr.length,
-      0,
-    );
-
-    return {
-      tipeUjian: namaUjian,
-      soal: soalFormatted.sort((a, b) =>
+      // sort based on code value
+      codeValue.sort((a, b) =>
         Object.keys(a)[0].localeCompare(Object.keys(b)[0]),
-      ),
-      totalKode,
-    };
-  });
+      );
+
+      return { examName, codeValue };
+    },
+  );
+
+  return formatedRows;
+}
+
+export function getExamsId(
+  examName: string,
+  exams: { id: string; examName: string }[],
+): string | undefined {
+  for (const exam of exams) {
+    if (exam.examName.toLowerCase() === examName.toLowerCase()) return exam.id;
+  }
+
+  return undefined;
 }
 
 export function toTitleCase(str: string) {
@@ -125,51 +68,65 @@ export function toTitleCase(str: string) {
     .join(" ");
 }
 
-// helper untuk pisah rasa + intensitas
 function parseSingle(val: string) {
-  const [rasa, intensitas] = val.split(" ");
-  return { rasa, intensitas };
+  const [taste, intensity] = val.split(" ");
+  return { taste, intensity };
 }
 
-// helper untuk pisah rasa mix
 function parseMix(val: string) {
   return val.split("+").map((v) => v.trim());
 }
 
-// HARDENING: tambahkan arg "inputNamaUjian" untuk memastika
-// pengecekan reliable ketika ada nilai kode sama pada
-// nama ujian yang berbeda. Kode akan terikat dengan inputNamaUjian
-// yang diberikan.
 export function codeCheck(
-  inputKode: string,
-  inputNilai: string,
-  listDataKunci: SoalUjiDBStructureRead[],
+  inputCode: string,
+  inputValue: string,
+  rowsData: RawExamsData[],
 ) {
-  const kunci = listDataKunci.find((d) => d.kode === inputKode);
-  if (!kunci) return "salah"; // kode tidak ada di kunci
+  const examData = rowsData.find((d) => d.code === inputCode);
+  if (!examData) return "wrong"; // code not found in given value
 
-  const jenis = kunci.namaUjian.toLowerCase();
-  const nilaiBenar = kunci.nilai;
+  const examName = examData.examName.toLowerCase();
+  const examValue = examData.value;
 
-  if (jenis === "treshold single") {
-    const { rasa: rasaInput, intensitas: intenInput } = parseSingle(inputNilai);
-    const { rasa: rasaBenar, intensitas: intenBenar } = parseSingle(nilaiBenar);
+  if (examName === "treshold single") {
+    const { taste: valueFromInput, intensity: intenFromInput } =
+      parseSingle(inputValue);
+    const { taste: correctValue, intensity: correctInten } =
+      parseSingle(examValue);
 
-    if (rasaInput === rasaBenar && intenInput === intenBenar) return "benar";
-    if (rasaInput === rasaBenar) return "salah-sebagian";
-    return "salah";
+    // value and intensity is match
+    if (valueFromInput === correctValue && intenFromInput === correctInten) {
+      return "correct";
+    }
+    // only value is match
+    if (valueFromInput === correctValue) {
+      return "partially-wrong";
+    }
+
+    return "wrong";
   }
 
-  if (jenis === "treshold mix") {
-    const inputRasa = parseMix(inputNilai);
-    const kunciRasa = parseMix(nilaiBenar);
+  if (examName === "treshold mix") {
+    const tasteInput = parseMix(inputValue);
+    const tasteValue = parseMix(examValue);
 
-    const cocok = inputRasa.filter((r) => kunciRasa.includes(r)).length;
+    const match = tasteInput.filter((taste) =>
+      tasteValue.includes(taste),
+    ).length;
 
-    if (cocok === 2) return "benar";
-    if (cocok === 1) return "salah-sebagian";
-    return "salah";
+    if (match === 2) return "correct";
+    if (match === 1) return "partially-wrong";
+    return "wrong";
   }
 
-  return inputNilai === nilaiBenar ? "benar" : "salah";
+  return inputValue === examValue ? "correct" : "wrong";
+}
+
+export function shuffle<T>(array: T[]): T[] {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j: number = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+
+  return array;
 }
