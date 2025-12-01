@@ -212,9 +212,15 @@ export async function submitExam(
         .insert(submissionAttempts)
         .values(submissionAttemptsInsertValues);
 
-      await tx.insert(examSubmissionNotes).values(submissionNoteData);
+      // 11. insert notes only if relevant exams (skoring/triangle) are selected and notes exist.
+      const isNoteExam = ["skoring", "triangle"].some((exam) =>
+        selectedExam.includes(exam),
+      );
+      if (isNoteExam && submissionNoteData.length > 0) {
+        await tx.insert(examSubmissionNotes).values(submissionNoteData);
+      }
 
-      // 11. get submissionAttempts inserted rows data
+      // 12. get submissionAttempts inserted rows data
       const insertedRows = await tx
         .select({
           id: submissionAttempts.id,
@@ -228,7 +234,7 @@ export async function submitExam(
           ),
         );
 
-      // 12. insert examSubmissions data
+      // 13. insert examSubmissions data
       const attemptMap = new Map<string, string>();
       for (const row of insertedRows) {
         attemptMap.set(row.examId, row.id);
