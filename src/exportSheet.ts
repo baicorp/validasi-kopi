@@ -17,6 +17,14 @@ export function export_data(
         aoa.push([key]);
         const listKode = value[key];
         for (const arrKode of listKode) {
+          // Insert blank at index 5 (requires length >= 6)
+          if (arrKode.length >= 6) {
+            arrKode.splice(5, 0, "");
+          }
+          // we need to add blank if length >=12 (11 + 1)
+          if (arrKode.length >= 12) {
+            arrKode.splice(11, 0, "");
+          }
           aoa.push(arrKode);
         }
       });
