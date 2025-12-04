@@ -512,7 +512,8 @@ export async function getSubmissionAttemptSummary(examEventId: string) {
       .leftJoin(exams, eq(submissionAttempts.examId, exams.id))
       .where(eq(submissionAttempts.examEventId, examEventId));
 
-    const groupName = normalizeExamSubmissions(rows, selectedExams);
+    const groupName =
+      rows.length !== 0 ? normalizeExamSubmissions(rows, selectedExams) : [];
 
     return { selectedExams, rowData: groupName };
   } catch (error) {
