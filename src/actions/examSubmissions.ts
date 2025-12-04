@@ -668,11 +668,14 @@ function calculateExamResultsWithCompletionCheck(
 
     const totalExam = gradeGroupByExamNameKeys.length;
     // only calculate averageGrade and result if the number of final grades matches the total number of exams
-    if (finalGrade.length === totalExam) {
-      const averageGrade =
-        finalGrade.reduce((acc, n) => acc + n, 0) / totalExam;
-      item["averageGrade"] = averageGrade;
-      item["result"] = averageGrade >= 70 ? "LULUS" : "TIDAK LULUS";
+    // totalExam > 0 => prevent division by 0 error
+    if (finalGrade.length === totalExam && totalExam > 0) {
+      const averageGrade = (
+        finalGrade.reduce((acc, n) => acc + n, 0) / totalExam
+      ).toFixed(2);
+      const averageGradeNumber = parseFloat(averageGrade);
+      item["averageGrade"] = averageGradeNumber;
+      item["result"] = averageGradeNumber >= 70 ? "LULUS" : "TIDAK LULUS";
     } else {
       item["averageGrade"] = null;
       item["result"] = null;
