@@ -615,98 +615,68 @@ function normalizeExamSubmissions(
   // 4. Convert the Map values back to an array
   const results = Array.from(normalizedDataMap.values());
 
-  return calculateExamResultsWithCompletionCheck(results, examTypes);
+  return calculateExamResultsWithCompletionCheck(results);
 }
 
 function calculateExamResultsWithCompletionCheck(
   normalizedData: NormalizedExamData[],
-  examTypes: string[],
 ): NormalizedExamData[] {
-  const PASSING_THRESHOLD = 70;
   const NUM_ATTEMPTS = 4;
 
   const resultsWithCalculations: NormalizedExamData[] = [];
 
+  // extract exam grade keys that contain "_", all grade data in examName_numberAttempt. ex: identifikasi_1
+  const examGradeKeys = Object.keys(normalizedData[0]).filter((key) =>
+    key.includes("_"),
+  );
   for (const item of normalizedData) {
-    const sumOfBestGrades = 0;
-    let bestGradeMetCount = 0; // Counts exams where best grade >= 70
-    let maxAttemptsMetCount = 0; // Counts exams where 4 attempts were made
+    // group grades by exam name (ex: identifikasi_1 → identifikasi)
+    const finalGrade: number[] = [];
+    const gradeGroupByExamName: Record<string, (number | null)[]> = {};
 
-    // Storage for the best grade found for each exam to calculate the average later
-    const bestGrades: (number | null)[] = [];
+    for (const key of examGradeKeys) {
+      const [examKey] = key.split("_");
 
-    // 1. Check Completion Criteria
-    for (const examType of examTypes) {
-      let bestGradeForExam: number | null = null;
-      let attemptCount = 0;
-
-      // Find the best grade and total attempts across the 4 slots
-      for (let i = 1; i <= NUM_ATTEMPTS; i++) {
-        const key = `${examType}_${i}`;
-        const currentGrade = item[key] as number | null;
-
-        if (currentGrade !== null) {
-          attemptCount++;
-          // Find the best grade
-          if (bestGradeForExam === null || currentGrade > bestGradeForExam) {
-            bestGradeForExam = currentGrade;
-          }
-        }
+      const grade = item[key];
+      if (typeof grade === "string") {
+        throw Error("Tipe data `Nilai` tidak seharusnya string");
       }
 
-      // Store the best grade for calculation later, regardless of completion status
-      bestGrades.push(bestGradeForExam);
+      if (!gradeGroupByExamName[examKey]) {
+        gradeGroupByExamName[examKey] = [];
+      }
+      gradeGroupByExamName[examKey].push(grade);
+    }
 
-      // Check if the best grade meets the passing threshold (Criterion 1)
-      if (bestGradeForExam !== null && bestGradeForExam >= PASSING_THRESHOLD) {
-        bestGradeMetCount++;
+    const gradeGroupByExamNameKeys = Object.keys(gradeGroupByExamName);
+    for (const key of gradeGroupByExamNameKeys) {
+      const cleanGrade = gradeGroupByExamName[key].filter(
+        (grade) => grade !== null,
+      );
+
+      // if any attempt >= 70 → use last attempt
+      if (cleanGrade.some((grade) => grade >= 70)) {
+        finalGrade.push(cleanGrade[cleanGrade.length - 1]);
+        continue;
       }
 
-      // Check if max attempts were submitted (Criterion 2)
-      if (attemptCount === NUM_ATTEMPTS) {
-        maxAttemptsMetCount++;
+      // if no attempt ≥ 70 but all attempts were used → use the last attempt
+      if (cleanGrade.length === NUM_ATTEMPTS) {
+        finalGrade.push(cleanGrade[cleanGrade.length - 1]);
       }
     }
 
-    // 2. Determine if Completion State is reached
-    const hasPassedAll = bestGradeMetCount === examTypes.length;
-    const hasMaxedAttempts = maxAttemptsMetCount === examTypes.length;
-
-    // The calculation is performed ONLY if either condition is met
-    if (hasPassedAll || hasMaxedAttempts) {
-      // 3. Calculate Average Grade (using the best grade found for each exam)
-      let sumOfFinalGrades = 0;
-      let gradesUsedInAverage = 0;
-
-      for (const grade of bestGrades) {
-        if (grade !== null) {
-          sumOfFinalGrades += grade;
-          gradesUsedInAverage++;
-        }
-      }
-
-      let averageGradeValue = 0;
-      if (examTypes.length > 0) {
-        // The average is calculated based on the sum of the best grade for each exam
-        // divided by the total number of required exam types (which is 3).
-        averageGradeValue = sumOfFinalGrades / examTypes.length;
-      }
-
-      // 4. Set the calculated fields
-      item.averageGrade = averageGradeValue.toFixed(2);
-
-      if (averageGradeValue >= PASSING_THRESHOLD) {
-        item.result = "LULUS";
-      } else {
-        item.result = "TIDAK LULUS";
-      }
+    const totalExam = gradeGroupByExamNameKeys.length;
+    // only calculate averageGrade and result if the number of final grades matches the total number of exams
+    if (finalGrade.length === totalExam) {
+      const averageGrade =
+        finalGrade.reduce((acc, n) => acc + n, 0) / totalExam;
+      item["averageGrade"] = averageGrade;
+      item["result"] = averageGrade >= 70 ? "LULUS" : "TIDAK LULUS";
     } else {
-      item.averageGrade = null;
-      item.result = null;
+      item["averageGrade"] = null;
+      item["result"] = null;
     }
-    // 5. If the completion state is not met, the fields are naturally omitted or left as defaults
-    // depending on how the initial object was built. Since the prompt implies adding them,
-    // they will be missing here if the condition is false.
 
     resultsWithCalculations.push(item);
   }
