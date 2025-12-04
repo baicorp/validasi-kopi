@@ -72,11 +72,7 @@ function evaluateIdentification(
   return {
     examName: examNameTarget,
     answerResults,
-    grade: calculateFinalGrade({
-      attemptNumber,
-      grade,
-      totalWrongCode: answerResults.length - totalCorrectCode,
-    }),
+    grade: calculateFinalGrade(grade, attemptNumber),
   };
 }
 
@@ -113,12 +109,18 @@ function evaluateTriangle(
   // prevent errors when triangle is not part of the submission”
   const note = answerResults[0]?.note ?? "";
   const codeScore = 100;
+  const attemptNumber = userAnswers[0].attemptNumber;
   const grade =
     answerResults.filter(
       (data) => data.value === "beda" && data.result === "correct",
     ).length * codeScore;
 
-  return { examName: examNameTarget, answerResults, grade, note };
+  return {
+    examName: examNameTarget,
+    answerResults,
+    grade: calculateFinalGrade(grade, attemptNumber),
+    note,
+  };
 }
 
 function evaluateSkoring(
@@ -147,18 +149,13 @@ function evaluateSkoring(
   const answerResultsDesc: AnswerWithResult[] = [];
 
   let totalCorrectAsc = 0;
-  let totalWrongAsc = 0;
   let totalCorrectDesc = 0;
-  let totalWrongDesc = 0;
 
   for (let i = 0; i < userList.length; i++) {
     const code = userList[i].code;
     if (code === "") {
       answerResultsAsc.push({ ...userList[i], result: "wrong" });
       answerResultsDesc.push({ ...userList[i], result: "wrong" });
-
-      totalWrongAsc++;
-      totalWrongDesc++;
       continue;
     }
 
@@ -167,7 +164,6 @@ function evaluateSkoring(
       totalCorrectAsc++;
     } else {
       answerResultsAsc.push({ ...userList[i], result: "wrong" });
-      totalWrongAsc++;
     }
 
     if (code === answerKeyDesc[i][1]) {
@@ -175,26 +171,21 @@ function evaluateSkoring(
       answerResultsDesc.push({ ...userList[i], result: "correct" });
     } else {
       answerResultsDesc.push({ ...userList[i], result: "wrong" });
-      totalWrongDesc++;
     }
   }
 
   let answerResults: AnswerWithResult[] = [];
   let totalCorrect = 0;
-  let totalWrong = 0;
 
   if (totalCorrectAsc === totalCorrectDesc) {
     answerResults = answerResultsAsc;
     totalCorrect = totalCorrectAsc;
-    totalWrong = totalWrongAsc;
   } else if (totalCorrectAsc > totalCorrectDesc) {
     answerResults = answerResultsAsc;
     totalCorrect = totalCorrectAsc;
-    totalWrong = totalWrongAsc;
   } else {
     answerResults = answerResultsDesc;
     totalCorrect = totalCorrectDesc;
-    totalWrong = totalWrongDesc;
   }
 
   // prevent errors when skoring is not part of the submission
@@ -202,16 +193,11 @@ function evaluateSkoring(
   const attemptNumber = userAnswers[0].attemptNumber;
   const codeScore = 20;
   const grade = totalCorrect * codeScore;
-  console.log("skoring : ", attemptNumber);
 
   return {
     examName: examNameTarget,
     answerResults,
-    grade: calculateFinalGrade({
-      attemptNumber,
-      grade,
-      totalWrongCode: totalWrong,
-    }),
+    grade: calculateFinalGrade(grade, attemptNumber),
     note,
   };
 }
@@ -271,20 +257,12 @@ function evaluateTwoOutOfFive(
     {
       examName: "2 out of 5 creamer",
       answerResults: twoOutOfFiveCreamer,
-      grade: calculateFinalGrade({
-        attemptNumber,
-        grade: gradeCreamer,
-        totalWrongCode: twoOutOfFiveCreamer.length - totalCorrectCodeCreamer,
-      }),
+      grade: calculateFinalGrade(gradeCreamer, attemptNumber),
     },
     {
       examName: "2 out of 5 pure",
       answerResults: twoOutOfFivePure,
-      grade: calculateFinalGrade({
-        attemptNumber,
-        grade: gradePure,
-        totalWrongCode: twoOutOfFivePure.length - totalCorrectCodePure,
-      }),
+      grade: calculateFinalGrade(gradePure, attemptNumber),
     },
   ];
 }
@@ -345,11 +323,7 @@ function evaluateTresholdSingle(
   return {
     examName: examNameTarget,
     answerResults,
-    grade: calculateFinalGrade({
-      attemptNumber,
-      grade,
-      totalWrongCode: answerResults.length - totalCorrectOrPartialCode,
-    }),
+    grade: calculateFinalGrade(grade, attemptNumber),
   };
 }
 
@@ -429,23 +403,11 @@ function evaluateTresholdMix(
   return {
     examName: examNameTarget,
     answerResults,
-    grade: calculateFinalGrade({
-      attemptNumber,
-      grade,
-      totalWrongCode: answerResults.length - totalCorrectCode,
-    }),
+    grade: calculateFinalGrade(grade, attemptNumber),
   };
 }
 
-function calculateFinalGrade({
-  grade,
-  totalWrongCode,
-  attemptNumber,
-}: {
-  grade: number;
-  totalWrongCode: number;
-  attemptNumber: number | undefined;
-}) {
+function calculateFinalGrade(grade: number, attemptNumber: number | undefined) {
   if (!attemptNumber) {
     throw Error("Jawaban yang dikumpulkan tidak memiliki attempt number");
   }
@@ -465,6 +427,6 @@ function calculateFinalGrade({
       break;
   }
 
-  const finalGrade = grade - totalWrongCode * minusPoint;
+  const finalGrade = grade - minusPoint;
   return finalGrade < 0 ? 0 : finalGrade;
 }
