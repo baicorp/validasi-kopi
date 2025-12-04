@@ -674,8 +674,12 @@ function calculateExamResultsWithCompletionCheck(
         finalGrade.reduce((acc, n) => acc + n, 0) / totalExam
       ).toFixed(2);
       const averageGradeNumber = parseFloat(averageGrade);
-      item["averageGrade"] = averageGradeNumber;
-      item["result"] = averageGradeNumber >= 70 ? "LULUS" : "TIDAK LULUS";
+      item["averageGrade"] = finalGrade.every((grade) => grade >= 70)
+        ? averageGradeNumber
+        : 0;
+      item["result"] = finalGrade.every((grade) => grade >= 70)
+        ? "LULUS"
+        : "TIDAK LULUS";
     } else {
       item["averageGrade"] = null;
       item["result"] = null;
