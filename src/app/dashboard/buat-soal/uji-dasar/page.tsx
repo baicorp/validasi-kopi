@@ -1,169 +1,148 @@
 "use client";
 
+import useSWR from "swr";
 import { toast } from "sonner";
-import React, { useState } from "react";
+import { useState } from "react";
+import { toTitleCase } from "@/lib/utils";
+import { basicExam } from "@/lib/constant";
+import { useRouter } from "next/navigation";
+import { ExamDataDetails } from "@/lib/types";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { UjiDasar } from "@/lib/uji/codeGenerator";
 import { Checkbox } from "@/components/ui/checkbox";
-import DataViewer from "@/components/ui/dataViewer";
-import { SoalUjiClientStructure } from "@/lib/types";
-import PilihanTresholdMix from "@/components/ui/pilihanTM";
-import PilihanTresholdSingle from "@/components/ui/pilihanTS";
-import { toTitleCase } from "@/lib/utils";
+import ExamDetail from "@/components/ui/examDetail";
+import ExamsTable from "@/components/table/examsTable";
+import { CheckedState } from "@radix-ui/react-checkbox";
+import { generateExamCodes } from "@/lib/handleFormInput";
+import { validateSessionClient } from "@/app/sign-in/page";
+import OptionForTresholdMix from "@/components/ui/optioinForTM";
+import InputParticipants from "@/components/ui/inputParticipant";
+import OptionForTresholdSingle from "@/components/ui/optioinForTS";
 
 export default function Page() {
-  const [soalUjiDasar, setSoalUjiDasar] = useState<SoalUjiClientStructure[]>(
-    [],
-  );
+  // FIXME : find why always redirect to /dashboard/produk
+  // const router = useRouter();
+  // const { data } = useSWR("session", validateSessionClient);
+  // if (!data?.data?.session) {
+  //   router.replace("/sign-in");
+  // }
+  //
+  const [selectedExam, setSelectedExam] = useState<string[]>([]);
+  const [examDataDetails, setExamDataDetails] = useState<ExamDataDetails>();
 
-  function handleGenerateUjiDasar(e: React.FormEvent<HTMLFormElement>) {
+  function handleSelectedExamChange(e: CheckedState, examName: string) {
+    setExamDataDetails(undefined); // reset table data
+    if (e && !selectedExam.includes(examName)) {
+      setSelectedExam((prev) => [...prev, examName].sort());
+    } else if (!e) {
+      setSelectedExam((prev) => prev.filter((exam) => exam !== examName));
+    }
+  }
+
+  function handleGenerateCode(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
     const formData = new FormData(e.currentTarget);
+    const examDataDetails = generateExamCodes(formData, selectedExam);
 
-    const nilaiTwoOutOfFiveCampuranKopi = formData.getAll(
-      "two-out-of-five-campuran-kopi",
-    ) as string[];
-    const nilaiTwoOutOfFiveKopiPure = formData.getAll(
-      "two-out-of-five-kopi-pure",
-    ) as string[];
-    const tresholdSingle = formData.getAll("rasa-single");
-    const tresholdMix = formData.getAll("rasa-mix");
-    const jumlahPeserta = formData.get("jumlah-peserta") as string;
-    const jumlah = Number(jumlahPeserta);
-
-    if (
-      nilaiTwoOutOfFiveCampuranKopi.length < 4 ||
-      tresholdSingle.length !== 12 ||
-      tresholdMix.length !== 5
-    ) {
-      toast.error("Lengkapi data sesuai petunjuk.");
+    if ("error" in examDataDetails) {
+      toast.error(examDataDetails.error);
       return;
     }
 
-    if (
-      nilaiTwoOutOfFiveKopiPure.length !== 0 &&
-      nilaiTwoOutOfFiveKopiPure.length < 4
-    ) {
-      toast.error("Lengkapi data sesuai petunjuk.");
-      return;
-    }
-
-    if (!Number.isInteger(jumlah) || jumlah < 1 || jumlah > 200) {
-      toast.error(`Jumlah peserta minimal 1 dan maksimal 200 orang`);
-      return;
-    }
-
-    const kode = new UjiDasar({
-      nilaiTwoOutOfFiveCampuranKopi: nilaiTwoOutOfFiveCampuranKopi,
-      nilaiTwoOutOfFiveKopiPure: nilaiTwoOutOfFiveKopiPure,
-      nilaiTresholdSingle: tresholdSingle.map((nilai) =>
-        nilai.toString().trim(),
-      ),
-      nilaiTresholdMix: tresholdMix.map((nilai) => nilai.toString().trim()),
-      jumlahPesertaUjian: jumlah,
-    });
-
-    const soalUjiDasar = kode.buatKodeUjiDasar();
-    setSoalUjiDasar(soalUjiDasar);
+    setExamDataDetails(examDataDetails);
   }
 
   return (
     <>
-      <section>
-        <p className="text-lg font-semibold mb-4">Buat Soal Uji Dasar</p>
-        <form onSubmit={handleGenerateUjiDasar} className="flex flex-col gap-6">
-          {/*<IncludePure />*/}
-          <TwoOutOfFive variant="campuran kopi" />
-          <TwoOutOfFive variant="kopi pure" />
-          <PilihanTresholdSingle />
-          <PilihanTresholdMix />
-          <div className="flex flex-col gap-2">
-            <div>
-              <Label htmlFor="jumlah-peserta" className="font-medium">
-                Masukkan jumlah peserta
+      <section className="py-3 bg-background border-b">
+        <p className="text-lg font-semibold">Buat Soal Uji Dasar</p>
+        <div className="grid grid-cols-2 w-fit gap-x-3 gap-y-2 mt-2.5">
+          {basicExam.map((exam) => {
+            const checkboxId = exam.replaceAll(" ", "-");
+            return (
+              <Label key={exam} htmlFor={checkboxId} className="font-normal">
+                <Checkbox
+                  id={checkboxId}
+                  onCheckedChange={(e) => handleSelectedExamChange(e, exam)}
+                />
+                <span>{toTitleCase(exam)}</span>
               </Label>
-              <span className="block text-sm text-muted-foreground">
-                Peserta minimal 1 dan maksimal 200
-              </span>
-            </div>
-            <Input
-              type="number"
-              id="jumlah-peserta"
-              name="jumlah-peserta"
-              min={1}
-              placeholder="Minimal 1 peserta"
-            />
+            );
+          })}
+        </div>
+      </section>
+      <section>
+        <form className="flex flex-col gap-6" onSubmit={handleGenerateCode}>
+          <div className="flex flex-col gap-6 md:flex-row md:gap-6 lg:gap-8">
+            {selectedExam.includes("2 out of 5 creamer") && (
+              <div className="basis-full">
+                <TwoOutOfFive variant="creamer" />
+              </div>
+            )}
+            {selectedExam.includes("2 out of 5 pure") && (
+              <div className="basis-full">
+                <TwoOutOfFive variant="pure" />
+              </div>
+            )}
           </div>
-          <Button type="submit">Buat Soal Uji Dasar</Button>
+          {selectedExam.includes("treshold single") && (
+            <OptionForTresholdSingle />
+          )}
+          {selectedExam.includes("treshold mix") && <OptionForTresholdMix />}
+          {selectedExam.length !== 0 && (
+            <>
+              <InputParticipants />
+              <Button type="submit">Buat Soal Uji Dasar</Button>
+            </>
+          )}
         </form>
       </section>
-      {soalUjiDasar.length !== 0 && (
-        <DataViewer
-          variant="saver"
-          jenisUji="Uji Dasar"
-          generatedCodeData={soalUjiDasar}
-        />
+      {examDataDetails && (
+        <>
+          <ExamDetail variant="saver" examDataDetails={examDataDetails} />
+          <ExamsTable formatedExamsData={examDataDetails.formatedExamsData} />
+        </>
       )}
     </>
   );
 }
 
-function TwoOutOfFive({ variant }: { variant: "campuran kopi" | "kopi pure" }) {
-  const variantForName = variant.split(" ").join("-");
-
-  const [isPureInclude, setIsPureInclude] = useState(false);
-
+function TwoOutOfFive({ variant }: { variant: "creamer" | "pure" }) {
   return (
     <div className="flex flex-col gap-2">
       <div>
         <div className="flex items-center gap-2">
-          {variant === "kopi pure" && (
-            <Checkbox
-              checked={isPureInclude}
-              id="include-pure"
-              onCheckedChange={() => setIsPureInclude((prev) => !prev)}
-            />
-          )}
           <Label
             className="font-medium"
-            htmlFor={variant === "kopi pure" ? "include-pure" : ""}
+            htmlFor={variant === "pure" ? "include-pure" : ""}
           >
             2 Out of 5 {toTitleCase(variant)}
           </Label>
         </div>
         <span className="block text-sm text-muted-foreground mt-1">
-          {variant === "kopi pure" && !isPureInclude
-            ? "Checklist jika ingin menambahkan 2 out of 5 pure."
-            : `Masukkan produk ${variant} untuk 2 Out Of 5.`}
+          Masukkan produk {variant} untuk 2 Out Of 5.
         </span>
       </div>
       <div>
         <div className="flex flex-col gap-1.5">
-          {variant === "kopi pure" &&
-            isPureInclude &&
-            ["sama", "beda 1", "beda 2", "beda 3"].map((nilai, index) => {
-              return (
-                <Input
-                  key={index}
-                  name={`two-out-of-five-${variantForName}`}
-                  placeholder={`Produk untuk nilai ${nilai}`}
-                  required
-                />
-              );
-            })}
-          {variant === "campuran kopi" &&
-            ["sama", "beda 1", "beda 2", "beda 3"].map((nilai, index) => {
-              return (
-                <Input
-                  key={index}
-                  name={`two-out-of-five-${variantForName}`}
-                  placeholder={`Produk untuk nilai ${nilai}`}
-                  required
-                />
-              );
-            })}
+          {["sama", "beda 1", "beda 2", "beda 3"].map((nilai, index) => {
+            return (
+              <Input
+                key={index}
+                // IMPORTANT: ensure this name matches basicExam in constant.ts
+                // replace all space with "-" and end with "-values"
+                name={
+                  variant === "creamer"
+                    ? "2-out-of-5-creamer-values"
+                    : "2-out-of-5-pure-values"
+                }
+                placeholder={`Produk untuk nilai ${nilai}`}
+                required
+              />
+            );
+          })}
         </div>
       </div>
     </div>

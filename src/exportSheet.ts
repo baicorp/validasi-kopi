@@ -1,21 +1,29 @@
-import { SoalUjiClientStructure } from "./lib/types";
+import * as XLSX from "xlsx";
+import { formatRawExamsData } from "./lib/utils";
 
-export async function export_data(
-  data: SoalUjiClientStructure[],
-  nama: string,
+export function export_data(
+  examsData: ReturnType<typeof formatRawExamsData>,
+  fileName: string,
 ) {
-  /* dynamically import the SheetJS Wrapper */
-  const XLSX = await import("./sheetWrapper");
+  // const XLSX = await import("./sheetWrapper");
   const wb = XLSX.utils.book_new();
   const aoa: string[][] = [];
 
-  for (const tipeUji of data) {
-    aoa.push([tipeUji.tipeUjian]);
-    for (const uji of tipeUji.soal) {
-      Object.keys(uji).forEach((key) => {
+  for (const exam of examsData) {
+    aoa.push([exam.examName]);
+    for (const value of exam.codeValue) {
+      Object.keys(value).forEach((key) => {
         aoa.push([key]);
-        const listKode = uji[key];
+        const listKode = value[key];
         for (const arrKode of listKode) {
+          // Insert blank at index 5 (requires length >= 6)
+          if (arrKode.length >= 6) {
+            arrKode.splice(5, 0, "");
+          }
+          // we need to add blank if length >=12 (11 + 1)
+          if (arrKode.length >= 12) {
+            arrKode.splice(11, 0, "");
+          }
           aoa.push(arrKode);
         }
       });
@@ -24,5 +32,5 @@ export async function export_data(
   }
   const ws = XLSX.utils.aoa_to_sheet(aoa);
   XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-  XLSX.writeFileXLSX(wb, `${nama}.xlsx`);
+  XLSX.writeFileXLSX(wb, `${fileName}.xlsx`);
 }

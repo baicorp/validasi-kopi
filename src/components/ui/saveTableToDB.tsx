@@ -2,42 +2,52 @@
 
 import { toast } from "sonner";
 import { Button } from "./button";
-import { useState } from "react";
-import { LoaderCircle } from "lucide-react";
-import { saveSoalUji } from "@/actions/kode";
-import { SoalUjiClientStructure } from "@/lib/types";
-import { toTitleCase, formatToDB } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import { ExamDataDetails } from "@/lib/types";
+import { Check, LoaderCircle } from "lucide-react";
+import { addGeneratedCodes } from "@/actions/codes";
 
 export default function SaveToDatabaseButton({
-  jenisUji,
-  soal,
+  examsData,
 }: {
-  jenisUji: string;
-  soal: SoalUjiClientStructure[];
+  examsData: ExamDataDetails;
 }) {
   const [isLoad, setIsLoad] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    setIsSaved(false);
+  }, [examsData]);
 
   async function handleClick() {
     try {
       setIsLoad(true);
-      const arrDataForDB = formatToDB(
-        toTitleCase(jenisUji) + new Date().toLocaleString("id-ID"),
-        soal,
-      );
+      const result = await addGeneratedCodes(examsData);
 
-      await saveSoalUji(arrDataForDB);
+      if ("error" in result) {
+        toast.error(result.error);
+        return;
+      } else {
+        setIsSaved(true);
+      }
+
       toast.success("Data berhasil disimpan.");
     } catch (e) {
-      if (e instanceof Error) {
-        toast.error(e.message);
-      }
+      console.error(e);
       toast.error("Ada yang salah.");
     } finally {
       setIsLoad(false);
     }
   }
 
-  return (
+  return isSaved ? (
+    <Button
+      variant={"ghost"}
+      className="bg-green-500 hover:bg-green-400 hover:text-white text-white cursor-default"
+    >
+      {<Check />} Tersimpan
+    </Button>
+  ) : (
     <Button
       onClick={handleClick}
       disabled={isLoad}

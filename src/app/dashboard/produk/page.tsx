@@ -12,105 +12,143 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Suspense } from "react";
+import { SearchParams } from "@/lib/types";
+import { ReactNode, Suspense } from "react";
 import { MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { deleteProduk, getAllProduct } from "@/actions/produk";
-import EditDialog from "@/components/ui/editDialog";
+import Paginator from "@/components/ui/paginator";
+import SearchData from "@/components/ui/searchData";
+import AddProductBtn from "@/components/ui/addProduct";
 import DeleteDialog from "@/components/ui/deleteDialog";
-import TambahProduk from "@/components/ui/tambahProduk";
+import EditDialogProduct from "@/components/ui/editDialogProduct";
+import { deleteProduct, getAllProduct } from "@/actions/products";
+import { validateSessionServer } from "@/actions/validateSession";
+import TableProductsDataSkeleton from "@/components/skeleton/tableProductsDataSkeleton";
 
-export default async function Page() {
+export default async function Page({ searchParams }: SearchParams) {
+  await validateSessionServer();
+
+  const currentPage = ((await searchParams).page as string) ?? "1";
+  const search = (await searchParams).q as string;
+  const categoryId = (await searchParams).categoryId as string;
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <TambahProduk />
+    <section className="space-y-4 py-3">
+      <div>
+        <p className="text-lg font-semibold">Daftar Produk.</p>
+        <p className="text-muted-foreground">
+          Daftar semua produk untuk uji identifikasi
+        </p>
       </div>
+      <div className="flex justify-between items-center">
+        <div className="basis-1/3">
+          <SearchData placeholder="Cari nama produk" />
+        </div>
+        <AddProductBtn />
+      </div>
+      <Suspense
+        key={search + currentPage}
+        fallback={<TableProductsDataSkeleton />}
+      >
+        <TableProductsData
+          currentPage={Number(currentPage)}
+          search={search}
+          categoryId={categoryId}
+        />
+      </Suspense>
+    </section>
+  );
+}
+
+async function TableProductsData({
+  currentPage,
+  search,
+  categoryId,
+}: {
+  currentPage: number;
+  search: string | undefined;
+  categoryId: string | undefined;
+}) {
+  const products = await getAllProduct(currentPage, search, categoryId);
+  let tableRowData: ReactNode | undefined;
+
+  if ("error" in products) {
+    tableRowData = (
+      <TableRow>
+        <TableCell colSpan={4} className="text-center">
+          {products.error}
+        </TableCell>
+      </TableRow>
+    );
+  } else if (products.data.length === 0) {
+    tableRowData = (
+      <TableRow>
+        <TableCell colSpan={4} className="text-center">
+          Belum ada produk yang ditambahkan
+        </TableCell>
+      </TableRow>
+    );
+  } else {
+    tableRowData = products.data.map((product, idx) => (
+      <TableRow key={product.id}>
+        <TableCell className="pl-4 py-1">
+          {(currentPage - 1) * 12 + idx + 1}
+        </TableCell>
+        <TableCell className="py-1">{product.productName}</TableCell>
+        <TableCell className="py-1">{product.categoryName}</TableCell>
+        <TableCell className="text-right py-1">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreVertical className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <EditDialogProduct
+                productId={product.id.toString()}
+                productName={product.productName}
+                productCategoryId={
+                  product.productCategoryId?.toString() as string
+                }
+              />
+              <DropdownMenuSeparator />
+              <DeleteDialog
+                dialogTitle="produk"
+                variant="dropDown"
+                deleteFnAction={deleteProduct}
+                id={product.id.toString()}
+                data={product.productName}
+              />
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </TableCell>
+      </TableRow>
+    ));
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
       <div className="rounded-lg border overflow-hidden">
-        <Table className="relative">
+        <Table>
           <TableHeader>
-            <TableRow className="bg-accent sticky top-0 z-10">
+            <TableRow className="bg-accent">
               <TableHead className="pl-2">No</TableHead>
               <TableHead>Nama Produk</TableHead>
               <TableHead>Kategori</TableHead>
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
-            <Suspense fallback={<ListProdukSkeleton />}>
-              <ListProduk />
-            </Suspense>
-          </TableBody>
+          <TableBody>{tableRowData}</TableBody>
         </Table>
+      </div>
+      <div>
+        {!("error" in products) && products.totalPages > 1 && (
+          <Paginator
+            currentPage={products.page}
+            totalPages={products.totalPages}
+          />
+        )}
       </div>
     </div>
   );
-}
-
-function ListProdukSkeleton() {
-  const skeleton = [0, 1, 2, 3, 4].map((number) => {
-    return (
-      <TableRow key={number}>
-        <TableCell className="py-3.5">
-          <span className="block w-6 h-4 bg-accent rounded-full animate-pulse"></span>
-        </TableCell>
-        <TableCell className="py-3.5">
-          <span className="block w-28 h-4 bg-accent rounded-full animate-pulse"></span>
-        </TableCell>
-        <TableCell className="py-3.5">
-          <span className="block w-10 h-4 bg-accent rounded-full animate-pulse"></span>
-        </TableCell>
-        <TableCell className="py-3.5 flex justify-end">
-          <span className="block w-4 h-4 bg-accent rounded-full animate-pulse"></span>
-        </TableCell>
-      </TableRow>
-    );
-  });
-  return skeleton;
-}
-
-async function ListProduk() {
-  const listProduk = await getAllProduct();
-
-  if (listProduk.length === 0) {
-    return (
-      <TableRow>
-        <TableCell colSpan={4} className="text-center">
-          Tidak ada produk
-        </TableCell>
-      </TableRow>
-    );
-  }
-
-  return listProduk.map((produk, idx) => (
-    <TableRow key={produk.id}>
-      <TableCell className="pl-4 py-1">{idx + 1}</TableCell>
-      <TableCell className="py-1">{produk.namaProduk}</TableCell>
-      <TableCell className="py-1">{produk.namaKategori}</TableCell>
-      <TableCell className="text-right py-1">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MoreVertical className="h-5 w-5" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <EditDialog
-              idProduk={produk.id.toString()}
-              namaProduk={produk?.namaProduk}
-              idKategori={produk.idKategori?.toString() as string}
-            />
-            <DropdownMenuSeparator />
-            <DeleteDialog
-              dialogTitle="produk"
-              variant="dropDown"
-              deleteFnAction={deleteProduk}
-              idProduk={produk.id.toString()}
-              namaProduk={produk.namaProduk}
-            />
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </TableCell>
-    </TableRow>
-  ));
 }

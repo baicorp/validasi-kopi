@@ -1,27 +1,49 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { toTitleCase } from "@/lib/utils";
+import { SearchParams } from "@/lib/types";
+import ErrorComp from "@/components/ui/error";
+import Paginator from "@/components/ui/paginator";
+import SearchData from "@/components/ui/searchData";
+import { deleteGeneratedCode } from "@/actions/codes";
+import { getAllCodeGroups } from "@/actions/codeGroups";
 import DeleteDialog from "@/components/ui/deleteDialog";
-import { deleteSoalUji, getListSoal } from "@/actions/kode";
-import { BrushCleaning, FileSpreadsheet } from "lucide-react";
+import { BrushCleaning, Sheet, User } from "lucide-react";
+import CodeGroupsLabel from "@/components/ui/codeGroupsLabel";
+import { validateSessionServer } from "@/actions/validateSession";
+import CodeGroupsSkeleton from "@/components/skeleton/codeGroupsSkeleton";
 
-export default function Page() {
+export default async function Page({ searchParams }: SearchParams) {
+  await validateSessionServer();
+
+  const search = (await searchParams).q as string;
+  const currentPage = ((await searchParams).page as string) ?? "1";
+
   return (
-    <>
-      <section>
-        <p className="text-lg font-semibold mb-4">Soal yang tersimpan</p>
-        <Suspense fallback={<ListSoalSkeleton />}>
-          <ListSoal />
-        </Suspense>
-      </section>
-    </>
+    <section className="py-3 space-y-4">
+      <div>
+        <p className="text-lg font-semibold">Soal yang tersimpan</p>
+      </div>
+      <div className="flex justify-between items-center">
+        <div className="basis-1/3">
+          <SearchData placeholder="Cari nama / ujian soal tersimpan" />
+        </div>
+      </div>
+      <Suspense key={search} fallback={<CodeGroupsSkeleton />}>
+        <CodeGroups page={currentPage} search={search} />
+      </Suspense>
+    </section>
   );
 }
 
-async function ListSoal() {
-  const list = await getListSoal();
+async function CodeGroups({ page, search }: { page: string; search: string }) {
+  const codeGroups = await getAllCodeGroups(Number(page), search);
 
-  if (list.length === 0) {
+  if ("error" in codeGroups) {
+    return <ErrorComp error={codeGroups.error} />;
+  }
+
+  if (codeGroups.data.length === 0) {
     return (
       <div className="h-80 text-muted-foreground flex justify-center items-center">
         <div className="flex flex-col justify-center items-center gap-2">
@@ -32,35 +54,85 @@ async function ListSoal() {
     );
   }
 
-  return list.map((data) => (
+  return (
+    <>
+      <div>
+        {codeGroups.data.map((codeGroup) => (
+          <CodeGroupItem
+            key={codeGroup.id}
+            id={codeGroup.id}
+            groupName={codeGroup.groupName}
+            selectedExam={codeGroup.selectedExam}
+            totalParticipants={codeGroup.totalParticipants}
+            createdAt={codeGroup.createdAt}
+          />
+        ))}
+      </div>
+      <div>
+        {!("error" in codeGroups) && codeGroups.totalPages > 1 && (
+          <Paginator
+            currentPage={codeGroups.page}
+            totalPages={codeGroups.totalPages}
+          />
+        )}
+      </div>
+    </>
+  );
+}
+
+function CodeGroupItem({
+  id,
+  groupName,
+  selectedExam,
+  totalParticipants,
+  createdAt,
+}: {
+  id: string;
+  groupName: string;
+  selectedExam: string;
+  totalParticipants: number;
+  createdAt: string | null;
+}) {
+  return (
     <div
-      key={data.session_uuid}
+      key={id}
       className="group flex gap-2 justify-between items-center hover:bg-accent rounded-md"
     >
       <Link
-        href={`/dashboard/list-soal/${data.session_uuid}`}
-        className="flex items-center gap-2 px-2.5 p-1.5 w-full"
+        href={`/dashboard/daftar-soal/${id}`}
+        className="flex items-center gap-4 px-2.5 p-1.5 w-full"
       >
-        <FileSpreadsheet size={20} />
-        <span className="font-mono">{toTitleCase(data?.session_name)}</span>
+        <Sheet size={27} />
+        <div className="flex flex-col">
+          <p>
+            {toTitleCase(groupName)}{" "}
+            <span className="text-muted-foreground">#{id}</span>
+          </p>
+          <div className="flex items-center gap-2.5">
+            <time
+              className="font-mono text-xs text-muted-foreground"
+              dateTime={createdAt?.split(" ")[0]}
+            >
+              {new Date(createdAt + "Z").toLocaleString()}
+            </time>
+            <div className="flex items-center gap-1 text-muted-foreground">
+              <User size={12} className="mb-1" />
+              <span className="text-xs">{totalParticipants}</span>
+            </div>
+          </div>
+        </div>
+        <div className="hidden lg:flex flex-wrap gap-0.5 items-center mx-auto w-76">
+          <CodeGroupsLabel label={selectedExam.split(",")} />
+        </div>
       </Link>
-      <div className="hidden group-hover:block px-2.5 p-1.5">
+      <div className="invisible group-hover:visible px-2.5 p-1.5">
         <DeleteDialog
           dialogTitle="Soal"
-          deleteFnAction={deleteSoalUji}
-          idProduk={data.session_uuid}
-          namaProduk={data.session_name}
+          deleteFnAction={deleteGeneratedCode}
+          id={id.toString()}
+          data={groupName}
         />
       </div>
     </div>
-  ));
-}
-
-function ListSoalSkeleton() {
-  return [1, 2, 3, 4].map((data) => (
-    <div key={data} className="flex gap-2.5 mb-1.5">
-      <div className="w-8 h-7 rounded-md animate-pulse bg-accent" />
-      <div className="w-56 h-7 rounded-md animate-pulse bg-accent" />
-    </div>
-  ));
+  );
 }

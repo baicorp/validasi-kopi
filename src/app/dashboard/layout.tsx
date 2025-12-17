@@ -8,7 +8,6 @@ import {
   ChevronRight,
   LoaderCircle,
   HeartHandshake,
-  TestTubes,
 } from "lucide-react";
 import {
   Sidebar,
@@ -34,7 +33,6 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbList";
 
 const sidebarMenu = [
   { url: "/dashboard/produk", menu: "Produk", icon: Coffee },
-  { url: "/dashboard/rasa-mix", menu: "Rasa Mix", icon: TestTubes },
   { url: "/dashboard/list-soal", menu: "List Soal", icon: FileText },
 ];
 
