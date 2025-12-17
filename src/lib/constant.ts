@@ -5,20 +5,31 @@ export interface RasaIntensitas {
   intensitas?: number; // undefined untuk "tidak berasa"
 }
 
-const listNilaiTresholdSingle = [
-  { rasa: "asam", intensitas: 1 },
-  { rasa: "asam", intensitas: 2 },
-  { rasa: "asam", intensitas: 3 },
-  { rasa: "asin", intensitas: 1 },
-  { rasa: "asin", intensitas: 2 },
-  { rasa: "asin", intensitas: 3 },
-  { rasa: "manis", intensitas: 1 },
-  { rasa: "manis", intensitas: 2 },
-  { rasa: "manis", intensitas: 3 },
-  { rasa: "pahit", intensitas: 1 },
-  { rasa: "pahit", intensitas: 2 },
-  { rasa: "pahit", intensitas: 3 },
-  { rasa: "hambar" },
+const basicExam = [
+  "2 out of 5 pure",
+  "2 out of 5 creamer",
+  "treshold single",
+  "treshold mix",
+];
+
+export interface TasteWithIntensity {
+  tasteIntent: string;
+}
+
+const listTresholdSingleValue: TasteWithIntensity[] = [
+  { tasteIntent: "asam+1" },
+  { tasteIntent: "asam+2" },
+  { tasteIntent: "asam+3" },
+  { tasteIntent: "asin+1" },
+  { tasteIntent: "asin+2" },
+  { tasteIntent: "asin+3" },
+  { tasteIntent: "manis+1" },
+  { tasteIntent: "manis+2" },
+  { tasteIntent: "manis+3" },
+  { tasteIntent: "pahit+1" },
+  { tasteIntent: "pahit+2" },
+  { tasteIntent: "pahit+3" },
+  { tasteIntent: "tidak berasa" },
 ];
 
 const listNilaiTresholdMix = [
@@ -39,4 +50,12 @@ const kategoriProduk = [
   "RTG",
 ];
 
-export { listNilaiTresholdSingle, listNilaiTresholdMix, kategoriProduk };
+const productExam = ["identifikasi", "triangle", "skoring"];
+
+export {
+  listTresholdSingleValue,
+  listNilaiTresholdMix,
+  kategoriProduk,
+  productExam,
+  basicExam,
+};

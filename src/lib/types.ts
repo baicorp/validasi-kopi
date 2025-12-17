@@ -25,6 +25,10 @@ export type Participants = {
   department: string | null;
 };
 
+export type SearchParams = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
 export type ExamDataDetails = InsertCodeGroups & {
   rowExamsData: RawExamsData[];
   formatedExamsData: ReturnType<typeof formatRawExamsData>;
