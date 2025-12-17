@@ -33,7 +33,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbList";
 
 const sidebarMenu = [
   { url: "/dashboard/produk", menu: "Produk", icon: Coffee },
-  { url: "/dashboard/list-soal", menu: "List Soal", icon: FileText },
+  { url: "/dashboard/daftar-soal", menu: "Daftar Soal", icon: FileText },
 ];
 
 const collapsibleSidebarMenu = [
