@@ -10,10 +10,8 @@ import { ExamDataDetails } from "@/lib/types";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import ExamDetail from "@/components/ui/examDetail";
 import ExamsTable from "@/components/table/examsTable";
-import { CheckedState } from "@radix-ui/react-checkbox";
 import { generateExamCodes } from "@/lib/handleFormInput";
 import { validateSessionClient } from "@/app/sign-in/page";
 import OptionForTresholdMix from "@/components/ui/optioinForTM";
@@ -28,23 +26,13 @@ export default function Page() {
   //   router.replace("/sign-in");
   // }
   //
-  const [selectedExam, setSelectedExam] = useState<string[]>([]);
   const [examDataDetails, setExamDataDetails] = useState<ExamDataDetails>();
-
-  function handleSelectedExamChange(e: CheckedState, examName: string) {
-    setExamDataDetails(undefined); // reset table data
-    if (e && !selectedExam.includes(examName)) {
-      setSelectedExam((prev) => [...prev, examName].sort());
-    } else if (!e) {
-      setSelectedExam((prev) => prev.filter((exam) => exam !== examName));
-    }
-  }
 
   function handleGenerateCode(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
-    const examDataDetails = generateExamCodes(formData, selectedExam);
+    const examDataDetails = generateExamCodes(formData, basicExam);
 
     if ("error" in examDataDetails) {
       toast.error(examDataDetails.error);
@@ -56,47 +44,23 @@ export default function Page() {
 
   return (
     <>
-      <section className="py-3 bg-background border-b">
+      <section className="py-3 bg-background">
         <p className="text-lg font-semibold">Buat Soal Uji Dasar</p>
-        <div className="grid grid-cols-2 w-fit gap-x-3 gap-y-2 mt-2.5">
-          {basicExam.map((exam) => {
-            const checkboxId = exam.replaceAll(" ", "-");
-            return (
-              <Label key={exam} htmlFor={checkboxId} className="font-normal">
-                <Checkbox
-                  id={checkboxId}
-                  onCheckedChange={(e) => handleSelectedExamChange(e, exam)}
-                />
-                <span>{toTitleCase(exam)}</span>
-              </Label>
-            );
-          })}
-        </div>
       </section>
       <section>
         <form className="flex flex-col gap-6" onSubmit={handleGenerateCode}>
           <div className="flex flex-col gap-6 md:flex-row md:gap-6 lg:gap-8">
-            {selectedExam.includes("2 out of 5 creamer") && (
-              <div className="basis-full">
-                <TwoOutOfFive variant="creamer" />
-              </div>
-            )}
-            {selectedExam.includes("2 out of 5 pure") && (
-              <div className="basis-full">
-                <TwoOutOfFive variant="pure" />
-              </div>
-            )}
+            <div className="basis-full">
+              <TwoOutOfFive variant="creamer" />
+            </div>
+            <div className="basis-full">
+              <TwoOutOfFive variant="pure" />
+            </div>
           </div>
-          {selectedExam.includes("treshold single") && (
-            <OptionForTresholdSingle />
-          )}
-          {selectedExam.includes("treshold mix") && <OptionForTresholdMix />}
-          {selectedExam.length !== 0 && (
-            <>
-              <InputParticipants />
-              <Button type="submit">Buat Soal Uji Dasar</Button>
-            </>
-          )}
+          <OptionForTresholdSingle />
+          <OptionForTresholdMix />
+          <InputParticipants />
+          <Button type="submit">Buat Soal Uji Dasar</Button>
         </form>
       </section>
       {examDataDetails && (

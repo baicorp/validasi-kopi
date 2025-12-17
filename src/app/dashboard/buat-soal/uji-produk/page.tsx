@@ -42,18 +42,7 @@ export default function Page() {
     id: string;
     name: string;
   }>();
-  const [selectedExam, setSelectedExam] = useState<string[]>([]);
   const [examDataDetails, setExamDataDetails] = useState<ExamDataDetails>();
-
-  function handleSelectedExamChange(e: CheckedState, examName: string) {
-    setExamDataDetails(undefined); // reset table data
-    setProductCategoryId(undefined); // reset ProductCategories
-    if (e && !selectedExam.includes(examName)) {
-      setSelectedExam((prev) => [...prev, examName].sort());
-    } else if (!e) {
-      setSelectedExam((prev) => prev.filter((exam) => exam !== examName));
-    }
-  }
 
   function handleGenerateCode(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -61,7 +50,7 @@ export default function Page() {
     const formData = new FormData(e.currentTarget);
     const examDataDetails = generateExamCodes(
       formData,
-      selectedExam,
+      productExam,
       productCategory?.name,
     );
 
@@ -75,37 +64,17 @@ export default function Page() {
 
   return (
     <>
-      <section className="py-3 bg-background border-b">
+      <section className="py-3 bg-background">
         <p className="text-lg font-semibold">Buat Soal Uji Produk</p>
-        <div className="grid grid-cols-2 w-fit gap-x-3 gap-y-2 mt-2.5">
-          {productExam.map((exam) => {
-            const checkboxId = exam.replaceAll(" ", "-");
-            return (
-              <Label key={exam} htmlFor={checkboxId} className="font-normal">
-                <Checkbox
-                  id={checkboxId}
-                  onCheckedChange={(e) => handleSelectedExamChange(e, exam)}
-                />
-                <span>{toTitleCase(exam)}</span>
-              </Label>
-            );
-          })}
-        </div>
       </section>
       <section>
         <form className="flex flex-col gap-6" onSubmit={handleGenerateCode}>
-          {selectedExam.length !== 0 && (
-            <ProductCategories setProductCategoryId={setProductCategoryId} />
-          )}
-          {selectedExam.includes("identifikasi") && productCategory && (
+          <ProductCategories setProductCategoryId={setProductCategoryId} />
+          {productCategory && (
             <ListProduk productCategory={productCategory.id} />
           )}
-          {selectedExam.length !== 0 && (
-            <>
-              <InputParticipants />
-              <Button type="submit">Buat Soal Uji Produk</Button>
-            </>
-          )}
+          <InputParticipants />
+          <Button type="submit">Buat Soal Uji Produk</Button>
         </form>
       </section>
       {examDataDetails && (
