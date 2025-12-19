@@ -1,10 +1,7 @@
 import * as XLSX from "xlsx";
-import { formatRawExamsData } from "./lib/utils";
+import { FormatedExamsData } from "./lib/types";
 
-export function export_data(
-  examsData: ReturnType<typeof formatRawExamsData>,
-  fileName: string,
-) {
+export function export_data(examsData: FormatedExamsData, fileName: string) {
   // const XLSX = await import("./sheetWrapper");
   const wb = XLSX.utils.book_new();
   const aoa: string[][] = [];

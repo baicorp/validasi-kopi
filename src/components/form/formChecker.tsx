@@ -2,13 +2,13 @@
 
 import { toast } from "sonner";
 import { Button } from "../ui/button";
-import { RawExamsData } from "@/lib/types";
+import { codeCheck, toTitleCase } from "@/lib/utils";
 import { FormEvent, useEffect, useState } from "react";
-import { codeCheck, formatRawExamsData, toTitleCase } from "@/lib/utils";
+import { FormatedExamsData, RawExamsData } from "@/lib/types";
 
 type FormCheckerProps = {
   rawExamsData: RawExamsData[];
-  formatedExamsData: ReturnType<typeof formatRawExamsData>;
+  formatedExamsData: FormatedExamsData;
 };
 
 export default function FormChecker({
@@ -121,7 +121,7 @@ function DynamicComponent({
   triggerReset: boolean;
   halfWrongCodes: string[];
   wrongCodes: string[];
-  formatedExamData: ReturnType<typeof formatRawExamsData>[number];
+  formatedExamData: FormatedExamsData[number];
 }) {
   return (
     <div>

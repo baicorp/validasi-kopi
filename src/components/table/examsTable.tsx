@@ -1,10 +1,11 @@
+import { toTitleCase } from "@/lib/utils";
 import TableContent from "./tableContent";
-import { formatRawExamsData, toTitleCase } from "@/lib/utils";
+import { FormatedExamsData } from "@/lib/types";
 
 export default function ExamsTable({
   formatedExamsData,
 }: {
-  formatedExamsData: ReturnType<typeof formatRawExamsData>;
+  formatedExamsData: FormatedExamsData;
 }) {
   return (
     <section className="flex flex-col gap-4">

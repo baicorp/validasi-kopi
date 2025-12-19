@@ -18,6 +18,8 @@ export type RawExamsData = {
   examName: string;
 };
 
+export type FormatedExamsData = ReturnType<typeof formatRawExamsData>;
+
 export type Participants = {
   id: string;
   username: string;
@@ -31,5 +33,5 @@ export type SearchParams = {
 
 export type ExamDataDetails = InsertCodeGroups & {
   rowExamsData: RawExamsData[];
-  formatedExamsData: ReturnType<typeof formatRawExamsData>;
+  formatedExamsData: FormatedExamsData;
 };
