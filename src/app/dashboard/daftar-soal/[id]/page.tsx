@@ -47,12 +47,11 @@ async function TabsContentData({ id }: { id: string }) {
           <TabsTrigger value="tampilkan-tabel">Tampilkan Tabel</TabsTrigger>
           <TabsTrigger value="form-checker">Cek Jawaban</TabsTrigger>
         </TabsList>
+        <Separator className="my-3" />
         <TabsContent value="tampilkan-tabel">
-          <Separator className="my-4" />
           <ExamsTable formatedExamsData={examDataDetails.formatedExamsData} />
         </TabsContent>
         <TabsContent value="form-checker">
-          <Separator className="my-4" />
           <FormChecker
             rawExamsData={examDataDetails.rowExamsData}
             formatedExamsData={examDataDetails.formatedExamsData}

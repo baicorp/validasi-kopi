@@ -15,7 +15,7 @@ export default function ExamDetails({
   examDataDetails: ExamDataDetails;
 }) {
   return (
-    <section className="py-4 border-y border-border bg-background z-10 sticky top-0">
+    <section className="py-4 my-4 border-y border-border bg-background z-10 sticky top-0">
       <div className="flex items-center justify-between">
         <p className="text-lg font-semibold">
           Table Soal {toTitleCase(examDataDetails.groupName)}.
