@@ -8,8 +8,7 @@ import SearchData from "@/components/ui/searchData";
 import { deleteGeneratedCode } from "@/actions/codes";
 import { getAllCodeGroups } from "@/actions/codeGroups";
 import DeleteDialog from "@/components/ui/deleteDialog";
-import { BrushCleaning, Sheet, User } from "lucide-react";
-import CodeGroupsLabel from "@/components/ui/codeGroupsLabel";
+import { BrushCleaning, FileSpreadsheet } from "lucide-react";
 import { validateSessionServer } from "@/actions/validateSession";
 import CodeGroupsSkeleton from "@/components/skeleton/codeGroupsSkeleton";
 
@@ -62,8 +61,6 @@ async function CodeGroups({ page, search }: { page: string; search: string }) {
             key={codeGroup.id}
             id={codeGroup.id}
             groupName={codeGroup.groupName}
-            selectedExam={codeGroup.selectedExam}
-            totalParticipants={codeGroup.totalParticipants}
             createdAt={codeGroup.createdAt}
           />
         ))}
@@ -83,14 +80,10 @@ async function CodeGroups({ page, search }: { page: string; search: string }) {
 function CodeGroupItem({
   id,
   groupName,
-  selectedExam,
-  totalParticipants,
   createdAt,
 }: {
   id: string;
   groupName: string;
-  selectedExam: string;
-  totalParticipants: number;
   createdAt: string | null;
 }) {
   return (
@@ -102,27 +95,12 @@ function CodeGroupItem({
         href={`/dashboard/daftar-soal/${id}`}
         className="flex items-center gap-4 px-2.5 p-1.5 w-full"
       >
-        <Sheet size={27} />
+        <FileSpreadsheet size={27} />
         <div className="flex flex-col">
           <p>
             {toTitleCase(groupName)}{" "}
-            <span className="text-muted-foreground">#{id}</span>
+            {new Date(createdAt + "Z").toLocaleString()}
           </p>
-          <div className="flex items-center gap-2.5">
-            <time
-              className="font-mono text-xs text-muted-foreground"
-              dateTime={createdAt?.split(" ")[0]}
-            >
-              {new Date(createdAt + "Z").toLocaleString()}
-            </time>
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <User size={12} className="mb-1" />
-              <span className="text-xs">{totalParticipants}</span>
-            </div>
-          </div>
-        </div>
-        <div className="hidden lg:flex flex-wrap gap-0.5 items-center mx-auto w-76">
-          <CodeGroupsLabel label={selectedExam.split(",")} />
         </div>
       </Link>
       <div className="invisible group-hover:visible px-2.5 p-1.5">
