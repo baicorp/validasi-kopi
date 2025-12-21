@@ -1,11 +1,9 @@
 "use client";
 
-import useSWR from "swr";
 import { toast } from "sonner";
 import { useState } from "react";
 import { toTitleCase } from "@/lib/utils";
 import { basicExam } from "@/lib/constant";
-import { useRouter } from "next/navigation";
 import { ExamDataDetails } from "@/lib/types";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -13,19 +11,11 @@ import { Button } from "@/components/ui/button";
 import ExamDetail from "@/components/ui/examDetail";
 import ExamsTable from "@/components/table/examsTable";
 import { generateExamCodes } from "@/lib/handleFormInput";
-import { validateSessionClient } from "@/app/sign-in/page";
 import OptionForTresholdMix from "@/components/ui/optioinForTM";
 import InputParticipants from "@/components/ui/inputParticipant";
 import OptionForTresholdSingle from "@/components/ui/optioinForTS";
 
 export default function Page() {
-  // FIXME : find why always redirect to /dashboard/produk
-  // const router = useRouter();
-  // const { data } = useSWR("session", validateSessionClient);
-  // if (!data?.data?.session) {
-  //   router.replace("/sign-in");
-  // }
-  //
   const [examDataDetails, setExamDataDetails] = useState<ExamDataDetails>();
 
   function handleGenerateCode(e: React.FormEvent<HTMLFormElement>) {

@@ -15,29 +15,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toTitleCase } from "@/lib/utils";
-import { useRouter } from "next/navigation";
 import { productExam } from "@/lib/constant";
 import { ExamDataDetails } from "@/lib/types";
 import { Checkbox } from "@/components/ui/checkbox";
 import ExamDetails from "@/components/ui/examDetail";
 import ExamsTable from "@/components/table/examsTable";
-import { CheckedState } from "@radix-ui/react-checkbox";
 import { Card, CardContent } from "@/components/ui/card";
 import { generateExamCodes } from "@/lib/handleFormInput";
 import { getProductsByCategory } from "@/actions/products";
-import { validateSessionClient } from "@/app/sign-in/page";
 import InputParticipants from "@/components/ui/inputParticipant";
 import { getAllProductCategories } from "@/actions/productCategories";
 import ListCheckboxSkeleton from "@/components/skeleton/listCheckboxSkeleton";
 
 export default function Page() {
-  // FIXME : find why always redirect to /dashboard/produk
-  // const router = useRouter();
-  // const { data } = useSWR("session", validateSessionClient);
-  // if (!data?.data?.session) {
-  //   router.replace("/sign-in");
-  // }
-
   const [productCategory, setProductCategoryId] = useState<{
     id: string;
     name: string;
