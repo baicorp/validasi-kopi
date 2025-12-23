@@ -17,36 +17,63 @@ export function formatArrToTJ(listKode: string[]): string[][] {
 }
 
 export function formatRawExamsData(rows: RawExamsData[]) {
-  // 1. group rows by examName
-  const groupedByExam = Object.groupBy(rows, (item) => item.examName);
+  const groupData = new Map<
+    string,
+    {
+      examName: string;
+      codeValue: Map<string, string[]>;
+    }
+  >();
 
-  const formatedRows = Object.entries(groupedByExam).map(
-    ([examName, group]) => {
-      // 2. group groupedByExam by value
-      const groupedByValueAndAdditionalValue = Object.groupBy(
-        group!,
-        (item) =>
-          item.value +
-          (item.additionalValue ? " & " + item.additionalValue : ""),
-      );
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    if (!row) continue;
 
-      // 3. get each value with its list of codes
-      const codeValue = Object.entries(groupedByValueAndAdditionalValue).map(
-        ([valueKey, items]) => ({
-          [valueKey]: formatArrToTJ(items!.map((item) => item.code)),
-        }),
-      );
+    let baseEntry = groupData.get(row.examName);
+    if (!baseEntry) {
+      baseEntry = {
+        examName: row.examName,
+        codeValue: new Map<string, string[]>(),
+      };
+      groupData.set(row.examName, baseEntry);
+    }
 
-      // sort based on code value
-      codeValue.sort((a, b) =>
-        Object.keys(a)[0].localeCompare(Object.keys(b)[0]),
-      );
+    const key = row.additionalValue
+      ? `${row.value} & ${row.additionalValue}`
+      : row.value;
 
-      return { examName, codeValue };
-    },
-  );
+    let codes = baseEntry.codeValue.get(key);
+    if (!codes) {
+      codes = [];
+      baseEntry.codeValue.set(key, codes);
+    }
 
-  return formatedRows;
+    codes.push(row.code);
+  }
+
+  const resultArr = new Array<{
+    examName: string;
+    codeValue: Record<string, string[][]>[];
+  }>(groupData.size);
+  let i = 0;
+
+  for (const data of groupData.values()) {
+    const codeValueArr = new Array<Record<string, string[][]>>(
+      data.codeValue.size,
+    );
+
+    let j = 0;
+    for (const [key, values] of data.codeValue) {
+      codeValueArr[j++] = { [key]: formatArrToTJ(values) };
+    }
+
+    resultArr[i++] = {
+      examName: data.examName,
+      codeValue: codeValueArr,
+    };
+  }
+
+  return resultArr;
 }
 
 export function getExamsId(
