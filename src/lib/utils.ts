@@ -69,12 +69,13 @@ export function toTitleCase(str: string) {
 }
 
 function parseSingle(val: string) {
-  const [taste, intensity] = val.split(" ");
+  const [taste, intensity] = val.split(" & ");
   return { taste, intensity };
 }
 
 function parseMix(val: string) {
-  return val.split("+").map((v) => v.trim());
+  const [firstMix, secondMix] = val.split(" & ");
+  return { firstMix, secondMix };
 }
 
 export function codeCheck(
@@ -86,7 +87,15 @@ export function codeCheck(
   if (!examData) return "wrong"; // code not found in given value
 
   const examName = examData.examName.toLowerCase();
-  const examValue = examData.value;
+  const examValue = examData.additionalValue
+    ? `${examData.value} & ${examData.additionalValue}`
+    : examData.value;
+
+  if (examName.includes("2 out of 5")) {
+    // value format ex: "benar & productName", we need only the first word
+    const correctValue = inputValue.split(" & ")[0];
+    return examData.value === correctValue ? "correct" : "wrong";
+  }
 
   if (examName === "treshold single") {
     const { taste: valueFromInput, intensity: intenFromInput } =
@@ -107,15 +116,28 @@ export function codeCheck(
   }
 
   if (examName === "treshold mix") {
-    const tasteInput = parseMix(inputValue);
-    const tasteValue = parseMix(examValue);
+    if (inputValue === examValue) {
+      return "correct";
+    }
+    const { firstMix: firstMixInput, secondMix: secondMixInput } =
+      parseMix(inputValue);
+    const { firstMix: firstMixUser, secondMix: secondMixUser } =
+      parseMix(examValue);
 
-    const match = tasteInput.filter((taste) =>
-      tasteValue.includes(taste),
-    ).length;
+    const userMixOne = firstMixUser.split("+")[0];
+    const userMixTwo = secondMixUser.split("+")[0];
+    const inputMixOne = firstMixInput.split("+")[0];
+    const inputMixTwo = secondMixInput.split("+")[0];
 
-    if (match === 2) return "correct";
-    if (match === 1) return "partially-wrong";
+    if (
+      userMixOne === inputMixOne ||
+      userMixOne === inputMixTwo ||
+      userMixTwo === inputMixOne ||
+      userMixTwo === inputMixTwo
+    ) {
+      return "partially-wrong";
+    }
+
     return "wrong";
   }
 
