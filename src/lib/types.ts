@@ -43,6 +43,9 @@ export type Answer = {
   note?: string;
 };
 
+type EvaluationStatus = "correct" | "partial" | "wrong";
+
 export type AnswerWithResult = Answer & {
-  result: "correct" | "partial" | "wrong";
+  result: EvaluationStatus;
+  additionalResult?: EvaluationStatus;
 };

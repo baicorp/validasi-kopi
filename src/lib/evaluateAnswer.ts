@@ -4,6 +4,7 @@ type EvaluatedResult = {
   examName: string;
   answerResults: AnswerWithResult[];
   grade: number;
+  additionalGrade?: number;
   note?: string;
 };
 
