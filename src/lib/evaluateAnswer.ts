@@ -277,51 +277,68 @@ function evaluateTresholdSingle(
     (answer) => answer.examName === examNameTarget,
   );
 
+  const dbLookup = new Map(dbTresholdSingleList.map((db) => [db.code, db]));
+
   const answerResults: AnswerWithResult[] = userTresholdSingleList.map(
     (user) => {
-      // correct => code + value + additional value
-      const isCorrect = dbTresholdSingleList.some((correct) => {
-        const nameMatch =
-          user.examName.toLowerCase() === correct.examName.toLowerCase();
-        const codeMatch = user.code === correct.code;
-        const tasteMatch =
-          user.value.toLowerCase() === correct.value.toLowerCase();
-        const intensityMatch = user.additionalValue === correct.additionalValue;
+      const matchAnswer = dbLookup.get(user.code);
 
-        return nameMatch && codeMatch && tasteMatch && intensityMatch;
-      });
+      if (!matchAnswer) {
+        return {
+          ...user,
+          result: "wrong",
+        };
+      }
 
-      // correct => code + value (only run when isCorrect is false)
-      const isPartial =
-        !isCorrect &&
-        dbTresholdSingleList.some((correct) => {
-          const nameMatch =
-            user.examName.toLowerCase() === correct.examName.toLowerCase();
-          const codeMatch = user.code === correct.code;
-          const tasteMatch =
-            user.value.toLowerCase() === correct.value.toLowerCase();
+      const nameMatch =
+        user.examName.toLowerCase() === matchAnswer.examName.toLowerCase();
+      const codeMatch = user.code === matchAnswer.code;
+      const tasteMatch =
+        user.value.toLowerCase() === matchAnswer.value.toLowerCase();
+      const intensityMatch =
+        user.additionalValue === matchAnswer.additionalValue;
 
-          return nameMatch && codeMatch && tasteMatch;
-        });
+      if (nameMatch && codeMatch && tasteMatch && intensityMatch) {
+        return {
+          ...user,
+          result: "correct",
+          additionalResult: "correct",
+        };
+      }
+
+      if (nameMatch && codeMatch && tasteMatch) {
+        return {
+          ...user,
+          result: "correct",
+          additionalResult: "wrong",
+        };
+      }
 
       return {
         ...user,
-        result: isCorrect ? "correct" : isPartial ? "partial" : "wrong",
+        result: "wrong",
       };
     },
   );
 
   const attemptNumber = userAnswers[0].attemptNumber;
   const codeScore = 8.33;
-  const totalCorrectOrPartialCode = answerResults.filter(
-    (data) => data.result === "correct" || data.result === "partial",
+
+  const totalCorrectTaste = answerResults.filter(
+    (answer) => answer.result === "correct",
   ).length;
-  const grade = totalCorrectOrPartialCode * codeScore;
+  const tasteGrade = totalCorrectTaste * codeScore;
+
+  const totalCorrectIntensity = answerResults.filter(
+    (answer) => answer.additionalResult === "correct",
+  ).length;
+  const intensityGrade = totalCorrectIntensity * codeScore;
 
   return {
     examName: examNameTarget,
     answerResults,
-    grade: calculateFinalGrade(grade, attemptNumber),
+    grade: calculateFinalGrade(tasteGrade, attemptNumber),
+    additionalGrade: calculateFinalGrade(intensityGrade, attemptNumber),
   };
 }
 
