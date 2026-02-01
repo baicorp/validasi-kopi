@@ -332,60 +332,61 @@ function evaluateTresholdMix(
   dbAnswers: Answer[],
 ): EvaluatedResult {
   const examNameTarget = "treshold mix";
-  const userTresholdSingleMix = userAnswers.filter(
+  const userTresholdMix = userAnswers.filter(
     (answer) => answer.examName === examNameTarget,
   );
-  const dbTresholdSingleList = dbAnswers.filter(
+  const dbTresholdMixList = dbAnswers.filter(
     (answer) => answer.examName === examNameTarget,
   );
 
-  const answerResults: AnswerWithResult[] = userTresholdSingleMix.map(
-    (user) => {
-      // correct => if all taste and intensity all correct
-      const isCorrect = dbTresholdSingleList.some((correct) => {
-        const nameMatch =
-          user.examName.toLowerCase() === correct.examName.toLowerCase();
-        const codeMatch = user.code === correct.code;
-        const taste1Match =
-          user.value.toLowerCase() === correct.value.toLowerCase();
-        const taste2Match =
-          user.additionalValue?.toLowerCase() ===
-          correct.additionalValue?.toLowerCase();
+  const answerResults: AnswerWithResult[] = userTresholdMix.map((user) => {
+    const matchAnswer = dbTresholdMixList.find(
+      (list) => list.examName === user.examName && list.code === user.code,
+    );
 
-        return nameMatch && codeMatch && taste1Match && taste2Match;
-      });
-
-      // partial => if on of the taste is correct (only run when isCorrect is false)
-      // ex in db => value : asam+1 ,additionalValue: manis+3 so we split using + and target index 0
-      const isPartial =
-        !isCorrect &&
-        dbTresholdSingleList.some((correct) => {
-          if (
-            user.examName.toLowerCase() !== correct.examName.toLowerCase() ||
-            user.code !== correct.code
-          ) {
-            return false;
-          }
-
-          const userTaste1 = user.value.split("+")[0];
-          const userTaste2 = user.additionalValue?.split("+")[0];
-          const correctTaste1 = correct.value.split("+")[0];
-          const correctTaste2 = correct.additionalValue?.split("+")[0];
-
-          return (
-            correctTaste1 === userTaste1 ||
-            correctTaste2 === userTaste2 ||
-            correctTaste1 === userTaste2 ||
-            correctTaste2 === userTaste1
-          );
-        });
-
+    if (!matchAnswer) {
       return {
         ...user,
-        result: isCorrect ? "correct" : isPartial ? "partial" : "wrong",
+        result: "wrong",
       };
-    },
-  );
+    }
+
+    const userTaste1 = user.value.split("+")[0].toLowerCase();
+    const userTaste2 = user.additionalValue?.split("+")[0].toLowerCase();
+    const correctTaste1 = matchAnswer.value.split("+")[0].toLowerCase();
+    const correctTaste2 = matchAnswer.additionalValue
+      ?.split("+")[0]
+      .toLowerCase();
+
+    const nameMatch =
+      user.examName.toLowerCase() === matchAnswer.examName.toLowerCase();
+    const codeMatch = user.code === matchAnswer.code;
+
+    const taste1Match = userTaste1 === correctTaste1;
+    const taste2Match = userTaste2 === correctTaste2;
+
+    if (nameMatch && codeMatch && taste1Match && taste2Match) {
+      return {
+        ...user,
+        result: "correct",
+      };
+    } else if (
+      correctTaste1 === userTaste1 ||
+      correctTaste2 === userTaste2 ||
+      correctTaste1 === userTaste2 ||
+      correctTaste2 === userTaste1
+    ) {
+      return {
+        ...user,
+        result: "partial",
+      };
+    } else {
+      return {
+        ...user,
+        result: "wrong",
+      };
+    }
+  });
 
   const attemptNumber = userAnswers[0].attemptNumber;
   const correctCodeScore = 20;
