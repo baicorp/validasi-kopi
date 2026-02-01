@@ -215,18 +215,15 @@ function evaluateTwoOutOfFive(
   );
 
   const answerResults: AnswerWithResult[] = userTwoOutOfFiveList.map((user) => {
-    // correct => code + value + additional value
+    // correct => code + value
     const isCorrect = dbTwoOutOfFiveList.some((correct) => {
       const nameMatch =
         user.examName.toLowerCase() === correct.examName.toLowerCase();
       const codeMatch = user.code === correct.code;
       const valueMatch =
         user.value.toLowerCase() === correct.value.toLowerCase();
-      const addValueMatch =
-        user.additionalValue?.toLowerCase() ===
-        correct.additionalValue?.toLowerCase();
 
-      return nameMatch && codeMatch && valueMatch && addValueMatch;
+      return nameMatch && codeMatch && valueMatch;
     });
 
     return {
