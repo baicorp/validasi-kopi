@@ -64,6 +64,7 @@ export const submissionAttempts = sqliteTable("submission_attempts", {
     .notNull(),
   numberAttempt: integer("number_attempt").notNull(),
   grade: integer("grade").notNull(),
+  additionalGrade: integer("additional_grade"),
   retakeExam: text("retake_exam"),
   examId: text("exam_id")
     .notNull()

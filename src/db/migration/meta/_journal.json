@@ -22,6 +22,13 @@
       "when": 1764087574305,
       "tag": "0002_fluffy_tarantula",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1770012435106,
+      "tag": "0003_silent_the_hood",
+      "breakpoints": true
     }
   ]
 }

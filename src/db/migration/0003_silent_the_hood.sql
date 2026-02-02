@@ -1,0 +1,1 @@
+ALTER TABLE `submission_attempts` ADD `additional_grade` integer;
