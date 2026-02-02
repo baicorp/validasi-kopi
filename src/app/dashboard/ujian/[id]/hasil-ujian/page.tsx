@@ -1,3 +1,4 @@
+import React from "react";
 import { redirect } from "next/navigation";
 import { validateSessionServer } from "@/actions/validateSession";
 import {
@@ -35,18 +36,26 @@ export default async function page({
   return (
     <div className="space-y-4">
       <p className="text-center font-semibold text-lg">Rangkuman Hasil Ujian</p>
+      <p>{results.selectedExams}</p>
       <div className="flex justify-end">
         <ExportSummary
           listExams={results.selectedExams.split(",")}
           data={results.rowData}
         />
       </div>
-      <CustomTable data={results} />
+      {results.selectedExams.includes("treshold mix") ? (
+        <>
+          <ThresholdTable data={results} />
+          <BasicExamTable data={results} />
+        </>
+      ) : (
+        <ProductExamTable data={results} />
+      )}
     </div>
   );
 }
 
-function CustomTable({
+function ProductExamTable({
   data,
 }: {
   data: { selectedExams: string; rowData: NormalizedExamData[] };
@@ -88,6 +97,217 @@ function CustomTable({
           {data.selectedExams.split(",").map((exam) => (
             <HeaderTableAttemptNumber key={exam} />
           ))}
+        </TableRow>
+      </TableHeader>
+
+      <TableBody>
+        {data.rowData.map((row, index) => {
+          const keys = Object.keys(row).slice(4);
+          return (
+            <TableRow
+              key={row.userId}
+              className="border border-neutral-400 border-collapse"
+            >
+              <TableCell className="border border-neutral-400 border-collapse">
+                {index + 1}
+              </TableCell>
+              <TableCell className="border border-neutral-400 border-collapse">
+                {row.name}
+              </TableCell>
+              {keys.map((data) => {
+                return (
+                  <TableCell
+                    key={data}
+                    className={`border border-neutral-400 border-collapse text-center ${typeof row[data] === "number" && row[data] < 70 && "text-red-500"}`}
+                  >
+                    {data === "averageGrade" || data === "result"
+                      ? row[data] === null
+                        ? "belum lengkap"
+                        : row[data]
+                      : row[data]}
+                  </TableCell>
+                );
+              })}
+            </TableRow>
+          );
+        })}
+      </TableBody>
+    </Table>
+  );
+}
+
+function ThresholdTable({
+  data,
+}: {
+  data: { selectedExams: string; rowData: NormalizedExamData[] };
+}) {
+  return (
+    <Table className="border border-neutral-400 border-collapse rounded-md">
+      <TableHeader>
+        <TableRow className="border border-neutral-400 border-collapse">
+          <TableHead
+            rowSpan={3}
+            className="border border-neutral-400 bg-neutral-100 border-collapse text-center w-10"
+          >
+            No
+          </TableHead>
+          <TableHead
+            rowSpan={3}
+            className="border border-neutral-400 bg-neutral-100 border-collapse text-center"
+          >
+            Nama
+          </TableHead>
+          <TableHead
+            colSpan={4}
+            rowSpan={2}
+            className="border border-neutral-400 bg-neutral-100 border-collapse text-center"
+          >
+            Treshold Mix
+          </TableHead>
+          <TableHead
+            colSpan={8}
+            className="border border-neutral-400 bg-neutral-100 border-collapse text-center"
+          >
+            Treshold Single
+          </TableHead>
+        </TableRow>
+
+        <TableRow className="border border-neutral-400 border-collapse">
+          <>
+            <TableHead
+              colSpan={2}
+              className="border border-neutral-400 bg-neutral-100 border-collapse text-center w-12"
+            ></TableHead>
+            <TableHead
+              colSpan={2}
+              className="border border-neutral-400 bg-neutral-100 border-collapse text-center w-12"
+            >
+              1
+            </TableHead>
+            <TableHead
+              colSpan={2}
+              className="border border-neutral-400 bg-neutral-100 border-collapse text-center w-12"
+            >
+              2
+            </TableHead>
+            <TableHead
+              colSpan={2}
+              className="border border-neutral-400 bg-neutral-100 border-collapse text-center w-12"
+            >
+              3
+            </TableHead>
+          </>
+        </TableRow>
+        <TableRow className="border border-neutral-400 border-collapse">
+          <HeaderTableAttemptNumber />
+          <>
+            {[1, 2, 3, 4].map((index) => (
+              <React.Fragment key={index}>
+                <TableHead className="border border-neutral-400 bg-neutral-100 border-collapse text-center w-12">
+                  Rasa
+                </TableHead>
+                <TableHead className="border border-neutral-400 bg-neutral-100 border-collapse text-center w-12">
+                  Skor
+                </TableHead>
+              </React.Fragment>
+            ))}
+          </>
+        </TableRow>
+      </TableHeader>
+
+      <TableBody>
+        {data.rowData.map((row, index) => {
+          const keys = Object.keys(row).slice(4);
+          return (
+            <TableRow
+              key={row.userId}
+              className="border border-neutral-400 border-collapse"
+            >
+              <TableCell className="border border-neutral-400 border-collapse">
+                {index + 1}
+              </TableCell>
+              <TableCell className="border border-neutral-400 border-collapse">
+                {row.name}
+              </TableCell>
+              {keys.map((data) => {
+                return (
+                  <TableCell
+                    key={data}
+                    className={`border border-neutral-400 border-collapse text-center ${typeof row[data] === "number" && row[data] < 70 && "text-red-500"}`}
+                  >
+                    {data === "averageGrade" || data === "result"
+                      ? row[data] === null
+                        ? "belum lengkap"
+                        : row[data]
+                      : row[data]}
+                  </TableCell>
+                );
+              })}
+            </TableRow>
+          );
+        })}
+      </TableBody>
+    </Table>
+  );
+}
+
+function BasicExamTable({
+  data,
+}: {
+  data: { selectedExams: string; rowData: NormalizedExamData[] };
+}) {
+  return (
+    <Table className="border border-neutral-400 border-collapse rounded-md">
+      <TableHeader>
+        <TableRow className="border border-neutral-400 border-collapse">
+          <TableHead
+            rowSpan={2}
+            className="border border-neutral-400 bg-neutral-100 border-collapse text-center w-10"
+          >
+            No
+          </TableHead>
+          <TableHead
+            rowSpan={2}
+            className="border border-neutral-400 bg-neutral-100 border-collapse text-center"
+          >
+            Nama
+          </TableHead>
+          {data.selectedExams
+            .split(",")
+            .map((exam) =>
+              exam.includes("mix") || exam.includes("single") ? null : (
+                <HeaderTableExamName key={exam} examName={exam} />
+              ),
+            )}
+          <TableHead
+            colSpan={4}
+            className="border border-neutral-400 bg-neutral-100 border-collapse text-center"
+          >
+            Treshold
+          </TableHead>
+          <TableHead
+            rowSpan={2}
+            className="border border-neutral-400 bg-neutral-100 border-collapse text-center w-28"
+          >
+            Rata-Rata KPI
+          </TableHead>
+          <TableHead
+            rowSpan={2}
+            className="border border-neutral-400 bg-neutral-100 border-collapse text-center"
+          >
+            Keterangan
+          </TableHead>
+        </TableRow>
+
+        <TableRow className="border border-neutral-400 border-collapse">
+          {data.selectedExams
+            .split(",")
+            .map((exam) =>
+              exam.includes("mix") || exam.includes("single") ? null : (
+                <HeaderTableAttemptNumber key={exam} />
+              ),
+            )}
+          <HeaderTableAttemptNumber />
         </TableRow>
       </TableHeader>
 
