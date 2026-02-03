@@ -72,3 +72,41 @@ export function calculateExamResultsWithCompletionCheck(
 
   return resultsWithCalculations;
 }
+
+export function combineTresholdData(
+  data: NormalizedExamData[],
+): NormalizedExamData[] {
+  return data.map((item) => {
+    const result: NormalizedExamData = {
+      userId: item.userId,
+      username: item.username,
+      name: item.name,
+      departments: item.departments,
+    };
+
+    // 1. Copy non-treshold fields
+    for (const [key, value] of Object.entries(item)) {
+      if (!key.startsWith("treshold")) {
+        result[key] = value;
+      }
+    }
+
+    // 2. Combine treshold values per index
+    for (let i = 1; i <= 4; i++) {
+      const values = [
+        item[`treshold mix_${i}`],
+        item[`treshold single_${i}`],
+        item[`treshold single_${i}_additional`],
+      ].filter((v): v is number => typeof v === "number");
+
+      result[`treshold_${i}`] =
+        values.length > 0
+          ? Number(
+              (values.reduce((a, b) => a + b, 0) / values.length).toFixed(2),
+            )
+          : null;
+    }
+
+    return result;
+  });
+}
