@@ -205,6 +205,7 @@ export async function submitExam(
           userId,
           examId,
           grade: data.grade,
+          additionalGrade: data?.additionalGrade,
           retakeExam: data.grade < 70 ? data.examName : "",
         };
       });
@@ -505,6 +506,7 @@ export async function getSubmissionAttemptSummary(examEventId: string) {
         examName: exams.examName,
         numberAttempt: submissionAttempts.numberAttempt,
         grade: submissionAttempts.grade,
+        additionalGrade: submissionAttempts.additionalGrade,
       })
       .from(submissionAttempts)
       .leftJoin(user, eq(submissionAttempts.userId, user.id))
@@ -534,6 +536,7 @@ export interface SubmissionRow {
   examName: string | null;
   numberAttempt: number;
   grade: number | null;
+  additionalGrade: number | null;
 }
 
 export interface NormalizedExamData {
@@ -565,6 +568,7 @@ function normalizeExamSubmissions(
       examName,
       numberAttempt,
       grade,
+      additionalGrade,
     } = row;
 
     // A submission cannot be grouped or mapped without a valid user ID or exam name.
@@ -595,6 +599,9 @@ function normalizeExamSubmissions(
       for (const type of examTypes) {
         for (let i = 1; i <= 4; i++) {
           initialEntry[`${type}_${i}`] = null;
+          if (type === "treshold single") {
+            initialEntry[`${type}_${i}_additional`] = null;
+          }
         }
       }
       normalizedDataMap.set(userId, initialEntry);
@@ -608,6 +615,12 @@ function normalizeExamSubmissions(
       // Construct the dynamic key and assign the grade (which can be null)
       const key = `${examName}_${numberAttempt}`;
       userData[key] = grade;
+
+      // add additional grade for treshold mix exam (rasa + skor) cell table
+      if (examName === "treshold single") {
+        const additionalKey = `${examName}_${numberAttempt}_additional`;
+        userData[additionalKey] = additionalGrade;
+      }
     } else {
       throw Error("Terdapat user dengan number attempt < 1 && > 4 ");
     }
