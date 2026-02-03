@@ -3,6 +3,10 @@ import { NormalizedExamData } from "@/actions/examSubmissions";
 export function calculateExamResultsWithCompletionCheck(
   normalizedData: NormalizedExamData[],
 ): NormalizedExamData[] {
+  if (normalizedData.length === 0) {
+    return [];
+  }
+
   const NUM_ATTEMPTS = 4;
 
   const resultsWithCalculations: NormalizedExamData[] = [];
