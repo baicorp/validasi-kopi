@@ -14,6 +14,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  calculateExamResultsWithCompletionCheck,
+  combineTresholdData,
+} from "@/lib/evaluateFinal";
 import ExportSummary from "@/components/ui/exportSummary";
 
 export default async function page({
@@ -36,7 +40,6 @@ export default async function page({
   return (
     <div className="space-y-4">
       <p className="text-center font-semibold text-lg">Rangkuman Hasil Ujian</p>
-      <p>{results.selectedExams}</p>
       <div className="flex justify-end">
         <ExportSummary
           listExams={results.selectedExams.split(",")}
@@ -60,6 +63,15 @@ function ProductExamTable({
 }: {
   data: { selectedExams: string; rowData: NormalizedExamData[] };
 }) {
+  const calculateFinal = calculateExamResultsWithCompletionCheck(data.rowData);
+  // remove all object with key containing "additional",
+  // because it's not needed for product exam table
+  const cleanProductExamData = calculateFinal.map((item) => {
+    return Object.fromEntries(
+      Object.entries(item).filter(([key]) => !key.includes("additional")),
+    );
+  });
+
   return (
     <Table className="border border-neutral-400 border-collapse rounded-md">
       <TableHeader>
@@ -101,7 +113,7 @@ function ProductExamTable({
       </TableHeader>
 
       <TableBody>
-        {data.rowData.map((row, index) => {
+        {cleanProductExamData.map((row, index) => {
           const keys = Object.keys(row).slice(4);
           return (
             <TableRow
@@ -141,6 +153,15 @@ function ThresholdTable({
 }: {
   data: { selectedExams: string; rowData: NormalizedExamData[] };
 }) {
+  // only include keys with "treshold" for this table
+  const cleanTresholdExamData = data.rowData.map((item) => {
+    return Object.fromEntries(
+      Object.entries(item).filter(
+        ([key]) => key.includes("treshold") || key == "name",
+      ),
+    );
+  });
+
   return (
     <Table className="border border-neutral-400 border-collapse rounded-md">
       <TableHeader>
@@ -216,11 +237,11 @@ function ThresholdTable({
       </TableHeader>
 
       <TableBody>
-        {data.rowData.map((row, index) => {
-          const keys = Object.keys(row).slice(4);
+        {cleanTresholdExamData.map((row, index) => {
+          const keys = Object.keys(row).slice(1);
           return (
             <TableRow
-              key={row.userId}
+              key={index}
               className="border border-neutral-400 border-collapse"
             >
               <TableCell className="border border-neutral-400 border-collapse">
@@ -229,17 +250,13 @@ function ThresholdTable({
               <TableCell className="border border-neutral-400 border-collapse">
                 {row.name}
               </TableCell>
-              {keys.map((data) => {
+              {keys.map((key) => {
                 return (
                   <TableCell
-                    key={data}
-                    className={`border border-neutral-400 border-collapse text-center ${typeof row[data] === "number" && row[data] < 70 && "text-red-500"}`}
+                    key={key}
+                    className="border border-neutral-400 border-collapse text-center"
                   >
-                    {data === "averageGrade" || data === "result"
-                      ? row[data] === null
-                        ? "belum lengkap"
-                        : row[data]
-                      : row[data]}
+                    {row[key]}
                   </TableCell>
                 );
               })}
@@ -256,6 +273,10 @@ function BasicExamTable({
 }: {
   data: { selectedExams: string; rowData: NormalizedExamData[] };
 }) {
+  const tresholdFinalScore = combineTresholdData(data.rowData);
+  const calculateFinal =
+    calculateExamResultsWithCompletionCheck(tresholdFinalScore);
+
   return (
     <Table className="border border-neutral-400 border-collapse rounded-md">
       <TableHeader>
@@ -275,7 +296,7 @@ function BasicExamTable({
           {data.selectedExams
             .split(",")
             .map((exam) =>
-              exam.includes("mix") || exam.includes("single") ? null : (
+              exam.includes("treshold") ? null : (
                 <HeaderTableExamName key={exam} examName={exam} />
               ),
             )}
@@ -303,7 +324,7 @@ function BasicExamTable({
           {data.selectedExams
             .split(",")
             .map((exam) =>
-              exam.includes("mix") || exam.includes("single") ? null : (
+              exam.includes("treshold") ? null : (
                 <HeaderTableAttemptNumber key={exam} />
               ),
             )}
@@ -312,7 +333,7 @@ function BasicExamTable({
       </TableHeader>
 
       <TableBody>
-        {data.rowData.map((row, index) => {
+        {calculateFinal.map((row, index) => {
           const keys = Object.keys(row).slice(4);
           return (
             <TableRow
