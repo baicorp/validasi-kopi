@@ -379,28 +379,36 @@ function evaluateTresholdMix(
 
     const taste1Match = userTaste1 === correctTaste1;
     const taste2Match = userTaste2 === correctTaste2;
+    const taste1MatchReverse = userTaste1 === correctTaste2;
+    const taste2MatchReverse = userTaste2 === correctTaste1;
 
-    if (nameMatch && codeMatch && taste1Match && taste2Match) {
+    const isTasteMatch =
+      (taste1Match && taste2Match) ||
+      (taste1MatchReverse && taste2MatchReverse);
+
+    if (!nameMatch || !codeMatch) {
+      return { ...user, result: "wrong" };
+    }
+
+    if (isTasteMatch) {
       return {
         ...user,
         result: "correct",
-      };
-    } else if (
-      correctTaste1 === userTaste1 ||
-      correctTaste2 === userTaste2 ||
-      correctTaste1 === userTaste2 ||
-      correctTaste2 === userTaste1
-    ) {
-      return {
-        ...user,
-        result: "partial",
-      };
-    } else {
-      return {
-        ...user,
-        result: "wrong",
+        additionalResult: "correct",
       };
     }
+
+    const hasPartialTaste =
+      (userTaste1 &&
+        (userTaste1 === correctTaste1 || userTaste1 === correctTaste2)) ||
+      (userTaste2 &&
+        (userTaste2 === correctTaste1 || userTaste2 === correctTaste2));
+
+    if (hasPartialTaste) {
+      return { ...user, result: "partial" };
+    }
+
+    return { ...user, result: "wrong" };
   });
 
   const attemptNumber = userAnswers[0].attemptNumber;
