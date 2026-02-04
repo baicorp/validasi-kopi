@@ -327,12 +327,14 @@ function evaluateTresholdSingle(
   const totalCorrectTaste = answerResults.filter(
     (answer) => answer.result === "correct",
   ).length;
-  const tasteGrade = totalCorrectTaste * codeScore;
+  let tasteGrade = totalCorrectTaste * codeScore;
+  tasteGrade = tasteGrade === 99.96000000000001 ? 100 : tasteGrade;
 
   const totalCorrectIntensity = answerResults.filter(
     (answer) => answer.additionalResult === "correct",
   ).length;
-  const intensityGrade = totalCorrectIntensity * codeScore;
+  let intensityGrade = totalCorrectIntensity * codeScore;
+  intensityGrade = intensityGrade === 99.96000000000001 ? 100 : intensityGrade;
 
   return {
     examName: examNameTarget,
