@@ -254,7 +254,7 @@ function ThresholdTable({
                 return (
                   <TableCell
                     key={key}
-                    className="border border-neutral-400 border-collapse text-center"
+                    className={`border border-neutral-400 border-collapse text-center ${typeof row[key] === "number" && row[key] < 70 && "text-red-500"}`}
                   >
                     {row[key]}
                   </TableCell>
