@@ -184,6 +184,18 @@ export async function submitExam(
       // 10. insert submissionAttempts data and submissionNote if available;
       const submissionNoteData: InferInsertModel<typeof examSubmissionNotes>[] =
         [];
+
+      // find final treshold (tmx + tsg (skor + rasa)) final grade avarege
+      const findTreshold = results.filter((data) =>
+        data.examName.toLowerCase().includes("treshold"),
+      );
+      let finalTresholdGrade = findTreshold.reduce((acc, curr) => {
+        const additionalGrade = curr.additionalGrade ? curr.additionalGrade : 0;
+        return acc + curr.grade + additionalGrade;
+      }, 0);
+      // NB : this calculation follow combineTresholdData();
+      finalTresholdGrade = finalTresholdGrade / 3; // tresholdSingle (rasa + skor) + tresholdMix
+
       const submissionAttemptsInsertValues: InferInsertModel<
         typeof submissionAttempts
       >[] = results.map((data) => {
@@ -198,6 +210,15 @@ export async function submitExam(
           submissionNoteData.push({ submissionAttemptId, note: data.note });
         }
 
+        // if final trehsold (tmx + tsg (skor + rasa)) avarege grade < 70,
+        // all treshold (tmx + tsg (skor + rasa)) must be retaken
+        const isThresholdFail =
+          data.examName.toLowerCase().includes("treshold") &&
+          finalTresholdGrade < 70;
+        const isGradeFail = data.grade < 70;
+
+        const isRetake = isThresholdFail || isGradeFail ? data.examName : "";
+
         return {
           id: submissionAttemptId,
           numberAttempt: nextAttempt,
@@ -206,7 +227,7 @@ export async function submitExam(
           examId,
           grade: data.grade,
           additionalGrade: data?.additionalGrade,
-          retakeExam: data.grade < 70 ? data.examName : "",
+          retakeExam: isRetake,
         };
       });
       await tx
