@@ -29,6 +29,13 @@
       "when": 1770012435106,
       "tag": "0003_silent_the_hood",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1770291336253,
+      "tag": "0004_whole_metal_master",
+      "breakpoints": true
     }
   ]
 }

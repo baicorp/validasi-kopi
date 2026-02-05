@@ -90,6 +90,7 @@ export const examSubmissions = sqliteTable("exam_submissions", {
   value: text("value").notNull(),
   additionalValue: text("additional_value"),
   result: text("result").notNull(), // correct | partial | wrong
+  additionalResult: text("additional_result"), // correct | wrong
   submissionAttemptId: text("submission_attempt_id")
     .notNull()
     .references(() => submissionAttempts.id, { onDelete: "cascade" }),
