@@ -207,7 +207,10 @@ export async function submitExam(
 
         if (data.note) {
           // this data for insert examSubmissionNotes
-          submissionNoteData.push({ submissionAttemptId, note: data.note });
+          submissionNoteData.push({
+            submissionAttemptId,
+            note: data.note.trim(),
+          });
         }
 
         // if final trehsold (tmx + tsg (skor + rasa)) avarege grade < 70,
