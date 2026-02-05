@@ -121,47 +121,10 @@ export async function submitExam(
         );
       }
 
-      // 8. if selectedExam include skoring, we have to provide additional code value pairs
-      const skoringMap: Record<string, string> = {
-        "1.5": "5",
-        "2": "4",
-        "4": "2",
-        "5": "1.5",
-      };
-
-      const additionalSkoringData: Answer[] = [];
-
-      for (const data of submittedExamData) {
-        if (data.examName !== "skoring") continue;
-
-        const newValue = skoringMap[data.value];
-        if (!newValue) continue;
-
-        additionalSkoringData.push({
-          ...data,
-          value: newValue,
-          code: data.code,
-        });
-      }
-
-      // this submittedExamDataForDbLookUp is only use for database look up
-      const submittedExamDataForDbLookUp = [
-        ...submittedExamData,
-        ...additionalSkoringData,
-      ];
-
-      const normalizedPairs = submittedExamDataForDbLookUp.map((data) => ({
-        examName: data.examName.toLowerCase(),
-        code: data.code.toLowerCase(),
-        value: data.value.toLowerCase(),
-      }));
-
-      // FIXME: this database lookup is not 100% valid for thresholdMix lookup
-      const orConditions = normalizedPairs.map((pair) =>
+      const orConditions = submittedExamData.map((pair) =>
         and(
           eq(sql`lower(${exams.examName})`, pair.examName),
           eq(sql`lower(${codes.code})`, pair.code),
-          eq(sql`lower(${codes.value})`, pair.value),
         ),
       );
 
@@ -176,16 +139,16 @@ export async function submitExam(
         .leftJoin(exams, eq(codes.examId, exams.id))
         .where(and(eq(codes.codeGroupId, codeGroupId), or(...orConditions)));
 
-      // 9. evaluate answer list by comparing userAnswerList and dbAnswerList.
+      // 8. evaluate answer list by comparing userAnswerList and dbAnswerList.
       // then give result either "correct" | "partial" | "wrong"
       // @ts-expect-error correct answer actually work (null and undefined)
       const results = evaluateAnswers(submittedExamData, dbAnswerList);
 
-      // 10. insert submissionAttempts data and submissionNote if available;
+      // 9. insert submissionAttempts data and submissionNote if available;
       const submissionNoteData: InferInsertModel<typeof examSubmissionNotes>[] =
         [];
 
-      // find final treshold (tmx + tsg (skor + rasa)) final grade avarege
+      // 10. find final treshold (tmx + tsg (skor + rasa)) final grade avarege
       const findTreshold = results.filter((data) =>
         data.examName.toLowerCase().includes("treshold"),
       );
