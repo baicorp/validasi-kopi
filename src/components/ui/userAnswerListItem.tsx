@@ -125,6 +125,7 @@ function UserAnswerListItem({
     value: string;
     addValue: string | null;
     result: string;
+    additionalResult: string | null;
   }[];
   note: string | null;
 }) {
@@ -139,6 +140,7 @@ function UserAnswerListItem({
             value={item.value}
             addValue={item.addValue}
             result={item.result}
+            additionalResult={item.additionalResult}
           />
         ))}
         {note && (
@@ -156,17 +158,19 @@ function UserAnswerCodeValueItem({
   value,
   addValue,
   result,
+  additionalResult,
 }: {
   code: string;
   value: string;
   addValue: string | null;
   result: string;
+  additionalResult: string | null;
 }) {
   const headerValue = `${value} ${addValue ?? ""}`;
 
   return (
     <div
-      className={`min-w-30 shrink-0 border rounded-md text-sm ${result === "wrong" && "bg-red-100"}`}
+      className={`min-w-30 shrink-0 border rounded-md text-sm ${result === "wrong" ? "bg-red-200" : (result === "correct" && additionalResult === "wrong") || result === "partial" ? "bg-orange-200" : ""}`}
     >
       <p className="px-3 pt-2 pb-1 bg-muted font-medium text-center">
         {headerValue.trim() ? headerValue : "tidak diisi"}

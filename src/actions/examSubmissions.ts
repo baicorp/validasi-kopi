@@ -249,6 +249,7 @@ export async function submitExam(
           value: result.value,
           additionalValue: result.additionalValue,
           result: result.result,
+          additionalResult: result.additionalResult,
         }));
       });
       await tx.insert(examSubmissions).values(examSubmissionsInsertValues);
@@ -370,6 +371,7 @@ export async function getSubmissionSummary(
         code: examSubmissions.code,
         value: examSubmissions.value,
         result: examSubmissions.result,
+        additionalResult: examSubmissions.additionalResult,
         addValue: examSubmissions.additionalValue,
         note: examSubmissionNotes.note,
       })
@@ -403,6 +405,7 @@ export async function getSubmissionSummary(
               value: string;
               addValue: string | null;
               result: string;
+              additionalResult: string | null;
             }[];
             note: string | null;
           }
@@ -438,6 +441,7 @@ export async function getSubmissionSummary(
         value: row.value,
         addValue: row.addValue,
         result: row.result,
+        additionalResult: row.additionalResult,
       });
     }
 
