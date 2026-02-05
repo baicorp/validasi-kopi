@@ -96,6 +96,9 @@ export function combineTresholdData(
     }
 
     // 2. Combine treshold values per index
+    // NB : currently we calculate using (tmx + tsgRasa + tsgSkor) / 3,
+    // other calculation methods (((tsgRasa + tsgSkor) / 2) + tmx) /2
+    // the result can be different so please make sure how to calculate the treshold values
     for (let i = 1; i <= 4; i++) {
       const values = [
         item[`treshold mix_${i}`],
