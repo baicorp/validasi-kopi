@@ -241,15 +241,15 @@ function evaluateTwoOutOfFive(
   );
 
   const attemptNumber = userAnswers[0].attemptNumber;
-  const codeScore = 20;
+
   const totalCorrectCodeCreamer = twoOutOfFiveCreamer.filter(
-    (data) => data.result === "correct",
+    (data) => data.result === "correct" && data.value === "sama",
   ).length;
-  const gradeCreamer = totalCorrectCodeCreamer * codeScore;
+  const gradeCreamer = totalCorrectCodeCreamer === 2 ? 100 : 0;
   const totalCorrectCodePure = twoOutOfFivePure.filter(
-    (data) => data.result === "correct",
+    (data) => data.result === "correct" && data.value === "sama",
   ).length;
-  const gradePure = totalCorrectCodePure * codeScore;
+  const gradePure = totalCorrectCodePure === 2 ? 100 : 0;
 
   return [
     {
