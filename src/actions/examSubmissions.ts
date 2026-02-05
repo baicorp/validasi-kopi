@@ -628,13 +628,9 @@ function haveSameValue(answers: Answer[]) {
 
   for (const obj of answers) {
     const isIdentifikasi = obj.examName === "identifikasi";
-    const isTwoOutOfFive = obj.examName.includes("2 out of 5");
 
-    if (isIdentifikasi || isTwoOutOfFive) {
-      const productValue =
-        (isIdentifikasi ? obj.value : obj.additionalValue) ?? "";
-
-      uniqueProductName.add(productValue);
+    if (isIdentifikasi) {
+      uniqueProductName.add(obj.value);
     }
 
     uniqueCode.add(obj.code);
@@ -642,7 +638,7 @@ function haveSameValue(answers: Answer[]) {
 
   const totalCodeCount = answers.length;
   const totalProductNameCount = answers.filter(
-    (a) => a.examName === "identifikasi" || a.examName.includes("2 out of 5"),
+    (a) => a.examName === "identifikasi",
   ).length;
 
   const allCodesUnique = uniqueCode.size === totalCodeCount;
