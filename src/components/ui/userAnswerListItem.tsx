@@ -73,8 +73,6 @@ function SubmissionList({ numberAttempt }: { numberAttempt: number }) {
     getSubmissionSummary(id, numberAttempt),
   );
 
-  console.log(submission);
-
   if (isLoading) {
     return <Loading />;
   }
@@ -131,20 +129,18 @@ function UserAnswerListItem({
   note: string | null;
 }) {
   return (
-    <div className="flex flex-col p-3 rounded-md border">
-      <div className="flex gap-2">
-        <p className="w-40 text-wrap shrink-0">{participantName}</p>
-        <div className="shrink-0 flex gap-2">
-          {listCodeValue.map((item, index) => (
-            <UserAnswerCodeValueItem
-              key={index}
-              code={item.code}
-              value={item.value}
-              addValue={item.addValue}
-              result={item.result}
-            />
-          ))}
-        </div>
+    <div className="p-2 rounded-md border min-w-0">
+      <p className="break-words">{participantName}</p>
+      <div className="flex gap-2 overflow-x-auto">
+        {listCodeValue.map((item, index) => (
+          <UserAnswerCodeValueItem
+            key={index}
+            code={item.code}
+            value={item.value}
+            addValue={item.addValue}
+            result={item.result}
+          />
+        ))}
         {note && (
           <div className="border-l-4 border-l-orange-300 border border-orange-200 text-sm px-3 py-1">
             {note}
@@ -170,7 +166,7 @@ function UserAnswerCodeValueItem({
 
   return (
     <div
-      className={`border rounded-md text-sm w-fi  ${result === "wrong" && "bg-red-100"}`}
+      className={`min-w-30 shrink-0 border rounded-md text-sm ${result === "wrong" && "bg-red-100"}`}
     >
       <p className="px-3 pt-2 pb-1 bg-muted font-medium text-center">
         {headerValue.trim() ? headerValue : "tidak diisi"}

@@ -109,7 +109,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </SidebarGroup>
         </SidebarFooter>
       </Sidebar>
-      <main className="basis-full py-4">
+      <main className="flex-1 min-w-0 py-4">
         <section className="flex items-center gap-2 px-3 lg:px-8">
           <SidebarTrigger />
           <div className="bg-border w-0.5 h-3.5 mr-1" />
