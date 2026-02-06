@@ -15,8 +15,8 @@ export const examEvents = mysqlTable("exam_events", {
     .$defaultFn(() => crypto.randomUUID())
     .notNull(),
   examEventName: varchar("exam_event_name", { length: 255 }).notNull(),
-  examStart: timestamp("exam_start").notNull(),
-  examEnd: timestamp("exam_end").notNull(),
+  examStart: varchar("exam_start", { length: 255 }).notNull(),
+  examEnd: varchar("exam_end", { length: 255 }).notNull(),
   codeGroupRegulerId: varchar("code_group_reguler_id", { length: 36 })
     .notNull()
     .references(() => codeGroups.id),
