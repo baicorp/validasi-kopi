@@ -12,7 +12,7 @@ export const auth = betterAuth({
   plugins: [username(), nextCookies(), admin()],
   database: drizzleAdapter(db, {
     schema,
-    provider: "sqlite", // for sqlite DB
+    provider: "mysql",
   }),
   user: {
     additionalFields: {
