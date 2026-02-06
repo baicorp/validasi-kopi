@@ -126,7 +126,7 @@ function SelectedCodeGroupCard({ codeGroupId }: { codeGroupId: string }) {
       <div className="flex gap-4">
         <div className="flex gap-2 items-center">
           <Calendar className="w-3 h-3" />
-          <p>{codeGroup.createdAt}</p>
+          <p>{codeGroup.createdAt.toLocaleString()}</p>
         </div>
         <div className="flex gap-2 items-center">
           <User className="w-3 h-3" />

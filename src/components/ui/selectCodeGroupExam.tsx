@@ -41,7 +41,7 @@ export default function SelectCodeGroupExam() {
 
   return (
     <Select name="code-group-exam" required>
-      <SelectTrigger className="w-full max-w-[334px]">
+      <SelectTrigger className="w-full max-w-83.5">
         <SelectValue placeholder="Pilih soal ujian" />
       </SelectTrigger>
       <SelectContent>
@@ -54,7 +54,7 @@ export default function SelectCodeGroupExam() {
                 <span className="text-muted-foreground">#{group.id}</span>
               </span>
               <span className="text-xs text-muted-foreground">
-                {group.createdAt}
+                {group.createdAt.toDateString()}
               </span>
             </SelectItem>
           ))}

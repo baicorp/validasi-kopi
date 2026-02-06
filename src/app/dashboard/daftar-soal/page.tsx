@@ -95,7 +95,7 @@ function CodeGroupItem({
   groupName: string;
   selectedExam: string;
   totalParticipants: number;
-  createdAt: string | null;
+  createdAt: Date | null;
 }) {
   return (
     <div
@@ -115,7 +115,7 @@ function CodeGroupItem({
           <div className="flex items-center gap-2.5">
             <time
               className="font-mono text-xs text-muted-foreground"
-              dateTime={createdAt?.split(" ")[0]}
+              dateTime={createdAt?.toLocaleString().split(" ")[0]}
             >
               {new Date(createdAt + "Z").toLocaleString()}
             </time>

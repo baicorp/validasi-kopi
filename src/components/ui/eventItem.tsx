@@ -97,7 +97,11 @@ export default function EventItem({
         <Separator />
         <div className="p-4 bg-muted">
           <p className="text-xs text-muted-foreground">
-            Diperbarui : {new Date(updatedAt + "Z").toLocaleString()}
+            Diperbarui :{" "}
+            {new Date(updatedAt!).toLocaleString("en-US", {
+              timeZone: "Asia/Jakarta",
+              hour12: true,
+            })}
           </p>
         </div>
       </div>
