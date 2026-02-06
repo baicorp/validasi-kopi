@@ -1,7 +1,13 @@
 import { user } from "./auth";
 import { exams } from "./exams";
 import { codeGroups } from "./codes";
-import { mysqlTable, int, timestamp, varchar } from "drizzle-orm/mysql-core";
+import {
+  mysqlTable,
+  int,
+  timestamp,
+  varchar,
+  float,
+} from "drizzle-orm/mysql-core";
 
 export const examEvents = mysqlTable("exam_events", {
   id: varchar("id", { length: 36 })
@@ -65,8 +71,8 @@ export const submissionAttempts = mysqlTable("submission_attempts", {
     .$defaultFn(() => crypto.randomUUID())
     .notNull(),
   numberAttempt: int("number_attempt").notNull(),
-  grade: int("grade").notNull(),
-  additionalGrade: int("additional_grade"),
+  grade: float("grade").notNull(),
+  additionalGrade: float("additional_grade"),
   retakeExam: varchar("retake_exam", { length: 255 }),
   examId: varchar("exam_id", { length: 36 })
     .notNull()
