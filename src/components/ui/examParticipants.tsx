@@ -123,28 +123,26 @@ export default function ExamParticipants({
           </div>
         )}
       </div>
-      {participants.length !== 0 && (
-        <div className="space-y-2 mt-2">
-          <div className="grid grid-cols-3 gap-2">
-            {participants.map((participant) => (
-              <ExamParticipantItem
-                key={participant.username}
-                name={participant.name}
-                username={participant.username}
-                department={participant.department}
-              />
-            ))}
-          </div>
-          <Button
-            onClick={handleSaveParticipant}
-            disabled={isLoad}
-            className="ml-auto"
-          >
-            Simpan
-            {isLoad && <LoaderCircle className="animate-spin" />}
-          </Button>
+      <div className="space-y-2 mt-2">
+        <div className="grid grid-cols-3 gap-2">
+          {participants.map((participant) => (
+            <ExamParticipantItem
+              key={participant.username}
+              name={participant.name}
+              username={participant.username}
+              department={participant.department}
+            />
+          ))}
         </div>
-      )}
+        <Button
+          onClick={handleSaveParticipant}
+          disabled={isLoad}
+          className="ml-auto"
+        >
+          Simpan
+          {isLoad && <LoaderCircle className="animate-spin" />}
+        </Button>
+      </div>
     </div>
   );
 }
