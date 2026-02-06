@@ -1,1 +1,0 @@
-ALTER TABLE `exam_submissions` ADD `additional_result` text;
