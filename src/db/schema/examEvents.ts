@@ -1,116 +1,121 @@
 import { user } from "./auth";
 import { exams } from "./exams";
-import { sql } from "drizzle-orm";
 import { codeGroups } from "./codes";
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { mysqlTable, int, timestamp, varchar } from "drizzle-orm/mysql-core";
 
-export const examEvents = sqliteTable("exam_events", {
-  id: text("id")
+export const examEvents = mysqlTable("exam_events", {
+  id: varchar("id", { length: 36 })
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID())
     .notNull(),
-  examEventName: text("exam_event_name").notNull(),
-  examStart: text("exam_start").notNull(),
-  examEnd: text("exam_end").notNull(),
-  codeGroupRegulerId: text("code_group_reguler_id")
+  examEventName: varchar("exam_event_name", { length: 255 }).notNull(),
+  examStart: timestamp("exam_start").notNull(),
+  examEnd: timestamp("exam_end").notNull(),
+  codeGroupRegulerId: varchar("code_group_reguler_id", { length: 36 })
     .notNull()
     .references(() => codeGroups.id),
-  codeGroupRetakeId: text("code_group_retake_id")
+  codeGroupRetakeId: varchar("code_group_retake_id", { length: 36 })
     .notNull()
     .references(() => codeGroups.id),
-  createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: text("updated_at")
-    .default(sql`(CURRENT_TIMESTAMP)`)
-    .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+  createdAt: timestamp("created_at", { fsp: 3 }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { fsp: 3 })
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
 });
 
-export const sampleExamAnswer = sqliteTable("sample_exam_answer", {
-  id: text("id")
+export const sampleExamAnswer = mysqlTable("sample_exam_answer", {
+  id: varchar("id", { length: 36 })
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID())
     .notNull(),
-  value: text("value").notNull(),
-  examEventId: text("exam_event_id")
+  value: varchar("value", { length: 255 }).notNull(),
+  examEventId: varchar("exam_event_id", { length: 36 })
     .notNull()
     .references(() => examEvents.id, { onDelete: "cascade" }),
-  examName: text("exam_name").notNull(),
-  createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: text("updated_at")
-    .default(sql`(CURRENT_TIMESTAMP)`)
-    .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+  examName: varchar("exam_name", { length: 255 }).notNull(),
+  createdAt: timestamp("created_at", { fsp: 3 }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { fsp: 3 })
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
 });
 
-export const examRegistrations = sqliteTable("exam_registrations", {
-  id: text("id")
+export const examRegistrations = mysqlTable("exam_registrations", {
+  id: varchar("id", { length: 36 })
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID())
     .notNull(),
-  userId: text("user_id")
+  userId: varchar("user_id", { length: 36 })
     .notNull()
     .references(() => user.id),
-  examEventId: text("exam_event_id")
+  examEventId: varchar("exam_event_id", { length: 36 })
     .notNull()
     .references(() => examEvents.id, { onDelete: "cascade" }),
-  createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: text("updated_at")
-    .default(sql`(CURRENT_TIMESTAMP)`)
-    .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+  createdAt: timestamp("created_at", { fsp: 3 }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { fsp: 3 })
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
 });
 
-export const submissionAttempts = sqliteTable("submission_attempts", {
-  id: text("id")
+export const submissionAttempts = mysqlTable("submission_attempts", {
+  id: varchar("id", { length: 36 })
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID())
     .notNull(),
-  numberAttempt: integer("number_attempt").notNull(),
-  grade: integer("grade").notNull(),
-  additionalGrade: integer("additional_grade"),
-  retakeExam: text("retake_exam"),
-  examId: text("exam_id")
+  numberAttempt: int("number_attempt").notNull(),
+  grade: int("grade").notNull(),
+  additionalGrade: int("additional_grade"),
+  retakeExam: varchar("retake_exam", { length: 255 }),
+  examId: varchar("exam_id", { length: 36 })
     .notNull()
     .references(() => exams.id),
-  userId: text("user_id")
+  userId: varchar("user_id", { length: 36 })
     .notNull()
     .references(() => user.id),
-  examEventId: text("exam_event_id")
+  examEventId: varchar("exam_event_id", { length: 36 })
     .notNull()
     .references(() => examEvents.id, { onDelete: "cascade" }),
-  createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: text("updated_at")
-    .default(sql`(CURRENT_TIMESTAMP)`)
-    .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+  createdAt: timestamp("created_at", { fsp: 3 }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { fsp: 3 })
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
 });
 
-export const examSubmissions = sqliteTable("exam_submissions", {
-  id: text("id")
+export const examSubmissions = mysqlTable("exam_submissions", {
+  id: varchar("id", { length: 36 })
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID())
     .notNull(),
-  code: text("code").notNull(),
-  value: text("value").notNull(),
-  additionalValue: text("additional_value"),
-  result: text("result").notNull(), // correct | partial | wrong
-  additionalResult: text("additional_result"), // correct | wrong
-  submissionAttemptId: text("submission_attempt_id")
+  code: varchar("code", { length: 255 }).notNull(),
+  value: varchar("value", { length: 255 }).notNull(),
+  additionalValue: varchar("additional_value", { length: 255 }),
+  result: varchar("result", { length: 255 }).notNull(), // correct | partial | wrong
+  additionalResult: varchar("additional_result", { length: 255 }), // correct | wrong
+  subAttemptId: varchar("sub_attempt_id", { length: 36 })
     .notNull()
     .references(() => submissionAttempts.id, { onDelete: "cascade" }),
-  createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: text("updated_at")
-    .default(sql`(CURRENT_TIMESTAMP)`)
-    .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+  createdAt: timestamp("created_at", { fsp: 3 }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { fsp: 3 })
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
 });
 
-export const examSubmissionNotes = sqliteTable("exam_submission_notes", {
-  id: text("id")
+export const examSubmissionNotes = mysqlTable("exam_submission_notes", {
+  id: varchar("id", { length: 36 })
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID())
     .notNull(),
-  note: text("note").notNull(),
-  submissionAttemptId: text("submission_attempt_id")
+  note: varchar("note", { length: 255 }).notNull(),
+  subAttemptId: varchar("sub_attempt_id", { length: 36 })
     .notNull()
     .references(() => submissionAttempts.id, { onDelete: "cascade" }),
-  createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: text("updated_at")
-    .default(sql`(CURRENT_TIMESTAMP)`)
-    .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+  createdAt: timestamp("created_at", { fsp: 3 }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { fsp: 3 })
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
 });

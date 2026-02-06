@@ -1,39 +1,38 @@
 import { exams } from "./exams";
-import { sql } from "drizzle-orm";
-import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
+import { mysqlTable, int, timestamp, varchar } from "drizzle-orm/mysql-core";
 
-// code_groups
-export const codeGroups = sqliteTable("code_groups", {
-  id: text("id")
+export const codeGroups = mysqlTable("code_groups", {
+  id: varchar("id", { length: 36 })
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID())
     .notNull(),
-  groupName: text("group_name").notNull(),
-  selectedExam: text("selected_exam").notNull(),
-  totalParticipants: integer("total_participants").notNull().default(0),
-  createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: text("updated_at")
-    .default(sql`(CURRENT_TIMESTAMP)`)
-    .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+  groupName: varchar("group_name", { length: 255 }).notNull(),
+  selectedExam: varchar("selected_exam", { length: 255 }).notNull(),
+  totalParticipants: int("total_participants").default(0).notNull(),
+  createdAt: timestamp("created_at", { fsp: 3 }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { fsp: 3 })
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
 });
 
-// codes
-export const codes = sqliteTable("codes", {
-  id: text("id")
+export const codes = mysqlTable("codes", {
+  id: varchar("id", { length: 36 })
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID())
     .notNull(),
-  code: text("code").notNull(),
-  value: text("value").notNull(),
-  additionalValue: text("additional_value"),
-  examId: text("exam_id")
+  code: varchar("code", { length: 255 }).notNull(),
+  value: varchar("value", { length: 255 }).notNull(),
+  additionalValue: varchar("additional_value", { length: 255 }),
+  examId: varchar("exam_id", { length: 36 })
     .notNull()
     .references(() => exams.id),
-  codeGroupId: text("code_group_id")
+  codeGroupId: varchar("code_group_id", { length: 36 })
     .notNull()
     .references(() => codeGroups.id, { onDelete: "cascade" }),
-  createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: text("updated_at")
-    .default(sql`(CURRENT_TIMESTAMP)`)
-    .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+  createdAt: timestamp("created_at", { fsp: 3 }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { fsp: 3 })
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
 });

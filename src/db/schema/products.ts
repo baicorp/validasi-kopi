@@ -1,31 +1,32 @@
-import { sql } from "drizzle-orm";
-import { sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { mysqlTable, timestamp, varchar } from "drizzle-orm/mysql-core";
 
 // product_categories
-export const productCategories = sqliteTable("product_categories", {
-  id: text("id")
+export const productCategories = mysqlTable("product_categories", {
+  id: varchar("id", { length: 36 })
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID())
     .notNull(),
-  categoryName: text("category_name").unique().notNull(),
-  createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: text("updated_at")
-    .default(sql`(CURRENT_TIMESTAMP)`)
-    .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+  categoryName: varchar("category_name", { length: 255 }).unique().notNull(),
+  createdAt: timestamp("created_at", { fsp: 3 }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { fsp: 3 })
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
 });
 
 // products
-export const products = sqliteTable("products", {
-  id: text("id")
+export const products = mysqlTable("products", {
+  id: varchar("id", { length: 36 })
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID())
     .notNull(),
-  productName: text("product_name").unique().notNull(),
-  productCategoryId: text("product_category_id")
+  productName: varchar("product_name", { length: 255 }).unique().notNull(),
+  productCategoryId: varchar("product_category_id", { length: 36 })
     .notNull()
     .references(() => productCategories.id, { onDelete: "cascade" }),
-  createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: text("updated_at")
-    .default(sql`(CURRENT_TIMESTAMP)`)
-    .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+  createdAt: timestamp("created_at", { fsp: 3 }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { fsp: 3 })
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
 });
