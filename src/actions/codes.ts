@@ -13,8 +13,6 @@ export async function addGeneratedCodes(data: ExamDataDetails) {
     return { error: "Daftar soal kosong." };
   }
 
-  let codeGroupId: string;
-
   try {
     const isValid = await isValidRole("admin");
     if (!isValid) {
@@ -22,30 +20,33 @@ export async function addGeneratedCodes(data: ExamDataDetails) {
     }
 
     const result = await db.transaction(async (tx) => {
-      const rowCodeGroups = await tx
-        .insert(codeGroups)
-        .values({
-          groupName: data.groupName,
-          selectedExam: data.selectedExam,
-          totalParticipants: data.totalParticipants,
-        })
-        .returning();
+      // 1. insert intod codeGroups
+      const codeGroupId = crypto.randomUUID();
+      const [groupResult] = await tx.insert(codeGroups).values({
+        id: codeGroupId,
+        groupName: data.groupName,
+        selectedExam: data.selectedExam,
+        totalParticipants: data.totalParticipants,
+      });
 
-      // get id and examName from exams table (use for getting exam id based on examName)
+      if (groupResult.affectedRows === 0) {
+        return { error: "Gagal menyimpan daftar kode." };
+      }
+
+      // 2. Fetch exams to map names to IDs
       const rowExams = await tx
         .select({ id: exams.id, examName: exams.examName })
         .from(exams);
 
-      if (rowExams.length === 0 || rowCodeGroups.length === 0) {
+      if (rowExams.length === 0) {
         return { error: "Gagal menyimpan soal." };
       }
 
-      // data to insert in codes table
-      codeGroupId = rowCodeGroups[0].id;
+      // 3. Prepare data for codes table
       const codesToInsert: InsertCodes[] = data.rowExamsData.map((row) => {
         const examId = getExamsId(row.examName, rowExams);
         if (!examId) {
-          throw Error("ID ujian tidak ditemukan.");
+          throw new Error("ID ujian tidak ditemukan.");
         }
         return {
           code: row.code,
@@ -56,18 +57,25 @@ export async function addGeneratedCodes(data: ExamDataDetails) {
         };
       });
 
-      const row = await tx.insert(codes).values(codesToInsert);
-      if (row.rowsAffected === 0) {
+      // 4. Batch insert into codes
+      const [codesResult] = await tx.insert(codes).values(codesToInsert);
+
+      if (codesResult.affectedRows === 0) {
         return { error: "Gagal menyimpan daftar kode." };
       }
 
-      return rowCodeGroups[0];
+      return {
+        id: codeGroupId,
+        groupName: data.groupName,
+        selectedExam: data.selectedExam,
+        totalParticipants: data.totalParticipants,
+      };
     });
 
-    revalidatePath("/dashboard/list-soal");
+    revalidatePath("/dashboard/daftar-soal");
     return result;
   } catch (error) {
-    console.error(error);
+    console.error("Database Error:", error);
     return { error: "Gagal menyimpan soal." };
   }
 }
@@ -81,7 +89,7 @@ export async function deleteGeneratedCode(codeGroupId: string) {
 
     await db.delete(codeGroups).where(eq(codeGroups.id, codeGroupId));
 
-    revalidatePath("/dashboard/list-soal");
+    revalidatePath("/dashboard/daftar-soal");
   } catch (error) {
     if (error instanceof Error) {
       console.error(error.message);

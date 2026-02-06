@@ -166,12 +166,12 @@ export async function submitExam(
         if (!examId) {
           throw Error("ID ujian tidak ditemukan.");
         }
-        const submissionAttemptId = crypto.randomUUID();
+        const subAttemptId = crypto.randomUUID();
 
         if (data.note) {
           // this data for insert examSubmissionNotes
           submissionNoteData.push({
-            submissionAttemptId,
+            subAttemptId,
             note: data.note.trim(),
           });
         }
@@ -186,7 +186,7 @@ export async function submitExam(
         const isRetake = isThresholdFail || isGradeFail ? data.examName : "";
 
         return {
-          id: submissionAttemptId,
+          id: subAttemptId,
           numberAttempt: nextAttempt,
           examEventId,
           userId,
@@ -235,16 +235,16 @@ export async function submitExam(
         if (!examId) {
           throw Error(`ID ujian ${data.examName} tidak ditemukan.`);
         }
-        const submissionAttemptId = attemptMap.get(examId);
+        const subAttemptId = attemptMap.get(examId);
 
-        if (!submissionAttemptId) {
+        if (!subAttemptId) {
           throw new Error(
             `Gagal menemukan submissionAttemptId untuk exam "${data.examName}"`,
           );
         }
 
         return data.answerResults.map((result) => ({
-          submissionAttemptId,
+          subAttemptId,
           code: result.code,
           value: result.value,
           additionalValue: result.additionalValue,
@@ -378,11 +378,11 @@ export async function getSubmissionSummary(
       .from(examSubmissions)
       .leftJoin(
         submissionAttempts,
-        eq(examSubmissions.submissionAttemptId, submissionAttempts.id),
+        eq(examSubmissions.subAttemptId, submissionAttempts.id),
       )
       .leftJoin(
         examSubmissionNotes,
-        eq(submissionAttempts.id, examSubmissionNotes.submissionAttemptId),
+        eq(submissionAttempts.id, examSubmissionNotes.subAttemptId),
       )
       .leftJoin(user, eq(submissionAttempts.userId, user.id))
       .leftJoin(departments, eq(user.departmentId, departments.id))

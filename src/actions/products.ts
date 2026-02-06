@@ -38,12 +38,14 @@ export async function addProduct(formData: FormData) {
         };
       }
 
-      const result = await tx.insert(products).values({
+      const productValue = {
         productName: productName,
         productCategoryId: productCategoryId,
-      });
+      };
 
-      return result.rows;
+      const [result] = await tx.insert(products).values(productValue);
+
+      return { id: result.insertId, ...result };
     });
 
     revalidatePath("/dashboard/produk");
@@ -139,16 +141,18 @@ export async function updateProduct(productId: string, formData: FormData) {
       return { error: "401 : Anda tidak memiliki izin." };
     }
 
-    const result = await db
+    const updatedProductValue = {
+      productName: productName,
+      productCategoryId: productCategoryId,
+    };
+
+    const [result] = await db
       .update(products)
-      .set({
-        productName: productName,
-        productCategoryId: productCategoryId,
-      })
+      .set(updatedProductValue)
       .where(eq(products.id, productId));
 
     revalidatePath("/dashboard/produk");
-    return result.rows;
+    return { id: result.insertId, ...updatedProductValue };
   } catch (error) {
     console.error(error);
     return { error: "Gagal memperbarui produk. Database bermasalah." };

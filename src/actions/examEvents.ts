@@ -51,22 +51,24 @@ export async function addExamEvent(formData: FormData) {
       return { error: "401 : Anda tidak memiliki izin." };
     }
 
-    const newEvent = await db.insert(examEvents).values({
+    const examEventValue = {
       examEventName: eventName,
       codeGroupRegulerId: codeGroupExam[0],
       codeGroupRetakeId: codeGroupExam[1],
       examStart,
       examEnd,
-    });
+    };
 
-    if (newEvent.rowsAffected === 0) {
+    const [newEvent] = await db.insert(examEvents).values(examEventValue);
+
+    if (newEvent.affectedRows === 0) {
       return {
         error: "Gagal membuat pendaftaran baru.",
       };
     }
 
     revalidatePath("/dashboard/ujian");
-    return newEvent.rows;
+    return { id: newEvent.insertId, ...examEventValue };
   } catch (error) {
     console.error(error);
     return { error: "Gagal membuat pendaftaran baru." };
@@ -109,23 +111,25 @@ export async function updateExamEvent(formData: FormData, examEventId: string) {
       return { error: "401 : Anda tidak memiliki izin." };
     }
 
-    const updatedEvent = await db
+    const examEventUpdateValue = {
+      examEventName: eventName,
+      examStart,
+      examEnd,
+    };
+
+    const [updatedEvent] = await db
       .update(examEvents)
-      .set({
-        examEventName: eventName,
-        examStart,
-        examEnd,
-      })
+      .set(examEventUpdateValue)
       .where(eq(examEvents.id, examEventId));
 
-    if (updatedEvent.rowsAffected === 0) {
+    if (updatedEvent.affectedRows === 0) {
       return {
         error: "Gagal memperbarui waktu ujian.",
       };
     }
 
     revalidatePath("/dashboard/ujian");
-    return updatedEvent.rows;
+    return { id: updatedEvent.insertId, ...examEventUpdateValue };
   } catch (error) {
     console.error(error);
     return { error: "Gagal memperbarui waktu ujian." };
@@ -139,12 +143,12 @@ export async function deleteExamEvent(examEventId: string) {
       return { error: "401 : Anda tidak memiliki izin." };
     }
 
-    const result = await db
+    const [result] = await db
       .delete(examEvents)
       .where(eq(examEvents.id, examEventId));
 
     revalidatePath("/dashboard/ujian");
-    return result.rows;
+    return { id: result.insertId };
   } catch (error) {
     if (error instanceof Error) {
       return { error: error.message };
@@ -231,6 +235,7 @@ export async function getActiveExamEvent() {
       );
 
     // 4. add numberAttempt and retakeExam filed to the active exam event data
+    // NB: improve performance
     const completeData = rows.map((row) => {
       const foundAttempt = latestAttemptRows.find(
         (attempt) => attempt.examEventId === row.examEventId,
@@ -499,7 +504,6 @@ export async function getExamValueFromExamEvent(
 
 export async function getExamThatNeedDummyData(examEventId: string) {
   try {
-    // TODO: get the examValue
     const [row] = await db
       .selectDistinct({
         selectedExams: codeGroups.selectedExam,
@@ -535,11 +539,11 @@ export async function addSampleExamAnswer(
   examName: string,
 ) {
   try {
-    const results = await db
+    const [results] = await db
       .insert(sampleExamAnswer)
       .values({ value: sample, examEventId, examName });
 
-    return { rowsAffected: results.rowsAffected };
+    return { rowsAffected: results.affectedRows };
   } catch (error) {
     console.error(error);
     return { error: "Gagal mendapatkan data daftar ujian" };
@@ -574,7 +578,7 @@ export async function deleteSampleExamAnswer(
   value: string,
 ) {
   try {
-    const rows = await db
+    const [rows] = await db
       .delete(sampleExamAnswer)
       .where(
         and(
@@ -584,7 +588,7 @@ export async function deleteSampleExamAnswer(
         ),
       );
 
-    return { rowsAffected: rows.rowsAffected };
+    return { rowsAffected: rows.affectedRows };
   } catch (error) {
     console.error(error);
     return { error: "Gagal mendapatkan data daftar ujian" };

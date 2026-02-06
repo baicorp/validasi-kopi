@@ -44,10 +44,6 @@ export async function assignUser(
       return { error: "401 : Anda tidak memiliki izin." };
     }
 
-    if (!listParticipant || listParticipant.length === 0) {
-      return { error: "Tidak ada peserta yang dipilih." };
-    }
-
     const examEvent = await getExamEventById(eventId);
     if ("error" in examEvent) {
       return { error: "Gagal mendapatkan detail ujian." };
@@ -61,22 +57,27 @@ export async function assignUser(
 
     const transationResult = await db.transaction(async (tx) => {
       // 1. delete all registered user
-      await tx
+      const [deleteResult] = await tx
         .delete(examRegistrations)
         .where(eq(examRegistrations.examEventId, eventId));
+
+      // if listParticipant is empty, just return the delete result
+      if (!listParticipant || listParticipant.length === 0) {
+        return { affectedRows: deleteResult.affectedRows };
+      }
 
       // 2. register new selected user
       const values = listParticipant.map((participant) => ({
         examEventId: eventId,
         userId: participant.id,
       }));
-      const result = await tx.insert(examRegistrations).values(values);
+      const [result] = await tx.insert(examRegistrations).values(values);
 
-      if (result.rowsAffected === 0) {
+      if (result.affectedRows === 0) {
         throw Error("Gagal menambahkan peserta");
       }
 
-      return result.rows;
+      return { affectedRows: result.affectedRows };
     });
 
     return transationResult;
