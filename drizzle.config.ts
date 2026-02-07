@@ -4,9 +4,11 @@ import { defineConfig } from "drizzle-kit";
 export default defineConfig({
   out: "./src/db/migration",
   schema: "./src/db/schema",
-  dialect: "turso",
+  dialect: "mysql",
   dbCredentials: {
-    url: process.env.TURSO_DATABASE_URL!,
-    authToken: process.env.TURSO_AUTH_TOKEN!,
+    host: process.env.MYSQL_DATABASE_HOST!,
+    user: process.env.MYSQL_DATABASE_USER!,
+    password: process.env.MYSQL_DATABASE_PASSWORD!,
+    database: process.env.MYSQL_DATABASE_NAME!,
   },
 });
