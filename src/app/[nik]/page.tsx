@@ -10,6 +10,7 @@ import UserNotMatch from "@/components/ui/userNotMatch";
 import { getActiveExamEvent } from "@/actions/examEvents";
 import { validateSessionServer } from "@/actions/validateSession";
 import { formatLocalTime, getDurationString } from "@/lib/datetimeFormat";
+import { ExamEventCardSkeleton } from "@/components/skeleton/examEventCard";
 
 export default async function Page({
   params,
@@ -28,7 +29,7 @@ export default async function Page({
   }
 
   return (
-    <Suspense fallback={<Loading />}>
+    <Suspense fallback={<ExamEventCardSkeleton user />}>
       <ActiveExamEvent nik={session.user.username} />
     </Suspense>
   );
