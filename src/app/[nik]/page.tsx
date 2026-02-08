@@ -5,7 +5,6 @@ import { redirect } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Loading from "@/components/skeleton/loading";
 import UserNotMatch from "@/components/ui/userNotMatch";
 import { getActiveExamEvent } from "@/actions/examEvents";
 import { validateSessionServer } from "@/actions/validateSession";
@@ -46,13 +45,13 @@ async function ActiveExamEvent({ nik }: { nik: string }) {
     );
 
   return (
-    <div className="flex gap-2">
+    <div className="flex flex-col md:flex-row gap-2">
       {examEvent.length !== 0 ? (
         examEvent.map((event) => {
           return (
             <div
               key={event.examEventId}
-              className="rounded-lg overflow-hidden border shadow w-[270px] p-5 flex flex-col justify-between"
+              className="rounded-lg overflow-hidden border shadow min-w-[270px] md:w-[270px] h-full p-5 flex flex-col justify-between"
             >
               <div className="flex flex-col gap-2">
                 <p className="font-medium">
