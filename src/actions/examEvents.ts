@@ -10,6 +10,7 @@ import {
 import { shuffle } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
 import { codeGroups, codes, exams } from "@/db/schema";
+import { wibInputToUtcISOString } from "@/lib/datetimeFormat";
 import { isValidRole, validateSessionServer } from "./validateSession";
 import { and, desc, eq, gte, inArray, like, lte, sql } from "drizzle-orm";
 
@@ -32,11 +33,8 @@ export async function addExamEvent(formData: FormData) {
     return { error: "Lengkapi semua data pendaftaran ujian." };
   }
 
-  // combine date and time into Date objects (ISO format)
-  const examStart = new Date(
-    `${eventStartDate} ${eventStartTime}`,
-  ).toISOString();
-  const examEnd = new Date(`${eventEndDate} ${eventEndTime}`).toISOString();
+  const examStart = wibInputToUtcISOString(eventStartDate, eventStartTime);
+  const examEnd = wibInputToUtcISOString(eventEndDate, eventEndTime);
 
   // exam end must be after exam start
   if (examEnd <= examStart) {
@@ -90,11 +88,8 @@ export async function updateExamEvent(formData: FormData, examEventId: string) {
     return { error: "Lengkapi semua data pendaftaran ujian." };
   }
 
-  // combine date and time into Date objects (ISO format)
-  const examStart = new Date(
-    `${eventStartDate} ${eventStartTime}`,
-  ).toISOString();
-  const examEnd = new Date(`${eventEndDate} ${eventEndTime}`).toISOString();
+  const examStart = wibInputToUtcISOString(eventStartDate, eventStartTime);
+  const examEnd = wibInputToUtcISOString(eventEndDate, eventEndTime);
 
   // exam end must be after exam start
   if (examEnd <= examStart) {

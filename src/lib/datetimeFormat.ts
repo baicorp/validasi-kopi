@@ -21,3 +21,18 @@ export function getDurationString(start: string, end: string): string {
 
   return result.trim();
 }
+
+export function wibInputToUtcISOString(date: string, time: string) {
+  // date: MM/DD/YYYY
+  // time: HH:mm:ss
+
+  const [month, day, year] = date.split("/").map(Number);
+  const [hour, minute, second] = time.split(":").map(Number);
+
+  // WIB = UTC+7 → subtract 7 hours
+  const utcDate = new Date(
+    Date.UTC(year, month - 1, day, hour - 7, minute, second),
+  );
+
+  return utcDate.toISOString();
+}
