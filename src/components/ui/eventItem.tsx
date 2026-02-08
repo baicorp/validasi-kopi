@@ -4,7 +4,7 @@ import { Separator } from "./separator";
 import { toTitleCase } from "@/lib/utils";
 import { Clock, ExternalLink } from "lucide-react";
 import DeleteDialogExamEvent from "./deleteExamEvent";
-import { formatLocalTime } from "@/lib/datetimeFormat";
+import { formatJakartaTime } from "@/lib/datetimeFormat";
 import EditDialogExamEvent from "./editDialogExamEvent";
 import { getAllExamEvents } from "@/actions/examEvents";
 
@@ -64,9 +64,9 @@ export default function EventItem({
           <p className="text-muted-foreground mb-1">Tanggal / Waktu Ujian</p>
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 shrink-0" />
-            <p className="text-sm">{formatLocalTime(examStart)}</p>
+            <p className="text-sm">{formatJakartaTime(examStart)}</p>
             <span>→</span>
-            <p className="text-sm">{formatLocalTime(examEnd)}</p>
+            <p className="text-sm">{formatJakartaTime(examEnd)}</p>
           </div>
         </div>
         <div>
@@ -97,7 +97,7 @@ export default function EventItem({
         <Separator />
         <div className="p-4 bg-muted">
           <p className="text-xs text-muted-foreground">
-            Diperbarui : {formatLocalTime(updatedAt || "")}
+            Diperbarui : {formatJakartaTime(updatedAt || "")}
           </p>
         </div>
       </div>

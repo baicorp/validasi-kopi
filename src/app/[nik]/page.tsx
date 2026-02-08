@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import UserNotMatch from "@/components/ui/userNotMatch";
 import { getActiveExamEvent } from "@/actions/examEvents";
 import { validateSessionServer } from "@/actions/validateSession";
-import { formatLocalTime, getDurationString } from "@/lib/datetimeFormat";
+import { formatJakartaTime, getDurationString } from "@/lib/datetimeFormat";
 import { ExamEventCardSkeleton } from "@/components/skeleton/examEventCard";
 
 export default async function Page({
@@ -62,10 +62,12 @@ async function ActiveExamEvent({ nik }: { nik: string }) {
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 shrink-0" />
                     <p className="text-sm">
-                      {formatLocalTime(event.examStart)}
+                      {formatJakartaTime(event.examStart)}
                     </p>
                     <span>→</span>
-                    <p className="text-sm">{formatLocalTime(event.examEnd)}</p>
+                    <p className="text-sm">
+                      {formatJakartaTime(event.examEnd)}
+                    </p>
                   </div>
                 </div>
                 <div>
