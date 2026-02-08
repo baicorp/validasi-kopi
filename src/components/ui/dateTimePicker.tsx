@@ -46,7 +46,6 @@ export default function DateTimePicker({
               selected={date}
               captionLayout="dropdown"
               onSelect={(date) => {
-                console.log(date);
                 setDate(date);
                 setOpen(false);
               }}
