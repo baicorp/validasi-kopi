@@ -238,12 +238,7 @@ export async function getActiveExamEvent() {
       return {
         ...row,
         numberAttempt: foundAttempt ? foundAttempt.numberAttempt : 0,
-        retakeExam: latestAttemptRows
-          .filter(
-            (data) => row.examEventId === data.examEventId && data.retakeExam,
-          )
-          .map((data) => data.retakeExam)
-          .toString(),
+        retakeExam: foundAttempt?.retakeExam ?? "",
       };
     });
 
