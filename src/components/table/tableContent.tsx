@@ -18,7 +18,7 @@ export default function TableContent({
               colSpan={17}
               className="text-center bg-accent font-medium"
             >
-              {nilai.replaceAll("+", " ").replace("&", " + ").toUpperCase()}
+              {nilai.replace("&", " + ").toUpperCase()}
             </TableCell>
           </TableRow>
           {listKode.map((barisKode, index) => (
