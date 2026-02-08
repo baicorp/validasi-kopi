@@ -150,21 +150,10 @@ export async function deleteExamEvent(examEventId: string) {
 
 export async function getActiveExamEvent() {
   try {
-    const options: Intl.DateTimeFormatOptions = {
-      timeZone: "Asia/Jakarta",
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-      second: "numeric",
-      fractionalSecondDigits: 3,
-    };
-
-    const wibTime = new Intl.DateTimeFormat("en-US", options).format(
-      new Date(),
-    );
-    const currentDateTime = new Date(wibTime).toISOString();
+    // current jakarta datetime
+    const now = new Date(); // always current UTC-based time
+    const jakartaTime = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+    const currentDateTime = jakartaTime.toISOString();
 
     // 1. get current user username (nik)
     const session = await validateSessionServer();
