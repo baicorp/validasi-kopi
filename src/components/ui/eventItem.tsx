@@ -3,10 +3,10 @@ import { Badge } from "./badge";
 import { Separator } from "./separator";
 import { toTitleCase } from "@/lib/utils";
 import { Clock, ExternalLink } from "lucide-react";
+import DeleteDialogExamEvent from "./deleteExamEvent";
 import { formatLocalTime } from "@/lib/datetimeFormat";
 import EditDialogExamEvent from "./editDialogExamEvent";
 import { getAllExamEvents } from "@/actions/examEvents";
-import DeleteDialogExamEvent from "./deleteExamEvent";
 
 type GetAllExamEventsResult = Awaited<ReturnType<typeof getAllExamEvents>>;
 type ExamEventItem = NonNullable<GetAllExamEventsResult["data"]>[number];
@@ -97,7 +97,7 @@ export default function EventItem({
         <Separator />
         <div className="p-4 bg-muted">
           <p className="text-xs text-muted-foreground">
-            Diperbarui : {new Date(updatedAt + "Z").toLocaleString()}
+            Diperbarui : {formatLocalTime(updatedAt || "")}
           </p>
         </div>
       </div>
