@@ -97,7 +97,7 @@ export default function EventItem({
         <Separator />
         <div className="p-4 bg-muted">
           <p className="text-xs text-muted-foreground">
-            Diperbarui : {formatJakartaTime(updatedAt || "")}
+            Diperbarui : {formatJakartaTime(updatedAt.toString() || "")}
           </p>
         </div>
       </div>

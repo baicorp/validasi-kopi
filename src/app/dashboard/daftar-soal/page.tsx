@@ -124,7 +124,7 @@ function CodeGroupItem({
               className="font-mono text-xs text-muted-foreground"
               dateTime={createdAt?.toLocaleString().split(" ")[0]}
             >
-              {formatJakartaTime(createdAt || "")}
+              {formatJakartaTime(createdAt?.toString() || "")}
             </time>
             <div className="flex items-center gap-1 text-muted-foreground">
               <User size={12} className="mb-1" />
