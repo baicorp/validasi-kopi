@@ -7,7 +7,7 @@ import InteractiveLink from "@/components/ui/link";
 import Loading from "@/components/skeleton/loading";
 import { getExamEventById } from "@/actions/examEvents";
 import { Calendar, Clock, ExternalLink } from "lucide-react";
-import { formatLocalTime, getDurationString } from "@/lib/datetimeFormat";
+import { formatJakartaTime, getDurationString } from "@/lib/datetimeFormat";
 
 export default async function Layout({
   children,
@@ -65,13 +65,13 @@ async function ExamEventDetails({ examEventId }: { examEventId: string }) {
             <span> : </span>
             <div className="flex gap-2 items-center">
               <Calendar className="w-4 h-4" />
-              <p>{formatLocalTime(examEvent.examStart)}</p>
+              <p>{formatJakartaTime(examEvent.examStart)}</p>
             </div>
             <p>Selesai</p>
             <span> : </span>
             <div className="flex gap-2 items-center">
               <Calendar className="w-4 h-4" />
-              <p>{formatLocalTime(examEvent.examEnd)}</p>
+              <p>{formatJakartaTime(examEvent.examEnd)}</p>
             </div>
           </div>
         </div>

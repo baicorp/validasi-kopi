@@ -12,7 +12,7 @@ import Callout from "@/components/ui/callout";
 import { Textarea } from "@/components/ui/textarea";
 import Loading from "@/components/skeleton/loading";
 import SelectTaste from "@/components/ui/selectTaste";
-import { formatLocalTime } from "@/lib/datetimeFormat";
+import { formatJakartaTime } from "@/lib/datetimeFormat";
 import UserNotMatch from "@/components/ui/userNotMatch";
 import SubmitExamForm from "@/components/form/submitExamForm";
 import SelectIntensity from "@/components/ui/selectIntensity";
@@ -81,13 +81,13 @@ async function ExamFormInfo({ examEventId }: { examEventId: string }) {
       <span> : </span>
       <div className="flex gap-2 items-center">
         <Calendar className="w-4 h-4" />
-        <p>{formatLocalTime(result.examStart)}</p>
+        <p>{formatJakartaTime(result.examStart)}</p>
       </div>
       <p>Selesai</p>
       <span> : </span>
       <div className="flex gap-2 items-center">
         <Calendar className="w-4 h-4" />
-        <p>{formatLocalTime(result.examEnd)}</p>
+        <p>{formatJakartaTime(result.examEnd)}</p>
       </div>
     </div>
   );

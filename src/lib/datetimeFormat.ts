@@ -1,5 +1,8 @@
-export function formatLocalTime(dateTime: string) {
-  return new Date(dateTime).toLocaleString();
+export function formatJakartaTime(dateTime: string) {
+  return new Date(dateTime).toLocaleString("id-ID", {
+    timeZone: "Asia/Jakarta",
+    hour12: true,
+  });
 }
 
 export function getDurationString(start: string, end: string): string {
