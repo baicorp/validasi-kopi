@@ -131,7 +131,7 @@ function UserAnswerListItem({
 }) {
   return (
     <div className="p-2 rounded-md border min-w-0">
-      <p className="break-words">{participantName}</p>
+      <p className="wrap-break-words">{participantName}</p>
       <div className="flex gap-2 overflow-x-auto">
         {listCodeValue.map((item, index) => (
           <UserAnswerCodeValueItem

@@ -9,9 +9,9 @@ import SearchData from "@/components/ui/searchData";
 import { deleteGeneratedCode } from "@/actions/codes";
 import { getAllCodeGroups } from "@/actions/codeGroups";
 import DeleteDialog from "@/components/ui/deleteDialog";
-import { BrushCleaning, Sheet, User } from "lucide-react";
 import CodeGroupsLabel from "@/components/ui/codeGroupsLabel";
 import { validateSessionServer } from "@/actions/validateSession";
+import { BrushCleaning, SearchX, Sheet, User } from "lucide-react";
 import CodeGroupsSkeleton from "@/components/skeleton/codeGroupsSkeleton";
 
 export default async function Page({ searchParams }: SearchParams) {
@@ -51,8 +51,14 @@ async function CodeGroups({ page, search }: { page: string; search: string }) {
     return (
       <div className="h-80 text-muted-foreground flex justify-center items-center">
         <div className="flex flex-col justify-center items-center gap-2">
-          <BrushCleaning className="w-11 h-11" />
-          <span className="block">Belum ada soal tersimpan.</span>
+          {search ? (
+            <SearchX className="w-11 h-11" />
+          ) : (
+            <BrushCleaning className="w-11 h-11" />
+          )}
+          <span className="block">
+            {search ? "Data tidak ditemukan" : "Belum ada soal yang dibuat."}
+          </span>
         </div>
       </div>
     );

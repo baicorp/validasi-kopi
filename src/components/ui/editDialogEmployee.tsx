@@ -33,7 +33,6 @@ export default function EditDialogEmployee({
     const formData = new FormData(e.currentTarget);
     try {
       const result = await updateEmployee(id, formData);
-      console.log(result);
       if ("error" in result) {
         toast.error(result.error);
         return;

@@ -70,7 +70,7 @@ async function TableEmployeesData({
   if ("error" in employees) {
     tableRowData = (
       <TableRow>
-        <TableCell colSpan={4} className="text-center">
+        <TableCell colSpan={7} className="text-center text-muted-foreground">
           {employees.error}
         </TableCell>
       </TableRow>
@@ -78,8 +78,10 @@ async function TableEmployeesData({
   } else if (employees.data.length === 0) {
     tableRowData = (
       <TableRow>
-        <TableCell colSpan={4} className="text-center">
-          Belum ada karyawan yang ditambahkan
+        <TableCell colSpan={7} className="text-center text-muted-foreground">
+          {search
+            ? "Karyawan tidak ditemukan"
+            : "Belum ada karyawan yang ditambahkan"}
         </TableCell>
       </TableRow>
     );

@@ -80,7 +80,7 @@ async function TableProductsData({
   if ("error" in products) {
     tableRowData = (
       <TableRow>
-        <TableCell colSpan={4} className="text-center">
+        <TableCell colSpan={4} className="text-center text-muted-foreground">
           {products.error}
         </TableCell>
       </TableRow>
@@ -88,8 +88,10 @@ async function TableProductsData({
   } else if (products.data.length === 0) {
     tableRowData = (
       <TableRow>
-        <TableCell colSpan={4} className="text-center">
-          Belum ada produk yang ditambahkan
+        <TableCell colSpan={4} className="text-center text-muted-foreground">
+          {search
+            ? "Produk tidak ditemukan"
+            : "Belum ada produk yang ditambahkan"}
         </TableCell>
       </TableRow>
     );

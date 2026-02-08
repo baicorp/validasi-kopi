@@ -1,14 +1,15 @@
 import { Suspense } from "react";
 import { SearchParams } from "@/lib/types";
 import { redirect } from "next/navigation";
-import { BrushCleaning } from "lucide-react";
 import ErrorComp from "@/components/ui/error";
 import EventItem from "@/components/ui/eventItem";
 import Paginator from "@/components/ui/paginator";
 import SearchData from "@/components/ui/searchData";
+import { BrushCleaning, SearchX } from "lucide-react";
 import { getAllExamEvents } from "@/actions/examEvents";
 import AddExamEventBtn from "@/components/ui/addExamEvent";
 import { validateSessionServer } from "@/actions/validateSession";
+import { ExamEventCardSkeleton } from "@/components/skeleton/examEventCard";
 
 export default async function Page({ searchParams }: SearchParams) {
   const session = await validateSessionServer();
@@ -30,10 +31,7 @@ export default async function Page({ searchParams }: SearchParams) {
         </div>
         <AddExamEventBtn />
       </div>
-      <Suspense
-        key={search + currentPage}
-        fallback={<p>Loading daftar pelaksanaan ujian. . .</p>}
-      >
+      <Suspense key={search + currentPage} fallback={<ExamEventCardSkeleton />}>
         <ExamEventList currentPage={Number(currentPage)} search={search} />
       </Suspense>
     </section>
@@ -57,8 +55,14 @@ async function ExamEventList({
     return (
       <div className="h-80 text-muted-foreground flex justify-center items-center">
         <div className="flex flex-col justify-center items-center gap-2">
-          <BrushCleaning className="w-11 h-11" />
-          <span className="block">Belum ada soal tersimpan.</span>
+          {search ? (
+            <SearchX className="w-11 h-11" />
+          ) : (
+            <BrushCleaning className="w-11 h-11" />
+          )}
+          <span className="block">
+            {search ? "Data tidak ditemukan" : "Belum ada ujian yang dibuat."}
+          </span>
         </div>
       </div>
     );

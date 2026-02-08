@@ -10,6 +10,7 @@ import {
 import { shuffle } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
 import { codeGroups, codes, exams } from "@/db/schema";
+import { wibInputToUtcISOString } from "@/lib/datetimeFormat";
 import { isValidRole, validateSessionServer } from "./validateSession";
 import { and, desc, eq, gte, inArray, like, lte, sql } from "drizzle-orm";
 
@@ -32,11 +33,8 @@ export async function addExamEvent(formData: FormData) {
     return { error: "Lengkapi semua data pendaftaran ujian." };
   }
 
-  // combine date and time into Date objects (ISO format)
-  const examStart = new Date(
-    `${eventStartDate} ${eventStartTime}`,
-  ).toISOString();
-  const examEnd = new Date(`${eventEndDate} ${eventEndTime}`).toISOString();
+  const examStart = wibInputToUtcISOString(eventStartDate, eventStartTime);
+  const examEnd = wibInputToUtcISOString(eventEndDate, eventEndTime);
 
   // exam end must be after exam start
   if (examEnd <= examStart) {
@@ -92,11 +90,8 @@ export async function updateExamEvent(formData: FormData, examEventId: string) {
     return { error: "Lengkapi semua data pendaftaran ujian." };
   }
 
-  // combine date and time into Date objects (ISO format)
-  const examStart = new Date(
-    `${eventStartDate} ${eventStartTime}`,
-  ).toISOString();
-  const examEnd = new Date(`${eventEndDate} ${eventEndTime}`).toISOString();
+  const examStart = wibInputToUtcISOString(eventStartDate, eventStartTime);
+  const examEnd = wibInputToUtcISOString(eventEndDate, eventEndTime);
 
   // exam end must be after exam start
   if (examEnd <= examStart) {
@@ -159,21 +154,10 @@ export async function deleteExamEvent(examEventId: string) {
 
 export async function getActiveExamEvent() {
   try {
-    const options: Intl.DateTimeFormatOptions = {
-      timeZone: "Asia/Jakarta",
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-      second: "numeric",
-      fractionalSecondDigits: 3,
-    };
-
-    const wibTime = new Intl.DateTimeFormat("en-US", options).format(
-      new Date(),
-    );
-    const currentDateTime = new Date(wibTime).toISOString();
+    // current jakarta datetime
+    const now = new Date(); // always current UTC-based time
+    const jakartaTime = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+    const currentDateTime = jakartaTime.toISOString();
 
     // 1. get current user username (nik)
     const session = await validateSessionServer();
@@ -243,12 +227,7 @@ export async function getActiveExamEvent() {
       return {
         ...row,
         numberAttempt: foundAttempt ? foundAttempt.numberAttempt : 0,
-        retakeExam: latestAttemptRows
-          .filter(
-            (data) => row.examEventId === data.examEventId && data.retakeExam,
-          )
-          .map((data) => data.retakeExam)
-          .toString(),
+        retakeExam: foundAttempt?.retakeExam ?? "",
       };
     });
 
