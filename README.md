@@ -1,12 +1,9 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## 📂 Folder Structure
 
-## Getting Started
-
-First, run the development server:
-
-```bash
-
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Folder / File           | Description            |
+|-------------------------|------------------------|
+| `src/db/index.ts`       | Database Configuration |
+| `src/db/schema`         | Database schema        |
+| `src/action`            | All database query     |
+| `src/lib/auth.ts`       | Server Authentication  |
+| `src/lib/authClient.ts` | Client Authentication  |
