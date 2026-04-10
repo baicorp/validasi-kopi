@@ -41,7 +41,7 @@ Cypress.Commands.add("login", () => {
   cy.session("superuser-session", () => {
     cy.visit("http://localhost:3000/");
 
-    cy.get("#username").type("superuser");
+    cy.get("#username").type("qualityassurance");
     cy.get("#password").type("supersecure");
     cy.get('button[type="submit"]').click();
 

@@ -756,7 +756,7 @@ describe("Form pengecekan jawaban ujian", () => {
   it("Harusnya dapat mengecek jawaban ujian (valid)", () => {
     cy.visit("http://localhost:3000/dashboard/daftar-soal");
 
-    cy.contains("p", "Uji Dasar 1/7/2026, 12:12:37 PM").click();
+    cy.contains("p", "Uji Dasar 1/5/2026, 3:00:00 PM").click();
 
     cy.get("section").contains("Soal kode").should("be.visible");
 
@@ -769,17 +769,17 @@ describe("Form pengecekan jawaban ujian", () => {
       "3973",
       "4974",
       "1021",
-      "7864",
+      "7861",
       "8088",
       "8357",
       "8425",
-      "5092",
+      "1193",
       "8386",
-      "2731",
+      "9853",
       "6542",
       "1103",
       "9001",
-      "8961",
+      "8962",
       "7393",
       "4347",
       "3830",
@@ -798,12 +798,22 @@ describe("Form pengecekan jawaban ujian", () => {
 
     // 3. Klik tombol submit untuk memicu handleCheck
     cy.get('button[type="submit"]').contains("Cek Jawaban").click();
+
+    cy.get('form input[type="number"]').each(($el, index) => {
+      if (index === 10) {
+        cy.wrap($el).should("not.have.class", "ring-2");
+      } else if (index === 12) {
+        cy.wrap($el).should("have.class", "ring-yellow-400");
+      } else {
+        cy.wrap($el).should("have.class", "ring-red-600");
+      }
+    });
   });
 
   it("Harusnya input tetap kosong karena hanya menerima input berupa angka (invalid, input dimasukkan selain angka)", () => {
     cy.visit("http://localhost:3000/dashboard/daftar-soal");
 
-    cy.contains("p", "Uji Dasar 1/7/2026, 12:12:37 PM").click();
+    cy.contains("p", "Uji Dasar 1/5/2026, 3:00:00 PM").click();
 
     cy.get("section").contains("Soal kode").should("be.visible");
 
@@ -855,7 +865,7 @@ describe("Form pengecekan jawaban ujian", () => {
   it("Harusnya tidak dapat mengecek jawaban ujian, (ivalid, ada duplikat jawaban yang dimasukkan)", () => {
     cy.visit("http://localhost:3000/dashboard/daftar-soal");
 
-    cy.contains("p", "Uji Dasar 1/7/2026, 12:12:37 PM").click();
+    cy.contains("p", "Uji Dasar 1/5/2026, 3:00:00 PM").click();
 
     cy.get("section").contains("Soal kode").should("be.visible");
 
@@ -905,7 +915,7 @@ describe("Form pengecekan jawaban ujian", () => {
   it("Harusnya tidak dapat mengecek jawaban ujian, (ivalid, tidak di isi sama sekali)", () => {
     cy.visit("http://localhost:3000/dashboard/daftar-soal");
 
-    cy.contains("p", "Uji Dasar 1/7/2026, 12:12:37 PM").click();
+    cy.contains("p", "Uji Dasar 1/5/2026, 3:00:00 PM").click();
 
     cy.get("section").contains("Soal kode").should("be.visible");
 
