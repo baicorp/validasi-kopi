@@ -472,11 +472,10 @@ export async function getExamValueFromExamEvent(
       .leftJoin(exams, eq(codes.examId, exams.id))
       .where(and(eq(exams.examName, examName), eq(examEvents.id, examEventId)));
 
-    const valueWithAddValue = rows.map((data) =>
-      data.addValue ? `${data.value} ${data.addValue}` : data.value,
-    );
+    // show addValue if the exam is "2 out of 5", otherwise show value
+    const values = rows.map((data) => data.addValue || data.value);
 
-    return valueWithAddValue.sort();
+    return values.sort();
   } catch (error) {
     if (error instanceof Error) {
       return { error: error.message };
