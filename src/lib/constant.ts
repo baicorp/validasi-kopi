@@ -30,6 +30,7 @@ const productCategories = [
 const basicExam = [
   "2 out of 5 pure",
   "2 out of 5 creamer",
+  "2 out of 5 coklat",
   "treshold single",
   "treshold mix",
 ];

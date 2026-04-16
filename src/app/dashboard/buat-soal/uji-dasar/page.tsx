@@ -80,6 +80,11 @@ export default function Page() {
                 <TwoOutOfFive variant="creamer" />
               </div>
             )}
+            {selectedExam.includes("2 out of 5 coklat") && (
+              <div className="basis-full">
+                <TwoOutOfFive variant="coklat" />
+              </div>
+            )}
             {selectedExam.includes("2 out of 5 pure") && (
               <div className="basis-full">
                 <TwoOutOfFive variant="pure" />
@@ -108,7 +113,7 @@ export default function Page() {
   );
 }
 
-function TwoOutOfFive({ variant }: { variant: "creamer" | "pure" }) {
+function TwoOutOfFive({ variant }: { variant: "creamer" | "pure" | "coklat" }) {
   return (
     <div className="flex flex-col gap-2">
       <div>
@@ -132,11 +137,7 @@ function TwoOutOfFive({ variant }: { variant: "creamer" | "pure" }) {
                 key={index}
                 // IMPORTANT: ensure this name matches basicExam in constant.ts
                 // replace all space with "-" and end with "-values"
-                name={
-                  variant === "creamer"
-                    ? "2-out-of-5-creamer-values"
-                    : "2-out-of-5-pure-values"
-                }
+                name={`2-out-of-5-${variant}-values`}
                 placeholder={`Produk untuk nilai ${nilai}`}
                 required
               />

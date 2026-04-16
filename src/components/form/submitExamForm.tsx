@@ -152,39 +152,19 @@ function getTriangleInput(formData: FormData) {
 }
 
 function getTwoOutOfFiveInput(formData: FormData) {
-  const examNamePure = "2 out of 5 pure";
-  const examNameMix = "2 out of 5 creamer";
+  const twoOutOfFiveVariant = ["creamer", "pure", "coklat"];
   const inputValues = ["beda", "beda", "beda", "sama", "sama"];
-  const userAnswer: Answer[] = [];
 
-  inputValues.forEach((value, index) => {
-    const codePure = formData.get(
-      `${examNamePure}-${value}-${index}-code`,
-    ) as string;
-    const addValuePure = formData.get(
-      `${examNamePure}-${value}-${index}-addValue`,
-    ) as string;
-    const codeMix = formData.get(
-      `${examNameMix}-${value}-${index}-code`,
-    ) as string;
-    const addValueMix = formData.get(
-      `${examNameMix}-${value}-${index}-addValue`,
-    ) as string;
-    userAnswer.push(
-      {
-        examName: examNamePure,
-        code: codePure,
-        value,
-        additionalValue: addValuePure,
-      },
-      {
-        examName: examNameMix,
-        code: codeMix,
-        value,
-        additionalValue: addValueMix,
-      },
-    );
-  });
+  const userAnswer: Answer[] = inputValues.flatMap((value, index) =>
+    twoOutOfFiveVariant.map((variant) => {
+      const examName = `2 out of 5 ${variant}`;
+      const code = formData.get(`${examName}-${value}-${index}-code`) as string;
+      const additionalValue = formData.get(
+        `${examName}-${value}-${index}-addValue`,
+      ) as string;
+      return { examName, code, value, additionalValue };
+    }),
+  );
 
   return userAnswer;
 }

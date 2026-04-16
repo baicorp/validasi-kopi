@@ -208,6 +208,7 @@ function evaluateTwoOutOfFive(
   dbAnswers: Answer[],
 ): EvaluatedResult[] {
   const examNameTarget = "2 out of 5";
+  const twoOutOfFiveVariant = ["creamer", "pure", "coklat"];
   const userTwoOutOfFiveList = userAnswers.filter((answer) =>
     answer.examName.includes(examNameTarget),
   );
@@ -233,36 +234,24 @@ function evaluateTwoOutOfFive(
     };
   });
 
-  const twoOutOfFiveCreamer = answerResults.filter(
-    (data) => data.examName === "2 out of 5 creamer",
-  );
-  const twoOutOfFivePure = answerResults.filter(
-    (data) => data.examName === "2 out of 5 pure",
-  );
-
   const attemptNumber = userAnswers[0].attemptNumber;
 
-  const totalCorrectCodeCreamer = twoOutOfFiveCreamer.filter(
-    (data) => data.result === "correct" && data.value === "sama",
-  ).length;
-  const gradeCreamer = totalCorrectCodeCreamer === 2 ? 100 : 0;
-  const totalCorrectCodePure = twoOutOfFivePure.filter(
-    (data) => data.result === "correct" && data.value === "sama",
-  ).length;
-  const gradePure = totalCorrectCodePure === 2 ? 100 : 0;
+  return twoOutOfFiveVariant.map((variant) => {
+    const variantResults = answerResults.filter(
+      (data) => data.examName === `${examNameTarget} ${variant}`,
+    );
 
-  return [
-    {
-      examName: "2 out of 5 creamer",
-      answerResults: twoOutOfFiveCreamer,
-      grade: calculateFinalGrade(gradeCreamer, attemptNumber),
-    },
-    {
-      examName: "2 out of 5 pure",
-      answerResults: twoOutOfFivePure,
-      grade: calculateFinalGrade(gradePure, attemptNumber),
-    },
-  ];
+    const totalCorrectCode = variantResults.filter(
+      (data) => data.result === "correct" && data.value === "sama",
+    ).length;
+    const grade = totalCorrectCode === 2 ? 100 : 0;
+
+    return {
+      examName: `${examNameTarget} ${variant}`,
+      answerResults: variantResults,
+      grade: calculateFinalGrade(grade, attemptNumber),
+    };
+  });
 }
 
 function evaluateTresholdSingle(
