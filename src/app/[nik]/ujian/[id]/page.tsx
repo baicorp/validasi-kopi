@@ -120,6 +120,8 @@ function InputForm({
   switch (examName) {
     case "2 out of 5 creamer":
       return <TwoOutOfFive examEventId={examEventId} examName={examName} />;
+    case "2 out of 5 coklat":
+      return <TwoOutOfFive examEventId={examEventId} examName={examName} />;
     case "2 out of 5 pure":
       return <TwoOutOfFive examEventId={examEventId} examName={examName} />;
     case "treshold single":

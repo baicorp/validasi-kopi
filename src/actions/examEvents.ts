@@ -491,7 +491,12 @@ export async function getExamThatNeedDummyData(examEventId: string) {
       .leftJoin(codeGroups, eq(examEvents.codeGroupRegulerId, codeGroups.id))
       .where(eq(examEvents.id, examEventId));
 
-    const exams = ["2 out of 5 creamer", "2 out of 5 pure", "identifikasi"];
+    const exams = [
+      "2 out of 5 creamer",
+      "2 out of 5 coklat",
+      "2 out of 5 pure",
+      "identifikasi",
+    ];
 
     const filteredExams = row.selectedExams
       ?.split(",")
