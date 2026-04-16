@@ -95,7 +95,12 @@ async function TableEmployeesData({
         <TableCell className="py-1">{employee.name}</TableCell>
         <TableCell className="py-1">{employee.position}</TableCell>
         <TableCell className="py-1">{employee.department}</TableCell>
-        <TableCell className="py-1">{employee.plantArea}</TableCell>
+        <TableCell className="py-1">
+          {employee.plantArea
+            ? employee.plantArea.charAt(0).toUpperCase() +
+              employee.plantArea.slice(1)
+            : ""}
+        </TableCell>
         <TableCell className="text-right py-1">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
