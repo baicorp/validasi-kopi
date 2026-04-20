@@ -63,8 +63,6 @@ function FormDummy({
     getExamValueFromExamEvent(examName, examEventId),
   );
 
-  console.log(realAnswers);
-
   const [listDummyData, setListDummyData] = useState<
     { value: string; lock: boolean }[]
   >([]);
