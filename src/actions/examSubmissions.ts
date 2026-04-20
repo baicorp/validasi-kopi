@@ -25,7 +25,16 @@ export async function submitExam(
     const session = await validateSessionServer();
     const userId = session.user.id;
 
-    // 2. verify that none of the code in this submission has been submitted before
+    // 2. ensure all codes and product names across exam sections are unique
+    const allInputIsUnique = haveSameValue(submittedExamData);
+    if (!allInputIsUnique) {
+      return {
+        error:
+          "Kode atau nama produk yang dimasukkan tidak boleh ada duplikasi.",
+      };
+    }
+
+    // 3. verify that none of the code in this submission has been submitted before
     const alreadySubmittedCodes = await db
       .select({ code: examSubmissions.code })
       .from(examSubmissions)
@@ -46,14 +55,14 @@ export async function submitExam(
       };
     }
 
-    // 3. get all exams data from db
+    // 4. get all exams data from db
     const examsData = await getAllExams();
     if (!examsData) {
       return { error: "Gagal mendapatkan daftar nama ujian" };
     }
 
     const transactionResult = await db.transaction(async (tx) => {
-      // 4. check how many time user already submit exam
+      // 5. check how many time user already submit exam
       const [{ latestAttempt }] = await tx
         .select({
           latestAttempt: sql<number>`max(${submissionAttempts.numberAttempt})`,
@@ -66,7 +75,7 @@ export async function submitExam(
           ),
         );
 
-      // 5. get codeGroupId based on how many times user already take
+      // 6. get codeGroupId based on how many times user already take
       const nextAttempt = (latestAttempt ?? 0) + 1;
       if (nextAttempt > 4) {
         throw new Error("Kesempatan perbaikan ujian anda sudah habis.");
@@ -99,7 +108,7 @@ export async function submitExam(
         throw Error("Gagal mendapatkan codeGroupId dan daftar ujian");
       }
 
-      // 6. get selectedExam based on user number of submission attempt
+      // 7. get selectedExam based on user number of submission attempt
       let selectedExam: string = "";
 
       if (nextAttempt > 1) {
@@ -122,7 +131,7 @@ export async function submitExam(
         selectedExam = selectedExamForFirstTimeExam ?? "";
       }
 
-      // 7. filter input data to only get current selected exam
+      // 8. filter input data to only get current selected exam
       submittedExamData = submittedExamData.filter((data) =>
         selectedExam?.split(",")?.some((exam) => exam.includes(data.examName)),
       );
@@ -133,14 +142,6 @@ export async function submitExam(
         attemptNumber: nextAttempt,
         note: data.note ? data.note : "",
       }));
-
-      // 8. ensure all codes and product names across exam sections are unique
-      const allInputIsUnique = haveSameValue(submittedExamData);
-      if (!allInputIsUnique) {
-        throw Error(
-          "Kode atau nama produk yang dimasukkan tidak boleh ada duplikasi.",
-        );
-      }
 
       const orConditions = submittedExamData.map((pair) =>
         and(
@@ -655,6 +656,7 @@ function haveSameValue(answers: Answer[]) {
   }
   const uniqueCode = new Set<string>();
   const uniqueProductName = new Set<string>();
+  let totalCodeCount = 0;
 
   for (const obj of answers) {
     const isIdentifikasi = obj.examName === "identifikasi";
@@ -663,10 +665,12 @@ function haveSameValue(answers: Answer[]) {
       uniqueProductName.add(obj.value);
     }
 
-    uniqueCode.add(obj.code);
+    if (obj.code) {
+      uniqueCode.add(obj.code);
+      totalCodeCount++;
+    }
   }
 
-  const totalCodeCount = answers.length;
   const totalProductNameCount = answers.filter(
     (a) => a.examName === "identifikasi",
   ).length;
