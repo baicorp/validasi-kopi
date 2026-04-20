@@ -25,14 +25,35 @@ export async function submitExam(
     const session = await validateSessionServer();
     const userId = session.user.id;
 
-    // 2. get all exams data from db
+    // 2. verify that none of the code in this submission has been submitted before
+    const alreadySubmittedCodes = await db
+      .select({ code: examSubmissions.code })
+      .from(examSubmissions)
+      .innerJoin(
+        submissionAttempts,
+        eq(examSubmissions.submissionAttemptId, submissionAttempts.id),
+      )
+      .where(eq(submissionAttempts.examEventId, examEventId));
+
+    const newCodes = new Set(submittedExamData.map((d) => d.code));
+    const hasOverlappingCodes = alreadySubmittedCodes.some((d) =>
+      newCodes.has(d.code),
+    );
+
+    if (hasOverlappingCodes) {
+      return {
+        error: `Gagal mengumpulkan jawaban, terdapat kode yang sudah pernah dikumpulkan sebelumnya.`,
+      };
+    }
+
+    // 3. get all exams data from db
     const examsData = await getAllExams();
     if (!examsData) {
       return { error: "Gagal mendapatkan daftar nama ujian" };
     }
 
     const transactionResult = await db.transaction(async (tx) => {
-      // 3. check how many time user already submit exam
+      // 4. check how many time user already submit exam
       const [{ latestAttempt }] = await tx
         .select({
           latestAttempt: sql<number>`max(${submissionAttempts.numberAttempt})`,
@@ -45,7 +66,7 @@ export async function submitExam(
           ),
         );
 
-      // 4. get codeGroupId based on how many times user already take
+      // 5. get codeGroupId based on how many times user already take
       const nextAttempt = (latestAttempt ?? 0) + 1;
       if (nextAttempt > 4) {
         throw new Error("Kesempatan perbaikan ujian anda sudah habis.");
@@ -78,7 +99,7 @@ export async function submitExam(
         throw Error("Gagal mendapatkan codeGroupId dan daftar ujian");
       }
 
-      // 5. get selectedExam based on user number of submission attempt
+      // 6. get selectedExam based on user number of submission attempt
       let selectedExam: string = "";
 
       if (nextAttempt > 1) {
@@ -101,7 +122,7 @@ export async function submitExam(
         selectedExam = selectedExamForFirstTimeExam ?? "";
       }
 
-      // 6. filter input data to only get current selected exam
+      // 7. filter input data to only get current selected exam
       submittedExamData = submittedExamData.filter((data) =>
         selectedExam?.split(",")?.some((exam) => exam.includes(data.examName)),
       );
@@ -113,7 +134,7 @@ export async function submitExam(
         note: data.note ? data.note : "",
       }));
 
-      // 7. ensure all codes and product names across exam sections are unique
+      // 8. ensure all codes and product names across exam sections are unique
       const allInputIsUnique = haveSameValue(submittedExamData);
       if (!allInputIsUnique) {
         throw Error(
@@ -139,16 +160,16 @@ export async function submitExam(
         .leftJoin(exams, eq(codes.examId, exams.id))
         .where(and(eq(codes.codeGroupId, codeGroupId), or(...orConditions)));
 
-      // 8. evaluate answer list by comparing userAnswerList and dbAnswerList.
+      // 9. evaluate answer list by comparing userAnswerList and dbAnswerList.
       // then give result either "correct" | "partial" | "wrong"
       // @ts-expect-error correct answer actually work (null and undefined)
       const results = evaluateAnswers(submittedExamData, dbAnswerList);
 
-      // 9. insert submissionAttempts data and submissionNote if available;
+      // 10. insert submissionAttempts data and submissionNote if available;
       const submissionNoteData: InferInsertModel<typeof examSubmissionNotes>[] =
         [];
 
-      // 10. find final treshold (tmx + tsg (skor + rasa)) final grade avarege
+      // 11. find final treshold (tmx + tsg (skor + rasa)) final grade avarege
       const findTreshold = results.filter((data) =>
         data.examName.toLowerCase().includes("treshold"),
       );
@@ -200,7 +221,7 @@ export async function submitExam(
         .insert(submissionAttempts)
         .values(submissionAttemptsInsertValues);
 
-      // 11. insert notes only if relevant exams (skoring/triangle) are selected and notes exist.
+      // 12. insert notes only if relevant exams (skoring/triangle) are selected and notes exist.
       const isNoteExam = ["skoring", "triangle"].some((exam) =>
         selectedExam.includes(exam),
       );
@@ -208,7 +229,7 @@ export async function submitExam(
         await tx.insert(examSubmissionNotes).values(submissionNoteData);
       }
 
-      // 12. get submissionAttempts inserted rows data
+      // 13. get submissionAttempts inserted rows data
       const insertedRows = await tx
         .select({
           id: submissionAttempts.id,
@@ -222,7 +243,7 @@ export async function submitExam(
           ),
         );
 
-      // 13. insert examSubmissions data
+      // 14. insert examSubmissions data
       const attemptMap = new Map<string, string>();
       for (const row of insertedRows) {
         attemptMap.set(row.examId, row.id);
