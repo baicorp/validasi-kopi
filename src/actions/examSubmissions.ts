@@ -12,8 +12,8 @@ import { Answer } from "@/lib/types";
 import { getAllExams } from "./exams";
 import { getExamsId } from "@/lib/utils";
 import { evaluateAnswers } from "@/lib/evaluateAnswer";
-import { and, eq, InferInsertModel, or, sql } from "drizzle-orm";
 import { isValidRole, validateSessionServer } from "./validateSession";
+import { and, between, eq, InferInsertModel, or, sql } from "drizzle-orm";
 import { codeGroups, codes, departments, exams, user } from "@/db/schema";
 
 export async function submitExam(
@@ -34,35 +34,14 @@ export async function submitExam(
       };
     }
 
-    // 3. verify that none of the code in this submission has been submitted before
-    const alreadySubmittedCodes = await db
-      .select({ code: examSubmissions.code })
-      .from(examSubmissions)
-      .innerJoin(
-        submissionAttempts,
-        eq(examSubmissions.submissionAttemptId, submissionAttempts.id),
-      )
-      .where(eq(submissionAttempts.examEventId, examEventId));
-
-    const newCodes = new Set(submittedExamData.map((d) => d.code));
-    const hasOverlappingCodes = alreadySubmittedCodes.some((d) =>
-      newCodes.has(d.code),
-    );
-
-    if (hasOverlappingCodes) {
-      return {
-        error: `Gagal mengumpulkan jawaban, terdapat kode yang sudah pernah dikumpulkan sebelumnya.`,
-      };
-    }
-
-    // 4. get all exams data from db
+    // 3. get all exams data from db
     const examsData = await getAllExams();
     if (!examsData) {
       return { error: "Gagal mendapatkan daftar nama ujian" };
     }
 
     const transactionResult = await db.transaction(async (tx) => {
-      // 5. check how many time user already submit exam
+      // 4. check how many time user already submit exam
       const [{ latestAttempt }] = await tx
         .select({
           latestAttempt: sql<number>`max(${submissionAttempts.numberAttempt})`,
@@ -75,12 +54,56 @@ export async function submitExam(
           ),
         );
 
-      // 6. get codeGroupId based on how many times user already take
       const nextAttempt = (latestAttempt ?? 0) + 1;
       if (nextAttempt > 4) {
         throw new Error("Kesempatan perbaikan ujian anda sudah habis.");
       }
 
+      // 5. verify that none of the code in this submission has been submitted before
+      const codeGroup = await tx
+        .select({
+          RegulerId: examEvents.codeGroupRegulerId,
+          RetakeId: examEvents.codeGroupRetakeId,
+        })
+        .from(examEvents)
+        .where(eq(examEvents.id, examEventId));
+
+      if (codeGroup.length === 0) {
+        throw new Error(`Tidak ditemukan ujian dengan ID "${examEventId}".`);
+      }
+
+      // if codeGroupReguler and codeGroupRetake is the same, only check submissionAttemptId
+      const isSameCodeGroup = codeGroup[0].RegulerId === codeGroup[0].RetakeId;
+      const whereClause = isSameCodeGroup
+        ? eq(submissionAttempts.examEventId, examEventId)
+        : and(
+            eq(submissionAttempts.examEventId, examEventId),
+            nextAttempt === 1
+              ? eq(submissionAttempts.numberAttempt, nextAttempt)
+              : between(submissionAttempts.numberAttempt, 2, nextAttempt),
+          );
+
+      const alreadySubmittedCodes = await tx
+        .select({ code: examSubmissions.code })
+        .from(examSubmissions)
+        .innerJoin(
+          submissionAttempts,
+          eq(examSubmissions.submissionAttemptId, submissionAttempts.id),
+        )
+        .where(whereClause);
+
+      const newCodes = new Set(submittedExamData.map((d) => d.code));
+      const hasOverlappingCodes = alreadySubmittedCodes.some((d) =>
+        newCodes.has(d.code),
+      );
+
+      if (hasOverlappingCodes) {
+        throw new Error(
+          `Gagal mengumpulkan jawaban, terdapat kode yang sudah pernah dikumpulkan sebelumnya.`,
+        );
+      }
+
+      // 6. get codeGroupId based on how many times user already take
       const targetGroupColumn =
         nextAttempt > 1
           ? examEvents.codeGroupRetakeId
