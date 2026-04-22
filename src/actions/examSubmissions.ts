@@ -26,7 +26,7 @@ export async function submitExam(
     const userId = session.user.id;
 
     // 2. ensure all codes and product names across exam sections are unique
-    const allInputIsUnique = haveSameValue(submittedExamData);
+    const allInputIsUnique = hasNoDuplicates(submittedExamData);
     if (!allInputIsUnique) {
       return {
         error:
@@ -645,34 +645,30 @@ function normalizeExamSubmissions(
   return results;
 }
 
-function haveSameValue(answers: Answer[]) {
+function hasNoDuplicates(answers: Answer[]) {
   if (answers.length === 0) {
     throw Error("Semua input form harus diisi.");
   }
   const uniqueCode = new Set<string>();
   const uniqueProductName = new Set<string>();
   let totalCodeCount = 0;
+  let totalProductNameCount = 0;
 
   for (const obj of answers) {
     const isIdentifikasi = obj.examName === "identifikasi";
 
-    if (isIdentifikasi) {
+    if (isIdentifikasi && obj.value) {
       uniqueProductName.add(obj.value);
+      totalProductNameCount++;
     }
-
     if (obj.code) {
       uniqueCode.add(obj.code);
       totalCodeCount++;
     }
   }
 
-  const totalProductNameCount = answers.filter(
-    (a) => a.examName === "identifikasi",
-  ).length;
-
-  const allCodesUnique = uniqueCode.size === totalCodeCount;
-  const allProductNamesUnique =
-    uniqueProductName.size === totalProductNameCount;
-
-  return allCodesUnique && allProductNamesUnique;
+  return (
+    uniqueCode.size === totalCodeCount &&
+    uniqueProductName.size === totalProductNameCount
+  );
 }
