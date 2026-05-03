@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { toTitleCase } from "@/lib/utils";
 import { redirect } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock } from "lucide-react";
@@ -54,9 +53,7 @@ async function ActiveExamEvent({ nik }: { nik: string }) {
               className="rounded-lg overflow-hidden border shadow min-w-[270px] md:w-[270px] h-full p-5 flex flex-col justify-between"
             >
               <div className="flex flex-col gap-2">
-                <p className="font-medium">
-                  {toTitleCase(event.examEventName)}
-                </p>
+                <p className="font-medium">{event.examEventName}</p>
                 <div>
                   <p className="text-muted-foreground mb-1">Pelaksanaan</p>
                   <div className="flex items-center gap-2">

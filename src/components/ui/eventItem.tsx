@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Badge } from "./badge";
 import { Separator } from "./separator";
-import { toTitleCase } from "@/lib/utils";
 import { Clock, ExternalLink } from "lucide-react";
 import DeleteDialogExamEvent from "./deleteExamEvent";
 import { formatJakartaTime } from "@/lib/datetimeFormat";
@@ -33,7 +32,7 @@ export default function EventItem({
         <div className="flex justify-between">
           <Link href={`ujian/${id}/peserta-ujian`}>
             <p className="font-medium line-clamp-2 overflow-ellipsis">
-              {toTitleCase(examEventName)}
+              {examEventName}
             </p>
           </Link>
           <div className="flex flex-col gap-1">

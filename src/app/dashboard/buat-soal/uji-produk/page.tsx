@@ -222,7 +222,7 @@ function ListProduk({ productCategory }: { productCategory: string }) {
                       onCheckedChange={() => toggleSelect(product.id)}
                     />
                     <Label htmlFor={`product-${product.id}`}>
-                      {toTitleCase(product.productName)}
+                      {product.productName}
                     </Label>
                     {checked && (
                       <input
