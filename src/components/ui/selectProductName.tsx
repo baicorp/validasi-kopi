@@ -11,7 +11,6 @@ import {
 } from "./select";
 import useSWR from "swr";
 import { getListValuesFromExamName } from "@/actions/examEvents";
-import { toTitleCase } from "@/lib/utils";
 
 export default function SelectProductName({
   inputName,
@@ -60,7 +59,7 @@ export default function SelectProductName({
           <SelectLabel>Daftar nama produk</SelectLabel>
           {codeValues.map((value, index) => (
             <SelectItem key={index} value={value!}>
-              {value && toTitleCase(value.toLowerCase())}
+              {value && value}
             </SelectItem>
           ))}
         </SelectGroup>
