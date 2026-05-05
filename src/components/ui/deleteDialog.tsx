@@ -59,7 +59,10 @@ export default function DeleteDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       {variant === "dropDown" ? (
         <DialogTrigger asChild>
-          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+          <DropdownMenuItem
+            variant="destructive"
+            onSelect={(e) => e.preventDefault()}
+          >
             Hapus
           </DropdownMenuItem>
         </DialogTrigger>

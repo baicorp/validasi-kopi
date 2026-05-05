@@ -47,7 +47,10 @@ export default function DeleteDialogExamEvent({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+        <DropdownMenuItem
+          variant="destructive"
+          onSelect={(e) => e.preventDefault()}
+        >
           Hapus
         </DropdownMenuItem>
       </DialogTrigger>
