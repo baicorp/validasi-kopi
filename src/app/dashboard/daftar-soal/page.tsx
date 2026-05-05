@@ -4,10 +4,10 @@ import { toTitleCase } from "@/lib/utils";
 import { redirect } from "next/navigation";
 import { SearchParams } from "@/lib/types";
 import ErrorComp from "@/components/ui/error";
+import { utcToWIB } from "@/lib/datetimeFormat";
 import Paginator from "@/components/ui/paginator";
 import SearchData from "@/components/ui/searchData";
 import { deleteGeneratedCode } from "@/actions/codes";
-import { formatJakartaTime } from "@/lib/datetimeFormat";
 import { getAllCodeGroups } from "@/actions/codeGroups";
 import DeleteDialog from "@/components/ui/deleteDialog";
 import CodeGroupsLabel from "@/components/ui/codeGroupsLabel";
@@ -124,7 +124,7 @@ function CodeGroupItem({
               className="font-mono text-xs text-muted-foreground"
               dateTime={createdAt?.split(" ")[0]}
             >
-              {formatJakartaTime(createdAt || "")}
+              {utcToWIB(createdAt || "")}
             </time>
             <div className="flex items-center gap-1 text-muted-foreground">
               <User size={12} className="mb-1" />

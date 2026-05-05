@@ -5,6 +5,11 @@ export function formatJakartaTime(dateTime: string) {
   });
 }
 
+export function utcToWIB(utcString: string): string {
+  const normalized = utcString.replace(" ", "T") + "Z";
+  return formatJakartaTime(normalized);
+}
+
 export function getDurationString(start: string, end: string): string {
   const startDate = new Date(start);
   const endDate = new Date(end);
