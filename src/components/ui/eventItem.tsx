@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { Badge } from "./badge";
+import { cn } from "@/lib/utils";
 import { Button } from "./button";
 import { Separator } from "./separator";
 import DeleteDialogExamEvent from "./deleteExamEvent";
 import EditDialogExamEvent from "./editDialogExamEvent";
 import { getAllExamEvents } from "@/actions/examEvents";
-import { Clock, ExternalLink, MoreVertical } from "lucide-react";
 import { formatJakartaTime, utcToWIB } from "@/lib/datetimeFormat";
+import { ArrowRightIcon, ExternalLink, MoreVertical } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,36 +35,36 @@ export default function EventItem({
 
   return (
     <div className="rounded-lg overflow-hidden border shadow flex flex-col justify-between">
-      <div className="p-5 flex flex-col gap-2">
-        <div className="flex justify-between">
-          <Link href={`ujian/${id}/peserta-ujian`}>
-            <p className="font-medium line-clamp-2 overflow-ellipsis">
-              {examEventName}
-            </p>
-          </Link>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <MoreVertical className="h-5 w-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <EditDialogExamEvent
-                eventId={id}
-                eventName={examEventName}
-                codeGroupReguler={codeGroupRegulerId ?? undefined}
-                codeGroupRetake={codeGroupRetakeId ?? undefined}
-                examDefaultDateStart={examDateStart}
-                examDefaultDateEnd={examDateEnd}
-                examDefaultTimeStart={examTimeStart}
-                examDefaultTimeEnd={examTimeEnd}
-              />
-              <DeleteDialogExamEvent eventId={id} eventName={examEventName} />
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+      <div className="flex justify-between p-5 border-b border-border">
+        <Link href={`ujian/${id}/peserta-ujian`}>
+          <p className="font-medium line-clamp-2 overflow-ellipsis">
+            {examEventName}
+          </p>
+        </Link>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="icon">
+              <MoreVertical className="h-5 w-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <EditDialogExamEvent
+              eventId={id}
+              eventName={examEventName}
+              codeGroupReguler={codeGroupRegulerId ?? undefined}
+              codeGroupRetake={codeGroupRetakeId ?? undefined}
+              examDefaultDateStart={examDateStart}
+              examDefaultDateEnd={examDateEnd}
+              examDefaultTimeStart={examTimeStart}
+              examDefaultTimeEnd={examTimeEnd}
+            />
+            <DeleteDialogExamEvent eventId={id} eventName={examEventName} />
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      <div className="px-5 py-2 flex flex-col gap-3">
         <div>
-          <p className="text-muted-foreground mb-1">Daftar ujian</p>
+          <SectionTitle>DAFTAR UJIAN</SectionTitle>
           <div className="flex flex-wrap gap-1">
             {selectedExams?.split(",")?.map((exam) => (
               <Badge key={exam} variant="secondary">
@@ -72,48 +73,101 @@ export default function EventItem({
             ))}
           </div>
         </div>
+        <Separator />
         <div>
-          <p className="text-muted-foreground mb-1">Tanggal / Waktu Ujian</p>
-          <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 shrink-0" />
-            <p className="text-sm">{formatJakartaTime(examStart)}</p>
-            <span>→</span>
-            <p className="text-sm">{formatJakartaTime(examEnd)}</p>
+          <SectionTitle>TANGGAL / WAKTU UJIAN</SectionTitle>
+          <div className="flex gap-2">
+            <ExamDateTime examDateTime={examStart} variant="start" />
+            <ArrowRightIcon size="18" className="self-center" />
+            <ExamDateTime examDateTime={examEnd} variant="end" />
           </div>
         </div>
+        <Separator />
         <div>
-          <p className="text-muted-foreground">Kuota peserta ujian</p>
-          <p>{totalParticipants} Orang</p>
+          <SectionTitle>KUOTA PESERTA UJIAN</SectionTitle>
+          <p className="text-sm">{totalParticipants} Orang</p>
         </div>
+        <Separator />
         <div>
-          <p className="text-muted-foreground">Link bank soal</p>
-          <div className="flex items-center gap-3 flex-wrap">
-            <Link
-              href={`daftar-soal/${codeGroupRegulerId}`}
-              className="flex gap-1 items-center text-blue-700 hover:underline hover:decoration-wavy"
-            >
-              <span className="text-sm">Soal reguler</span>
-              <ExternalLink className="w-3 h-3" />
-            </Link>
-            <Link
-              href={`daftar-soal/${codeGroupRetakeId}`}
-              className="flex gap-1 items-center text-blue-700 hover:underline hover:decoration-wavy"
-            >
-              <span className="text-sm">Soal mengulang</span>
-              <ExternalLink className="w-3 h-3" />
-            </Link>
+          <SectionTitle>LINK BANK SOAL</SectionTitle>
+          <div className="flex gap-2 flex-wrap">
+            <BankExamUrl
+              codeGroupRegulerId={codeGroupRegulerId}
+              variant="reguler"
+            />
+            <BankExamUrl
+              codeGroupRegulerId={codeGroupRetakeId}
+              variant="retake"
+            />
           </div>
         </div>
       </div>
       <div>
-        <Separator />
-        <div className="p-4 bg-muted">
+        <div className="px-4 bg-muted py-2 border-t border-border">
           <p className="text-xs text-muted-foreground">
             Diperbarui : {utcToWIB(updatedAt || "")}
           </p>
         </div>
       </div>
     </div>
+  );
+}
+
+function SectionTitle({
+  children,
+  className,
+  ...props
+}: React.ComponentProps<"p">) {
+  return (
+    <p
+      className={cn(`text-muted-foreground text-xs mb-0.5`, className)}
+      {...props}
+    >
+      {children}
+    </p>
+  );
+}
+
+function ExamDateTime({
+  examDateTime,
+  variant,
+}: {
+  examDateTime: string;
+  variant: "start" | "end";
+}) {
+  return (
+    <div className="flex-1 px-2 py-1 rounded-md border border-border bg-sidebar-accent">
+      <p className="text-xs text-muted-foreground">
+        {variant === "start" ? "Mulai" : "Selesai"}
+      </p>
+      <p className="font-medium text-sm">
+        {formatJakartaTime(examDateTime).split(",")[0]}
+      </p>
+      <p className="text-xs text-muted-foreground">
+        {formatJakartaTime(examDateTime).split(",")[1]}
+      </p>
+    </div>
+  );
+}
+
+function BankExamUrl({
+  codeGroupRegulerId,
+  variant,
+}: {
+  codeGroupRegulerId: string;
+  variant: "reguler" | "retake";
+}) {
+  return (
+    <Link
+      href={`daftar-soal/${codeGroupRegulerId}`}
+      target="_blank"
+      className="flex-1 flex justify-center gap-2 items-center text-green-700 py-1 bg-green-100 rounded-md border border-green-200"
+    >
+      <span className="text-sm">
+        {variant === "reguler" ? "Reguler" : "Mengulang"}
+      </span>
+      <ExternalLink size="14" />
+    </Link>
   );
 }
 
