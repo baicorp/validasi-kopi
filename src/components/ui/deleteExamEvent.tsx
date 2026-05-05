@@ -11,7 +11,8 @@ import {
 import { toast } from "sonner";
 import { Button } from "./button";
 import { FormEvent, useState } from "react";
-import { LoaderCircle, Trash } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
+import { DropdownMenuItem } from "./dropdown-menu";
 import { deleteExamEvent } from "@/actions/examEvents";
 
 export default function DeleteDialogExamEvent({
@@ -46,10 +47,9 @@ export default function DeleteDialogExamEvent({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <div className="cursor-pointer flex items-center text-white bg-red-500 gap-2 rounded-sm px-2 py-1 border shadow text-sm self-start">
-          <Trash className="w-3 h-3" />
-          <span>Hapus</span>
-        </div>
+        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+          Hapus
+        </DropdownMenuItem>
       </DialogTrigger>
       <DialogContent className="w-96">
         <DialogHeader>

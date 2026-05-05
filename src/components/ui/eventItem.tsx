@@ -1,11 +1,17 @@
 import Link from "next/link";
 import { Badge } from "./badge";
+import { Button } from "./button";
 import { Separator } from "./separator";
-import { Clock, ExternalLink } from "lucide-react";
 import DeleteDialogExamEvent from "./deleteExamEvent";
-import { formatJakartaTime } from "@/lib/datetimeFormat";
 import EditDialogExamEvent from "./editDialogExamEvent";
 import { getAllExamEvents } from "@/actions/examEvents";
+import { formatJakartaTime } from "@/lib/datetimeFormat";
+import { Clock, ExternalLink, MoreVertical } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "./dropdown-menu";
 
 type GetAllExamEventsResult = Awaited<ReturnType<typeof getAllExamEvents>>;
 type ExamEventItem = NonNullable<GetAllExamEventsResult["data"]>[number];
@@ -35,19 +41,26 @@ export default function EventItem({
               {examEventName}
             </p>
           </Link>
-          <div className="flex flex-col gap-1">
-            <EditDialogExamEvent
-              eventId={id}
-              eventName={examEventName}
-              codeGroupReguler={codeGroupRegulerId ?? undefined}
-              codeGroupRetake={codeGroupRetakeId ?? undefined}
-              examDefaultDateStart={examDateStart}
-              examDefaultDateEnd={examDateEnd}
-              examDefaultTimeStart={examTimeStart}
-              examDefaultTimeEnd={examTimeEnd}
-            />
-            <DeleteDialogExamEvent eventId={id} eventName={examEventName} />
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreVertical className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <EditDialogExamEvent
+                eventId={id}
+                eventName={examEventName}
+                codeGroupReguler={codeGroupRegulerId ?? undefined}
+                codeGroupRetake={codeGroupRetakeId ?? undefined}
+                examDefaultDateStart={examDateStart}
+                examDefaultDateEnd={examDateEnd}
+                examDefaultTimeStart={examTimeStart}
+                examDefaultTimeEnd={examTimeEnd}
+              />
+              <DeleteDialogExamEvent eventId={id} eventName={examEventName} />
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         <div>
           <p className="text-muted-foreground mb-1">Daftar ujian</p>
