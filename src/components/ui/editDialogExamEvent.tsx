@@ -8,8 +8,8 @@ import {
   DialogTrigger,
 } from "./dialog";
 import { toast } from "sonner";
-import { SquarePen } from "lucide-react";
 import { FormEvent, useState } from "react";
+import { DropdownMenuItem } from "./dropdown-menu";
 import { updateExamEvent } from "@/actions/examEvents";
 import ExamEventForm, { ExamEventFormInputProps } from "../form/examEventForm";
 
@@ -52,10 +52,9 @@ export default function EditDialogExamEvent({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <div className="cursor-pointer flex items-center gap-2 rounded-sm px-2 py-1 border shadow text-sm self-start">
-          <SquarePen className="w-3 h-3" />
-          <span>Edit</span>
-        </div>
+        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+          Edit
+        </DropdownMenuItem>
       </DialogTrigger>
       <DialogContent className="w-96">
         <DialogHeader>
