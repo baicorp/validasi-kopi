@@ -85,6 +85,7 @@ async function ExamEventDetails({ examEventId }: { examEventId: string }) {
           <div className="flex flex-col">
             <Link
               href={`/dashboard/daftar-soal/${examEvent.codeGroupRegulerId}`}
+              target="_blank"
               className="flex gap-1 items-center text-blue-700 hover:underline hover:decoration-wavy"
             >
               <span className="text-sm">Reguler</span>
@@ -92,6 +93,7 @@ async function ExamEventDetails({ examEventId }: { examEventId: string }) {
             </Link>
             <Link
               href={`/dashboard/daftar-soal/${examEvent.codeGroupRetakeId}`}
+              target="_blank"
               className="flex gap-1 items-center text-blue-700 hover:underline hover:decoration-wavy"
             >
               <span className="text-sm">Mengulang</span>
