@@ -21,10 +21,10 @@ export default function Paginator({
 }) {
   const searchParams = useSearchParams();
   const pageNumbers = [
+    currentPage - 2,
     currentPage - 1,
     currentPage,
     currentPage + 1,
-    currentPage + 2,
   ]
     .filter((numb) => numb >= 1 && numb <= totalPages)
     .slice(0, 4);
@@ -35,35 +35,33 @@ export default function Paginator({
     return `?${params.toString()}`;
   };
 
-  const listPaginationItem = pageNumbers.map((pageNumber) => {
-    return (
-      <PaginationItem key={pageNumber}>
-        <PaginationLink
-          isActive={pageNumber === currentPage}
-          href={`${createPageURL(pageNumber)}`}
-        >
-          {pageNumber}
-        </PaginationLink>
-      </PaginationItem>
-    );
-  });
+  const listPaginationItem = pageNumbers.map((pageNumber) => (
+    <PaginationItem key={pageNumber}>
+      <PaginationLink
+        isActive={pageNumber === currentPage}
+        href={createPageURL(pageNumber)}
+      >
+        {pageNumber}
+      </PaginationLink>
+    </PaginationItem>
+  ));
 
   return (
     <Pagination>
       <PaginationContent>
         <PaginationItem>
-          {currentPage - 1 < 1 ? (
+          {currentPage <= 1 ? (
             <DisableLinkPrev />
           ) : (
-            <PaginationPrevious href={`?page=${currentPage - 1}`} />
+            <PaginationPrevious href={createPageURL(currentPage - 1)} />
           )}
         </PaginationItem>
         {listPaginationItem}
         <PaginationItem>
-          {currentPage + 1 > totalPages ? (
+          {currentPage >= totalPages ? (
             <DisableLinkNext />
           ) : (
-            <PaginationNext href={`?page=${currentPage + 1}`} />
+            <PaginationNext href={createPageURL(currentPage + 1)} />
           )}
         </PaginationItem>
       </PaginationContent>
