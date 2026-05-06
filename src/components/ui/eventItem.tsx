@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { Badge } from "./badge";
-import { cn } from "@/lib/utils";
 import { Button } from "./button";
 import { Separator } from "./separator";
+import { utcToWIB } from "@/lib/datetimeFormat";
+import { CardSectionTitle } from "./cardSectionTitle";
+import { CardExamDateTime } from "./cardExamDateTime";
 import DeleteDialogExamEvent from "./deleteExamEvent";
 import EditDialogExamEvent from "./editDialogExamEvent";
 import { getAllExamEvents } from "@/actions/examEvents";
-import { formatJakartaTime, utcToWIB } from "@/lib/datetimeFormat";
 import { ArrowRightIcon, ExternalLink, MoreVertical } from "lucide-react";
 import {
   DropdownMenu,
@@ -64,7 +65,7 @@ export default function EventItem({
       </div>
       <div className="px-5 py-2 flex flex-col gap-3">
         <div>
-          <SectionTitle>DAFTAR UJIAN</SectionTitle>
+          <CardSectionTitle>DAFTAR UJIAN</CardSectionTitle>
           <div className="flex flex-wrap gap-1">
             {selectedExams?.split(",")?.map((exam) => (
               <Badge key={exam} variant="secondary">
@@ -75,21 +76,21 @@ export default function EventItem({
         </div>
         <Separator />
         <div>
-          <SectionTitle>TANGGAL / WAKTU UJIAN</SectionTitle>
+          <CardSectionTitle>TANGGAL / WAKTU UJIAN</CardSectionTitle>
           <div className="flex gap-2">
-            <ExamDateTime examDateTime={examStart} variant="start" />
+            <CardExamDateTime examDateTime={examStart} variant="start" />
             <ArrowRightIcon size="18" className="self-center" />
-            <ExamDateTime examDateTime={examEnd} variant="end" />
+            <CardExamDateTime examDateTime={examEnd} variant="end" />
           </div>
         </div>
         <Separator />
         <div>
-          <SectionTitle>KUOTA PESERTA UJIAN</SectionTitle>
+          <CardSectionTitle>KUOTA PESERTA UJIAN</CardSectionTitle>
           <p className="text-sm">{totalParticipants} Orang</p>
         </div>
         <Separator />
         <div>
-          <SectionTitle>LINK BANK SOAL</SectionTitle>
+          <CardSectionTitle>LINK BANK SOAL</CardSectionTitle>
           <div className="flex gap-2 flex-wrap">
             <BankExamUrl
               codeGroupRegulerId={codeGroupRegulerId}
@@ -109,43 +110,6 @@ export default function EventItem({
           </p>
         </div>
       </div>
-    </div>
-  );
-}
-
-function SectionTitle({
-  children,
-  className,
-  ...props
-}: React.ComponentProps<"p">) {
-  return (
-    <p
-      className={cn(`text-muted-foreground text-xs mb-0.5`, className)}
-      {...props}
-    >
-      {children}
-    </p>
-  );
-}
-
-function ExamDateTime({
-  examDateTime,
-  variant,
-}: {
-  examDateTime: string;
-  variant: "start" | "end";
-}) {
-  return (
-    <div className="flex-1 px-2 py-1 rounded-md border border-border bg-sidebar-accent">
-      <p className="text-xs text-muted-foreground">
-        {variant === "start" ? "Mulai" : "Selesai"}
-      </p>
-      <p className="font-medium text-sm">
-        {formatJakartaTime(examDateTime).split(",")[0]}
-      </p>
-      <p className="text-xs text-muted-foreground">
-        {formatJakartaTime(examDateTime).split(",")[1]}
-      </p>
     </div>
   );
 }
