@@ -20,13 +20,15 @@ export default async function page({
   const { id } = await params;
 
   return (
-    <div>
-      <div className="px-6 py-4 border rounded-lg space-y-6">
+    <div className="flex flex-col gap-4">
+      <section className="px-6 py-4 border rounded-lg space-y-6">
         <DummyExamValues eventId={id} />
+      </section>
+      <section className="px-6 py-4 border rounded-lg space-y-6">
         <Suspense fallback={<Loading />}>
           <Participants eventId={id} />
         </Suspense>
-      </div>
+      </section>
     </div>
   );
 }
