@@ -2,13 +2,15 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock } from "lucide-react";
+import { ArrowRightIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import UserNotMatch from "@/components/ui/userNotMatch";
 import { getActiveExamEvent } from "@/actions/examEvents";
 import { validateSessionServer } from "@/actions/validateSession";
-import { formatJakartaTime, getDurationString } from "@/lib/datetimeFormat";
 import { ExamEventCardSkeleton } from "@/components/skeleton/examEventCard";
+import { CardSectionTitle } from "@/components/ui/cardSectionTitle";
+import { CardExamDateTime } from "@/components/ui/cardExamDateTime";
 
 export default async function Page({
   params,
@@ -48,86 +50,128 @@ async function ActiveExamEvent({ nik }: { nik: string }) {
       {examEvent.length !== 0 ? (
         examEvent.map((event) => {
           return (
-            <div
+            <UserExamEventItem
               key={event.examEventId}
-              className="rounded-lg overflow-hidden border shadow min-w-[270px] md:w-[270px] h-full p-5 flex flex-col justify-between"
-            >
-              <div className="flex flex-col gap-2">
-                <p className="font-medium">{event.examEventName}</p>
-                <div>
-                  <p className="text-muted-foreground mb-1">Pelaksanaan</p>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 shrink-0" />
-                    <p className="text-sm">
-                      {formatJakartaTime(event.examStart)}
-                    </p>
-                    <span>→</span>
-                    <p className="text-sm">
-                      {formatJakartaTime(event.examEnd)}
-                    </p>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-muted-foreground mb-1">Waktu pengerjaan</p>
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 shrink-0" />
-                    <p className="text-sm">
-                      {getDurationString(event.examStart, event.examEnd)}
-                    </p>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-muted-foreground mb-1">Daftar ujian</p>
-                  <div className="flex items-center flex-wrap gap-2">
-                    {event.selectedExam?.split(",").map((exam) => (
-                      <Badge key={exam} variant="secondary">
-                        {exam}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-                {event.numberAttempt > 0 && (
-                  <div>
-                    <p className="text-muted-foreground mb-1">Status</p>
-                    <div className="flex flex-wrap items-center gap-2">
-                      {event.retakeExam ? (
-                        <>
-                          <span className="text-sm text-red-500">
-                            Mengulang ({event.numberAttempt - 1} / 3)
-                          </span>
-                          <span> : </span>
-                          {event.retakeExam.split(",").map((exam) => (
-                            <Badge key={exam} variant={"secondary"}>
-                              {exam}
-                            </Badge>
-                          ))}
-                        </>
-                      ) : (
-                        <span className="px-2 py-0.5 rounded-md text-xs bg-green-500 text-white">
-                          SELESAI
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-              {(event.numberAttempt === 0 ||
-                (event.numberAttempt < 4 && event.retakeExam)) && (
-                <Link
-                  href={`${nik}/ujian/${event.examEventId}`}
-                  className="mt-4"
-                >
-                  <Button className="w-full">
-                    Mulai ujian{" "}
-                    {event.numberAttempt > 0 && event.retakeExam && "ulang"}
-                  </Button>
-                </Link>
-              )}
-            </div>
+              nik={nik}
+              numberAttempt={event.numberAttempt}
+              retakeExam={event.retakeExam}
+              examEventId={event.examEventId}
+              examEventName={event.examEventName}
+              examStart={event.examStart}
+              examEnd={event.examEnd}
+              selectedExam={event.selectedExam}
+            />
           );
         })
       ) : (
         <p>Tidak ada ujian dibuka</p>
+      )}
+    </div>
+  );
+}
+
+type GetActiveExamEventResult = Awaited<ReturnType<typeof getActiveExamEvent>>;
+
+type UserExamEventItem = Exclude<
+  GetActiveExamEventResult,
+  { error: string }
+>[number];
+
+function UserExamEventItem({
+  nik,
+  numberAttempt,
+  retakeExam,
+  examEventId,
+  examEventName,
+  examStart,
+  examEnd,
+  selectedExam,
+}: UserExamEventItem & { nik: string }) {
+  const nowUtc = new Date(new Date().toUTCString()).getTime();
+  const examEndUtc = new Date(examEnd).getTime();
+
+  const timeDiff = (examEndUtc - nowUtc) / 1000;
+
+  const minutes = Math.floor((timeDiff / 60) % 60);
+  const hours = Math.floor((timeDiff / 3600) % 24);
+  const days = Math.floor(timeDiff / 86400);
+
+  return (
+    <div
+      key={examEventId}
+      className="rounded-lg overflow-hidden border shadow min-w-[270px] md:w-[270px] h-full py-3 flex flex-col gap-2 justify-between"
+    >
+      <div className="border-b">
+        <p className="font-medium px-5 pb-2">{examEventName}</p>
+      </div>
+      <div className="flex flex-col gap-2 px-5">
+        <div>
+          <CardSectionTitle>PELAKSANAAN UJIAN</CardSectionTitle>
+          <div className="flex gap-2">
+            <CardExamDateTime examDateTime={examStart} variant="start" />
+            <ArrowRightIcon size="18" className="self-center" />
+            <CardExamDateTime examDateTime={examEnd} variant="end" />
+          </div>
+        </div>
+        <Separator />
+        <div>
+          <CardSectionTitle>BERAKHIR DALAM</CardSectionTitle>
+          <div className="flex gap-2">
+            <p className="text-lg font-bold">{days}</p>
+            <span className="text-xs self-end">Hari</span>
+            <p className="text-lg font-bold">{hours}</p>
+            <span className="text-xs self-end">Jam</span>
+            <p className="text-lg font-bold">{minutes}</p>
+            <span className="text-xs self-end">Menit</span>
+          </div>
+        </div>
+        <Separator />
+        <div>
+          <CardSectionTitle>DAFTAR UJIAN</CardSectionTitle>
+          <div className="flex items-center flex-wrap gap-2">
+            {selectedExam?.split(",").map((exam) => (
+              <Badge key={exam} variant="secondary">
+                {exam}
+              </Badge>
+            ))}
+          </div>
+        </div>
+        {numberAttempt > 0 && (
+          <div className="border-t pt-2">
+            <div className="flex justify-between">
+              <CardSectionTitle>STATUS</CardSectionTitle>
+              {retakeExam ? (
+                <span className="text-xs font-font-medium text-destructive">
+                  MENGULANG ({numberAttempt - 1} / 3)
+                </span>
+              ) : (
+                <span className="px-2 flex justify-center items-center rounded-md text-xs bg-green-500 text-white">
+                  SELESAI
+                </span>
+              )}
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {retakeExam && (
+                <>
+                  {retakeExam.split(",").map((exam) => (
+                    <Badge key={exam} variant="destructive">
+                      {exam}
+                    </Badge>
+                  ))}
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+      {(numberAttempt === 0 || (numberAttempt < 4 && retakeExam)) && (
+        <div className="px-5 pt-1">
+          <Link href={`${nik}/ujian/${examEventId}`}>
+            <Button className="w-full">
+              Mulai ujian {numberAttempt > 0 && retakeExam && "ulang"}
+            </Button>
+          </Link>
+        </div>
       )}
     </div>
   );
