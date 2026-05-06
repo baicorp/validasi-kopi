@@ -8,9 +8,9 @@ import { Separator } from "@/components/ui/separator";
 import UserNotMatch from "@/components/ui/userNotMatch";
 import { getActiveExamEvent } from "@/actions/examEvents";
 import { validateSessionServer } from "@/actions/validateSession";
-import { ExamEventCardSkeleton } from "@/components/skeleton/examEventCard";
 import { CardSectionTitle } from "@/components/ui/cardSectionTitle";
 import { CardExamDateTime } from "@/components/ui/cardExamDateTime";
+import { ExamEventCardSkeleton } from "@/components/skeleton/examEventCard";
 
 export default async function Page({
   params,
@@ -64,7 +64,7 @@ async function ActiveExamEvent({ nik }: { nik: string }) {
           );
         })
       ) : (
-        <p>Tidak ada ujian dibuka</p>
+        <ExamNotFound />
       )}
     </div>
   );
@@ -173,6 +173,18 @@ function UserExamEventItem({
           </Link>
         </div>
       )}
+    </div>
+  );
+}
+
+function ExamNotFound() {
+  return (
+    <div className="mt-8 w-full">
+      <p className="font-semibold text-center">Tidak ada ujian yang tersedia</p>
+      <p className="text-muted-foreground text-center text-sm">
+        Saat ini belum ada ujian yang dibuka untukmu. Ujian akan muncul di sini
+        saat periode pelaksanaan dimulai.
+      </p>
     </div>
   );
 }
