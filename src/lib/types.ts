@@ -49,3 +49,5 @@ export type AnswerWithResult = Answer & {
   result: EvaluationStatus;
   additionalResult?: EvaluationStatus;
 };
+
+export type examEventPeriode = "akan datang" | "berlangsung" | "selesai";
