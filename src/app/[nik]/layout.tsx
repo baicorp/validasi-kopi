@@ -30,7 +30,9 @@ async function Identity() {
   return (
     <div>
       <p className="text-lg font-medium">{session.user.name}</p>
-      <p className="text-muted-foreground text-sm">{session.user.username}</p>
+      <p className="text-muted-foreground text-sm font-mono">
+        {session.user.username}
+      </p>
     </div>
   );
 }

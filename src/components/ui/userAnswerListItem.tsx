@@ -176,7 +176,9 @@ function UserAnswerCodeValueItem({
         {headerValue.trim() ? headerValue : "tidak diisi"}
       </p>
       <Separator />
-      <p className="px-3 py-1 text-center">{code ? code : "tidak diisi"}</p>
+      <p className="px-3 py-1 text-center font-mono">
+        {code ? code : "tidak diisi"}
+      </p>
     </div>
   );
 }

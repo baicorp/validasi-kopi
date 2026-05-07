@@ -86,7 +86,9 @@ export default function EventItem({
         <Separator />
         <div>
           <CardSectionTitle>KUOTA PESERTA UJIAN</CardSectionTitle>
-          <p className="text-sm">{totalParticipants} Orang</p>
+          <p className="text-sm">
+            <span className="font-mono">{totalParticipants}</span> Orang
+          </p>
         </div>
         <Separator />
         <div>
@@ -106,7 +108,8 @@ export default function EventItem({
       <div>
         <div className="px-4 bg-muted py-2 border-t border-border">
           <p className="text-xs text-muted-foreground">
-            Diperbarui : {utcToWIB(updatedAt || "")}
+            Diperbarui :
+            <span className="font-mono">{utcToWIB(updatedAt || "")}</span>
           </p>
         </div>
       </div>

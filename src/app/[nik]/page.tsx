@@ -116,13 +116,19 @@ function UserExamEventItem({
         <Separator />
         <div>
           <CardSectionTitle>BERAKHIR DALAM</CardSectionTitle>
-          <div className="flex gap-2">
-            <p className="text-lg font-bold">{days}</p>
-            <span className="text-xs self-end">Hari</span>
-            <p className="text-lg font-bold">{hours}</p>
-            <span className="text-xs self-end">Jam</span>
-            <p className="text-lg font-bold">{minutes}</p>
-            <span className="text-xs self-end">Menit</span>
+          <div className="flex gap-4">
+            <div className="flex gap-1">
+              <p className="text-xl font-bold font-mono">{days}</p>
+              <span className="text-xs self-end mb-1">Hari</span>
+            </div>
+            <div className="flex gap-1">
+              <p className="text-xl font-bold font-mono">{hours}</p>
+              <span className="text-xs self-end mb-1">Jam</span>
+            </div>
+            <div className="flex gap-1">
+              <p className="text-xl font-bold font-mono">{minutes}</p>
+              <span className="text-xs self-end mb-1">Menit</span>
+            </div>
           </div>
         </div>
         <Separator />

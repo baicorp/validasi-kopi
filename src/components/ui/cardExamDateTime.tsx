@@ -12,10 +12,10 @@ export function CardExamDateTime({
       <p className="text-xs text-muted-foreground">
         {variant === "start" ? "Mulai" : "Selesai"}
       </p>
-      <p className="font-medium text-sm">
+      <p className="font-medium text-sm font-mono">
         {formatJakartaTime(examDateTime).split(",")[0]}
       </p>
-      <p className="text-xs text-muted-foreground">
+      <p className="text-xs text-muted-foreground font-mono">
         {formatJakartaTime(examDateTime).split(",")[1]}
       </p>
     </div>
