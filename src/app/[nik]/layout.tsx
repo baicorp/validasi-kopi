@@ -28,11 +28,28 @@ async function Identity() {
   }
 
   return (
-    <div>
-      <p className="text-lg font-medium">{session.user.name}</p>
-      <p className="text-muted-foreground text-sm font-mono">
-        {session.user.username}
-      </p>
+    <div className="flex gap-2 items-center">
+      <div className="shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-black text-white">
+        <p className="font-medium">{getInitials(session.user.name)}</p>
+      </div>
+      <div>
+        <p className="text-lg font-medium leading-none text-ellipsis line-clamp-1">
+          {session.user.name}
+        </p>
+        <p className="text-muted-foreground text-sm font-mono">
+          {session.user.username}
+        </p>
+      </div>
     </div>
   );
+}
+
+function getInitials(name: string, limit: number = 3): string {
+  return name
+    .trim()
+    .split(" ")
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, limit);
 }
