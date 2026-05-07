@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { toTitleCase } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import Paginator from "@/components/ui/paginator";
 import DeleteDialog from "@/components/ui/deleteDialog";
@@ -91,15 +92,12 @@ async function TableEmployeesData({
         <TableCell className="pl-4 py-1">
           {(currentPage - 1) * 12 + idx + 1}
         </TableCell>
-        <TableCell className="py-1">{employee.username}</TableCell>
+        <TableCell className="py-1 font-mono">{employee.username}</TableCell>
         <TableCell className="py-1">{employee.name}</TableCell>
         <TableCell className="py-1">{employee.position}</TableCell>
         <TableCell className="py-1">{employee.department}</TableCell>
         <TableCell className="py-1">
-          {employee.plantArea
-            ? employee.plantArea.charAt(0).toUpperCase() +
-              employee.plantArea.slice(1)
-            : ""}
+          {employee.plantArea ? toTitleCase(employee.plantArea) : ""}
         </TableCell>
         <TableCell className="text-right py-1">
           <DropdownMenu>

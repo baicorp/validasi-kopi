@@ -130,7 +130,7 @@ function ProductExamTable({
                 return (
                   <TableCell
                     key={data}
-                    className={`border border-neutral-400 border-collapse text-center ${typeof row[data] === "number" && row[data] < 70 && "text-red-500"}`}
+                    className={`font-mono border border-neutral-400 border-collapse text-center ${typeof row[data] === "number" && row[data] < 70 && "text-red-500"}`}
                   >
                     {data === "averageGrade" || data === "result"
                       ? row[data] === null
@@ -254,7 +254,7 @@ function ThresholdTable({
                 return (
                   <TableCell
                     key={key}
-                    className={`border border-neutral-400 border-collapse text-center ${typeof row[key] === "number" && row[key] < 70 && "text-red-500"}`}
+                    className={`tracking-tighter font-mono border border-neutral-400 border-collapse text-center ${typeof row[key] === "number" && row[key] < 70 && "text-red-500"}`}
                   >
                     {row[key]}
                   </TableCell>
@@ -350,7 +350,7 @@ function BasicExamTable({
                 return (
                   <TableCell
                     key={data}
-                    className={`border border-neutral-400 border-collapse text-center ${typeof row[data] === "number" && row[data] < 70 && "text-red-500"}`}
+                    className={`font-mono tracking-tighter border border-neutral-400 border-collapse text-center ${typeof row[data] === "number" && row[data] < 70 && "text-red-500"}`}
                   >
                     {data === "averageGrade" || data === "result"
                       ? row[data] === null

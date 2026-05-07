@@ -117,7 +117,7 @@ function CodeGroupItem({
         <div className="flex flex-col">
           <p>
             {toTitleCase(groupName)}{" "}
-            <span className="text-muted-foreground">#{id}</span>
+            <span className="text-muted-foreground font-mono">#{id}</span>
           </p>
           <div className="flex items-center gap-2.5">
             <time
@@ -128,7 +128,7 @@ function CodeGroupItem({
             </time>
             <div className="flex items-center gap-1 text-muted-foreground">
               <User size={12} className="mb-1" />
-              <span className="text-xs">{totalParticipants}</span>
+              <span className="text-xs font-mono">{totalParticipants}</span>
             </div>
           </div>
         </div>

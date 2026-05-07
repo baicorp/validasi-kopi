@@ -72,7 +72,7 @@ async function ExamEventDetails({ examEventId }: { examEventId: string }) {
       <div className="flex flex-wrap">
         <div className="flex-1 px-5 py-4 space-y-1 border-r border-t border-border">
           <Label className="text-muted-foreground">TANGGAL / WAKTU UJIAN</Label>
-          <div className="text-sm">
+          <div className="text-sm font-mono">
             <p>{formatJakartaTime(examEvent.examStart)}</p>
             <div className="flex gap-2 items-center">
               <ArrowRight size={14} />
@@ -104,7 +104,9 @@ async function ExamEventDetails({ examEventId }: { examEventId: string }) {
         <div className="flex-1 px-5 py-4 border-t border-border space-y-1">
           <Label className="text-muted-foreground">KUOTA PESERTA UJIAN</Label>
           <div className="flex gap-2">
-            <p className="text-4xl font-bold">{examEvent.totalParticipants}</p>
+            <p className="text-4xl font-bold font-mono">
+              {examEvent.totalParticipants}
+            </p>
             <span className="text-sm self-end">Orang</span>
           </div>
         </div>
@@ -157,7 +159,9 @@ function ExamEventDetailHeader({
           <p className="text-xs font-medium">{toTitleCase(variant)}</p>
         </div>
       </div>
-      <p className="text-sm mb-1 text-muted-foreground">ID : {examEventId}</p>
+      <p className="text-sm mb-1 text-muted-foreground">
+        ID : <span className="font-mono">{examEventId}</span>
+      </p>
       <div className="flex flex-wrap gap-1.5">
         {selectedExams?.split(",")?.map((exam) => (
           <Badge variant={"secondary"} key={exam}>

@@ -86,7 +86,9 @@ export default function EventItem({
         <Separator />
         <div>
           <CardSectionTitle>KUOTA PESERTA UJIAN</CardSectionTitle>
-          <p className="text-sm">{totalParticipants} Orang</p>
+          <p className="text-sm">
+            <span className="font-mono">{totalParticipants}</span> Orang
+          </p>
         </div>
         <Separator />
         <div>
