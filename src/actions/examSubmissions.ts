@@ -323,11 +323,13 @@ export async function getUserLatestExamResult(examEventId: string) {
     const userId = user.session.userId;
 
     // 2. get latest submission
-    const [{ latestAttempt }] = await db
+    const [{ latestAttempt, examEventName }] = await db
       .select({
         latestAttempt: sql<number>`max(${submissionAttempts.numberAttempt})`,
+        examEventName: examEvents.examEventName,
       })
       .from(submissionAttempts)
+      .leftJoin(examEvents, eq(examEvents.id, submissionAttempts.examEventId))
       .where(
         and(
           eq(submissionAttempts.examEventId, examEventId),
@@ -357,7 +359,10 @@ export async function getUserLatestExamResult(examEventId: string) {
         ),
       );
 
-    return rows;
+    return {
+      examEventName,
+      examResults: rows,
+    };
   } catch (error) {
     console.error(error);
     return { error: "Gagal mendapatkan hasil ujian" };
