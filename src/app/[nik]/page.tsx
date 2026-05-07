@@ -140,7 +140,7 @@ function UserExamEventItem({
           <div className="border-t pt-2">
             <div className="flex justify-between">
               <CardSectionTitle>STATUS</CardSectionTitle>
-              {retakeExam ? (
+              {retakeExam && numberAttempt !== 4 ? (
                 <span className="text-xs font-font-medium text-destructive">
                   MENGULANG ({numberAttempt - 1} / 3)
                 </span>
@@ -150,17 +150,15 @@ function UserExamEventItem({
                 </span>
               )}
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              {retakeExam && (
-                <>
-                  {retakeExam.split(",").map((exam) => (
-                    <Badge key={exam} variant="destructive">
-                      {exam}
-                    </Badge>
-                  ))}
-                </>
-              )}
-            </div>
+            {retakeExam && numberAttempt !== 4 && (
+              <div className="flex flex-wrap items-center gap-2">
+                {retakeExam.split(",").map((exam) => (
+                  <Badge key={exam} variant="destructive">
+                    {exam}
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
