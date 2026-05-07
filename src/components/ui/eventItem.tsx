@@ -36,7 +36,7 @@ export default function EventItem({
 
   return (
     <div className="rounded-lg overflow-hidden border shadow flex flex-col justify-between">
-      <div className="flex justify-between p-5 border-b border-border">
+      <div className="flex justify-between px-5 py-3 border-b border-border">
         <Link href={`ujian/${id}/peserta-ujian`}>
           <p className="font-medium line-clamp-2 overflow-ellipsis">
             {examEventName}
@@ -63,7 +63,7 @@ export default function EventItem({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="px-5 py-2 flex flex-col gap-3">
+      <div className="px-5 py-2 flex flex-col gap-2">
         <div>
           <CardSectionTitle>DAFTAR UJIAN</CardSectionTitle>
           <div className="flex flex-wrap gap-1">
@@ -108,7 +108,7 @@ export default function EventItem({
       <div>
         <div className="px-4 bg-muted py-2 border-t border-border">
           <p className="text-xs text-muted-foreground">
-            Diperbarui :
+            Diperbarui :{" "}
             <span className="font-mono">{utcToWIB(updatedAt || "")}</span>
           </p>
         </div>
