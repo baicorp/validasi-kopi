@@ -1,14 +1,15 @@
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 import { Suspense } from "react";
 import { Badge } from "@/components/ui/badge";
 import ErrorComp from "@/components/ui/error";
 import { Label } from "@/components/ui/label";
-import { cn, toTitleCase } from "@/lib/utils";
 import InteractiveLink from "@/components/ui/link";
 import Loading from "@/components/skeleton/loading";
 import { getExamEventById } from "@/actions/examEvents";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { formatJakartaTime } from "@/lib/datetimeFormat";
+import ExamEventPeriode from "@/components/ui/examEventPeriode";
 
 export default async function Layout({
   children,
@@ -136,28 +137,7 @@ function ExamEventDetailHeader({
     >
       <div className="flex justify-between">
         <p className="text-lg font-semibold">{examEventName}</p>
-        <div
-          className={cn(
-            "rounded-full flex justify-center items-center gap-2 px-3 py-1.5",
-            {
-              "bg-[#B5D4F4] text-[#042C53] border border-[#378ADD]":
-                variant === "akan datang",
-              "bg-[#FAC775] text-[#412402] border border-[#BA7517]":
-                variant === "berlangsung",
-              "bg-[#C0DD97] text-[#173404] border border-[#639922]":
-                variant === "selesai",
-            },
-          )}
-        >
-          <div
-            className={cn("w-2 h-2 rounded-full", {
-              "bg-[#185FA5]": variant === "akan datang",
-              "bg-[#854F0B] animate-pulse": variant === "berlangsung",
-              "bg-[#3B6D11]": variant === "selesai",
-            })}
-          ></div>
-          <p className="text-xs font-medium">{toTitleCase(variant)}</p>
-        </div>
+        <ExamEventPeriode variant={variant} />
       </div>
       <p className="text-sm mb-1 text-muted-foreground">
         ID : <span className="font-mono">{examEventId}</span>
