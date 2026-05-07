@@ -7,7 +7,7 @@ import { validateSessionServer } from "@/actions/validateSession";
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <main className="py-4">
-      <section className="px-4 lg:px-10 flex justify-between items-center">
+      <section className="px-4 lg:px-10 flex justify-between items-center pb-4 border-b">
         <Suspense fallback={<Loading />}>
           <Identity />
         </Suspense>
