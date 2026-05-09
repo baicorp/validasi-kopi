@@ -205,15 +205,11 @@ function TwoOutOfFive({
   const values = ["beda", "beda", "beda", "sama", "sama"];
   return (
     <div className="border rounded-lg space-y-2">
-      <div className="flex justify-between items-center p-2.5 border-b">
-        <div className="flex gap-1 items-center">
-          <p className="flex justify-center items-center w-7 h-7 shrink-0 aspect-square rounded-full bg-black text-white font-bold ">
-            {index}
-          </p>
-          <p className="font-medium">{examName}</p>
-        </div>
-        <Badge variant="secondary">5 sampel</Badge>
-      </div>
+      <InputFormHeader
+        sequenceNumber={index}
+        numberOfSamples={5}
+        examName={examName}
+      />
       <div className="p-2">
         <Callout>
           <p>
@@ -254,15 +250,11 @@ function TresholdSingleForm({ index }: { index: number }) {
   const totalInput = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
   return (
     <div className="border rounded-lg space-y-2">
-      <div className="flex justify-between items-center p-2.5 border-b">
-        <div className="flex gap-1 items-center">
-          <p className="flex justify-center items-center w-7 h-7 shrink-0 aspect-square rounded-full bg-black text-white font-bold ">
-            {index}
-          </p>
-          <p className="font-medium">Treshold single</p>
-        </div>
-        <Badge variant="secondary">12 sampel</Badge>
-      </div>
+      <InputFormHeader
+        sequenceNumber={index}
+        numberOfSamples={12}
+        examName="Treshold single"
+      />
       <div className="p-2">
         <Callout>
           <p>
@@ -308,15 +300,11 @@ function TresholdMixForm({ index }: { index: number }) {
   const totalInput = [1, 2, 3, 4, 5];
   return (
     <div className="border rounded-lg space-y-2">
-      <div className="flex justify-between items-center p-2.5 border-b">
-        <div className="flex gap-1 items-center">
-          <p className="flex justify-center items-center w-7 h-7 shrink-0 aspect-square rounded-full bg-black text-white font-bold ">
-            {index}
-          </p>
-          <p className="font-medium">Treshold mix</p>
-        </div>
-        <Badge variant="secondary">5 sampel</Badge>
-      </div>
+      <InputFormHeader
+        sequenceNumber={index}
+        numberOfSamples={5}
+        examName="Treshold mix"
+      />
       <div className="p-2">
         <Callout>
           <p>
@@ -363,15 +351,11 @@ function IdentifikasiForm({
   const totalInput = [1, 2, 3, 4, 5];
   return (
     <div className="border rounded-lg space-y-2">
-      <div className="flex justify-between items-center p-2.5 border-b">
-        <div className="flex gap-1 items-center">
-          <p className="flex justify-center items-center w-7 h-7 shrink-0 aspect-square rounded-full bg-black text-white font-bold ">
-            {index}
-          </p>
-          <p className="font-medium">Identifikasi</p>
-        </div>
-        <Badge variant="secondary">5 sampel</Badge>
-      </div>
+      <InputFormHeader
+        sequenceNumber={index}
+        numberOfSamples={5}
+        examName="Identifikasi"
+      />
       <div className="p-2">
         <Callout>
           <p>
@@ -416,15 +400,11 @@ function TriangleForm({ index }: { index: number }) {
   const values = ["beda", "sama", "sama"];
   return (
     <div className="border rounded-lg space-y-2">
-      <div className="flex justify-between items-center p-2.5 border-b">
-        <div className="flex gap-1 items-center">
-          <p className="flex justify-center items-center w-7 h-7 shrink-0 aspect-square rounded-full bg-black text-white font-bold ">
-            {index}
-          </p>
-          <p className="font-medium">Triangle</p>
-        </div>
-        <Badge variant="secondary">3 sampel</Badge>
-      </div>
+      <InputFormHeader
+        sequenceNumber={index}
+        numberOfSamples={3}
+        examName="Triangle"
+      />
       <div className="p-2">
         <Callout>
           <p>
@@ -463,15 +443,11 @@ function SkoringForm({ index }: { index: number }) {
   const values = ["1.5", "2", "3", "4", "5"];
   return (
     <div className="border rounded-lg space-y-2">
-      <div className="flex justify-between items-center p-2.5 border-b">
-        <div className="flex gap-1 items-center">
-          <p className="flex justify-center items-center w-7 h-7 shrink-0 aspect-square rounded-full bg-black text-white font-bold ">
-            {index}
-          </p>
-          <p className="font-medium">Skoring</p>
-        </div>
-        <Badge variant="secondary">5 sampel</Badge>
-      </div>
+      <InputFormHeader
+        sequenceNumber={index}
+        numberOfSamples={5}
+        examName="Skoring"
+      />
       <div className="p-2">
         <Callout>
           <p>
@@ -527,6 +503,28 @@ function InputNote({ examName }: { examName: string }) {
         placeholder={`Masukkan ${examName === "triangle" ? "Alasan berbeda" : "Keterangan jawaban"} (wajib di isi)`}
         required
       />
+    </div>
+  );
+}
+
+function InputFormHeader({
+  sequenceNumber,
+  numberOfSamples,
+  examName,
+}: {
+  sequenceNumber: number;
+  numberOfSamples: number;
+  examName: string;
+}) {
+  return (
+    <div className="flex justify-between items-center p-2.5 border-b">
+      <div className="flex gap-1 items-center">
+        <p className="flex justify-center items-center w-7 h-7 shrink-0 aspect-square rounded-full bg-black text-white font-bold ">
+          {sequenceNumber}
+        </p>
+        <p className="font-medium">{examName}</p>
+      </div>
+      <Badge variant="secondary">{numberOfSamples} sampel</Badge>
     </div>
   );
 }
