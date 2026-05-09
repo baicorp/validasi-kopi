@@ -16,7 +16,7 @@ export default async function Page({
   const data = await getUserLatestExamResult(id);
 
   if ("error" in data) {
-    return <pre className="text-sm">{JSON.stringify(data, null, 2)}</pre>;
+    return <ErrorGetData errorMessage={data.error || ""} />;
   }
 
   const numberAttempt = data.examResults[0].numberAttempt;
@@ -103,6 +103,139 @@ function ExamResultItem({
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function ErrorGetData({ errorMessage }: { errorMessage: string }) {
+  return (
+    <div>
+      <div className="flex justify-center">
+        <svg
+          width="180"
+          height="160"
+          viewBox="0 0 180 160"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            x="38"
+            y="28"
+            width="104"
+            height="116"
+            rx="10"
+            fill="white"
+            stroke="#e4e4e7"
+            stroke-width="1.5"
+          ></rect>
+          <rect
+            x="68"
+            y="20"
+            width="44"
+            height="16"
+            rx="5"
+            fill="white"
+            stroke="#e4e4e7"
+            stroke-width="1.5"
+          ></rect>
+          <rect
+            x="78"
+            y="24"
+            width="24"
+            height="7"
+            rx="3.5"
+            fill="#e4e4e7"
+          ></rect>
+          <rect
+            x="54"
+            y="60"
+            width="72"
+            height="7"
+            rx="3.5"
+            fill="#f4f4f5"
+          ></rect>
+          <rect
+            x="54"
+            y="74"
+            width="52"
+            height="7"
+            rx="3.5"
+            fill="#f4f4f5"
+          ></rect>
+          <rect
+            x="54"
+            y="88"
+            width="64"
+            height="7"
+            rx="3.5"
+            fill="#f4f4f5"
+          ></rect>
+          <rect
+            x="54"
+            y="102"
+            width="40"
+            height="7"
+            rx="3.5"
+            fill="#f4f4f5"
+          ></rect>
+          <circle cx="90" cy="84" r="28" fill="#f4f4f5"></circle>
+          <text
+            x="90"
+            y="93"
+            text-anchor="middle"
+            font-size="30"
+            font-weight="700"
+            fill="#d4d4d8"
+            font-family="ui-sans-serif,system-ui,sans-serif"
+          >
+            ?
+          </text>
+          <circle cx="148" cy="48" r="5" fill="#e4e4e7"></circle>
+          <circle cx="158" cy="62" r="3" fill="#f4f4f5"></circle>
+          <circle cx="32" cy="110" r="4" fill="#e4e4e7"></circle>
+          <circle cx="24" cy="96" r="2.5" fill="#f4f4f5"></circle>
+          <circle
+            cx="142"
+            cy="110"
+            r="16"
+            fill="white"
+            stroke="#e4e4e7"
+            stroke-width="1.5"
+          ></circle>
+          <text
+            x="142"
+            y="115"
+            text-anchor="middle"
+            font-size="14"
+            font-weight="700"
+            fill="#d4d4d8"
+            font-family="ui-sans-serif,system-ui,sans-serif"
+          >
+            0
+          </text>
+        </svg>
+      </div>
+      {errorMessage === "Anda belum pernah melakukan ujian." ? (
+        <div>
+          <p className="font-semibold text-center">{errorMessage}</p>
+          <p className="text-muted-foreground text-center text-sm">
+            Kamu belum pernah mengikuti ujian ini. Hasil ujian akan muncul di
+            sini{" "}
+            <span className="font-semibold">
+              {" "}
+              setelah kamu menyelesaikan ujian pertamamu.
+            </span>
+          </p>
+        </div>
+      ) : (
+        <div>
+          <p className="font-semibold text-center">{errorMessage}</p>
+        </div>
+      )}
+      <Button className="mx-auto w-full md:w-fit flex gap-2 items-center mt-2.5">
+        <Home size={18} />
+        <Link href={`/`}>Halaman utama</Link>
+      </Button>
     </div>
   );
 }
