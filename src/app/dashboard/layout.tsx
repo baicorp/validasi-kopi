@@ -23,7 +23,6 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import SignOutButton from "@/components/ui/signOutBtn";
@@ -139,18 +138,13 @@ function ActiveMenuItem({
         asChild
         className={`${
           isActive
-            ? "bg-black text-white hover:bg-black/85 hover:text-white"
-            : "hover:bg-neutral-200 hover:text-accent-foreground"
+            ? "bg-primary text-primary-foreground shadow-xs hover:bg-primary hover:text-primary-foreground"
+            : "hover:bg-primary/10 hover:text-accent-foreground"
         }`}
       >
         <Link
           href={href}
-          className={cn(
-            "flex items-center gap-2 rounded-lg px-2 py-2 text-sm transition-colors",
-            isActive
-              ? "bg-black text-white hover:bg-black/85 hover:text-white"
-              : "hover:bg-neutral-200 hover:text-accent-foreground",
-          )}
+          className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm transition-colors"
         >
           <Icon className="w-5 h-5" />
           <span>{label}</span>
@@ -190,18 +184,13 @@ function CollapsibleMenu({ Icon, menu, subMenu }: CollapsibleMenuData) {
                   asChild
                   className={`${
                     isActive
-                      ? "bg-black text-white hover:bg-black/85 hover:text-white"
-                      : "hover:bg-neutral-200 hover:text-accent-foreground"
+                      ? "bg-primary text-primary-foreground shadow-xs hover:bg-primary hover:text-primary-foreground"
+                      : "hover:bg-primary/10 hover:text-accent-foreground"
                   }`}
                 >
                   <Link
                     href={child.url}
-                    className={cn(
-                      "block text-sm rounded-lg px-2 py-2",
-                      isActive
-                        ? "bg-black text-white hover:bg-black/85 hover:text-white"
-                        : "hover:bg-neutral-200 hover:text-accent-foreground",
-                    )}
+                    className="block text-sm rounded-lg px-2 py-2"
                   >
                     {child.menu}
                   </Link>
