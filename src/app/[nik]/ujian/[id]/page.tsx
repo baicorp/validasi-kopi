@@ -88,10 +88,10 @@ async function ExamFormInfo({ examEventId }: { examEventId: string }) {
       <div className="flex flex-col gap-2">
         <div className="w-fit">
           <ExamEventPeriode
-            className="flex gap-2 items-center"
+            className="flex gap-1 items-center"
             variant={"berlangsung"}
           >
-            <Suspense fallback={<span className="text-xs">|</span>}>
+            <Suspense fallback={<span className="text-xs"> • </span>}>
               <AttemptDescription examEventId={examEventId} />
             </Suspense>
           </ExamEventPeriode>
@@ -131,10 +131,10 @@ async function AttemptDescription({ examEventId }: { examEventId: string }) {
   const currentAttempt = result.latestAttempt + 1;
 
   return currentAttempt === 1 ? (
-    <span className="text-xs font-medium"> | Ujian Reguler</span>
+    <span className="text-xs font-medium">• Ujian Reguler</span>
   ) : (
     <span className="text-xs font-medium">
-      | Mengulang <span>{currentAttempt - 1} dari 3</span>
+      • Mengulang <span>{currentAttempt - 1} dari 3</span>
     </span>
   );
 }
