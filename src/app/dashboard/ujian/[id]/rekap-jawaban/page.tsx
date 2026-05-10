@@ -10,9 +10,7 @@ export default async function page() {
 
   return (
     <div>
-      <p className="text-center font-semibold text-lg">
-        Rangkuman Jawaban Ujian
-      </p>
+      <p className="text-center font-semibold text-lg">Rekap Jawaban Ujian</p>
       <UserAnswerList />
     </div>
   );
