@@ -321,28 +321,52 @@ export async function getAllExamEvents(page: number = 1, search?: string) {
 // this is for drop down list "identifikasi" || "2 out of 5"
 export async function getListValuesFromExamName(
   examName: string,
-  eventId: string,
+  examEventId: string,
 ) {
   try {
     const transactionResult = await db.transaction(async (tx) => {
-      const getCorrectValue = tx
+      const getExamId = tx
+        .select({ id: exams.id })
+        .from(exams)
+        .where(eq(exams.examName, examName));
+
+      const getCodeGroupReguler = tx
+        .select({ id: examEvents.codeGroupRegulerId })
+        .from(examEvents)
+        .where(eq(examEvents.id, examEventId));
+
+      const [examId, codeGroupReguler] = await Promise.all([
+        getExamId,
+        getCodeGroupReguler,
+      ]);
+
+      if (!examId[0]?.id)
+        return { error: `Ujian ${examName} tidak ditemukan.` };
+      if (!codeGroupReguler[0]?.id)
+        return {
+          error: `Tidak ditemukan bank soal untuk ujian dengan id ${examEventId}.`,
+        };
+
+      const getCorrectValue = await tx
         .selectDistinct({
           value: examName.includes("2 out of 5")
             ? codes.additionalValue
             : codes.value,
         })
-        .from(examEvents)
-        .rightJoin(codeGroups, eq(examEvents.codeGroupRegulerId, codeGroups.id))
-        .leftJoin(codes, eq(codes.codeGroupId, codeGroups.id))
-        .leftJoin(exams, eq(codes.examId, exams.id))
-        .where(and(eq(examEvents.id, eventId), eq(exams.examName, examName)));
+        .from(codes)
+        .where(
+          and(
+            eq(codes.codeGroupId, codeGroupReguler[0].id),
+            eq(codes.examId, examId[0].id),
+          ),
+        );
 
       const getSampleValue = tx
         .selectDistinct({ value: sampleExamAnswer.value })
         .from(sampleExamAnswer)
         .where(
           and(
-            eq(sampleExamAnswer.examEventId, eventId),
+            eq(sampleExamAnswer.examEventId, examEventId),
             eq(sampleExamAnswer.examName, examName),
           ),
         );
@@ -455,22 +479,43 @@ export async function getExamValueFromExamEvent(
   examEventId: string,
 ) {
   try {
-    const rows = await db
-      .selectDistinct({
-        value: codes.value,
-        addValue: codes.additionalValue,
-      })
-      .from(codes)
-      .leftJoin(codeGroups, eq(codes.codeGroupId, codeGroups.id))
-      .leftJoin(examEvents, eq(examEvents.codeGroupRegulerId, codeGroups.id))
-      .leftJoin(exams, eq(codes.examId, exams.id))
-      .where(and(eq(exams.examName, examName), eq(examEvents.id, examEventId)));
+    const getExamId = db
+      .select({ id: exams.id })
+      .from(exams)
+      .where(eq(exams.examName, examName));
 
-    const valueWithAddValue = rows.map((data) =>
-      data.addValue ? `${data.value} ${data.addValue}` : data.value,
+    const getCodeGroupReguler = db
+      .select({ id: examEvents.codeGroupRegulerId })
+      .from(examEvents)
+      .where(eq(examEvents.id, examEventId));
+
+    const [examId, codeGroupReguler] = await Promise.all([
+      getExamId,
+      getCodeGroupReguler,
+    ]);
+
+    if (!examId[0]?.id) return { error: `Ujian ${examName} tidak ditemukan.` };
+    if (!codeGroupReguler[0]?.id)
+      return {
+        error: `Tidak ditemukan bank soal untuk ujian dengan id ${examEventId}.`,
+      };
+
+    const rows = await db
+      .selectDistinct({ value: codes.value, addValue: codes.additionalValue })
+      .from(codes)
+      .where(
+        and(
+          eq(codes.codeGroupId, codeGroupReguler[0].id),
+          eq(codes.examId, examId[0].id),
+        ),
+      );
+
+    // show addValue if the exam is "2 out of 5", otherwise show value
+    const values = rows.map((data) =>
+      examName.includes("2 out of 5") ? data.addValue || "" : data.value,
     );
 
-    return valueWithAddValue.sort();
+    return values.sort();
   } catch (error) {
     if (error instanceof Error) {
       return { error: error.message };
