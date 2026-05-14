@@ -1,6 +1,6 @@
 import { exams } from "./exams";
 import { sql } from "drizzle-orm";
-import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
+import { sqliteTable, integer, text, index } from "drizzle-orm/sqlite-core";
 
 // code_groups
 export const codeGroups = sqliteTable("code_groups", {
@@ -18,22 +18,26 @@ export const codeGroups = sqliteTable("code_groups", {
 });
 
 // codes
-export const codes = sqliteTable("codes", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID())
-    .notNull(),
-  code: text("code").notNull(),
-  value: text("value").notNull(),
-  additionalValue: text("additional_value"),
-  examId: text("exam_id")
-    .notNull()
-    .references(() => exams.id),
-  codeGroupId: text("code_group_id")
-    .notNull()
-    .references(() => codeGroups.id, { onDelete: "cascade" }),
-  createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: text("updated_at")
-    .default(sql`(CURRENT_TIMESTAMP)`)
-    .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
-});
+export const codes = sqliteTable(
+  "codes",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID())
+      .notNull(),
+    code: text("code").notNull(),
+    value: text("value").notNull(),
+    additionalValue: text("additional_value"),
+    examId: text("exam_id")
+      .notNull()
+      .references(() => exams.id),
+    codeGroupId: text("code_group_id")
+      .notNull()
+      .references(() => codeGroups.id, { onDelete: "cascade" }),
+    createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`),
+    updatedAt: text("updated_at")
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+  },
+  (table) => [index("code_group_id_idx").on(table.codeGroupId)],
+);

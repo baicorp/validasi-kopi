@@ -1,0 +1,1 @@
+CREATE INDEX `code_group_id_idx` ON `codes` (`code_group_id`);
