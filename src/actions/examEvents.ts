@@ -507,7 +507,11 @@ export async function getExamValueFromExamEvent(
       };
 
     const rows = await db
-      .selectDistinct({ value: codes.value, addValue: codes.additionalValue })
+      .select({
+        id: codes.id,
+        value: codes.value,
+        additionalValue: codes.additionalValue,
+      })
       .from(codes)
       .where(
         and(
@@ -517,10 +521,13 @@ export async function getExamValueFromExamEvent(
       );
 
     // show addValue if the exam is "2 out of 5", otherwise show value
-    const values = rows.map((data) =>
-      examName.includes("2 out of 5") ? data.addValue || "" : data.value,
-    );
-
+    let values = rows.map((data) => ({
+      id: data.id,
+      value: examName.includes("2 out of 5")
+        ? data.additionalValue || ""
+        : data.value,
+    }));
+    values = [...new Map(values.map((item) => [item.value, item])).values()];
     return values.sort();
   } catch (error) {
     if (error instanceof Error) {
@@ -570,6 +577,7 @@ export async function getExamThatNeedDummyData(examEventId: string) {
 }
 
 export async function addSampleExamAnswer(
+  id: string,
   examEventId: string,
   sample: string,
   examName: string,
@@ -577,7 +585,7 @@ export async function addSampleExamAnswer(
   try {
     const results = await db
       .insert(sampleExamAnswer)
-      .values({ value: sample, examEventId, examName });
+      .values({ id, value: sample, examEventId, examName });
 
     return { rowsAffected: results.rowsAffected };
   } catch (error) {
@@ -592,7 +600,7 @@ export async function getSampleExamAnswer(
 ) {
   try {
     const rows = await db
-      .select()
+      .select({ id: sampleExamAnswer.id, value: sampleExamAnswer.value })
       .from(sampleExamAnswer)
       .where(
         and(
@@ -601,28 +609,18 @@ export async function getSampleExamAnswer(
         ),
       );
 
-    return rows.map((row) => row.value);
+    return rows.map((row) => ({ id: row.id, value: row.value }));
   } catch (error) {
     console.error(error);
     return { error: "Gagal mendapatkan data daftar ujian" };
   }
 }
 
-export async function deleteSampleExamAnswer(
-  examEventId: string,
-  examName: string,
-  value: string,
-) {
+export async function deleteSampleExamAnswer(sampleId: string) {
   try {
     const rows = await db
       .delete(sampleExamAnswer)
-      .where(
-        and(
-          eq(sampleExamAnswer.examEventId, examEventId),
-          eq(sampleExamAnswer.examName, examName),
-          eq(sampleExamAnswer.value, value),
-        ),
-      );
+      .where(eq(sampleExamAnswer.id, sampleId));
 
     return { rowsAffected: rows.rowsAffected };
   } catch (error) {
