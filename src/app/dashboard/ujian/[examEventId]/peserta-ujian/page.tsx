@@ -10,31 +10,31 @@ import ExamDummyAnswerInput from "@/components/ui/examDummyAnswerInput";
 export default async function page({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ examEventId: string }>;
 }) {
   const session = await validateSessionServer();
   if (session.user.role !== "admin") {
     redirect(`/${session.user.username}`);
   }
 
-  const { id } = await params;
+  const { examEventId } = await params;
 
   return (
     <div className="flex flex-col gap-4">
       <section className="px-6 py-4 border rounded-lg space-y-6">
-        <DummyExamValues eventId={id} />
+        <DummyExamValues examEventId={examEventId} />
       </section>
       <section className="px-6 py-4 border rounded-lg space-y-6">
         <Suspense fallback={<Loading />}>
-          <Participants eventId={id} />
+          <Participants examEventId={examEventId} />
         </Suspense>
       </section>
     </div>
   );
 }
 
-async function Participants({ eventId }: { eventId: string }) {
-  const registeredUsers = await getAllRegisteredUser(eventId);
+async function Participants({ examEventId }: { examEventId: string }) {
+  const registeredUsers = await getAllRegisteredUser(examEventId);
 
   if ("error" in registeredUsers)
     return <ErrorComp error={registeredUsers.error} />;
@@ -42,6 +42,6 @@ async function Participants({ eventId }: { eventId: string }) {
   return <ExamParticipants listParticipant={registeredUsers} />;
 }
 
-async function DummyExamValues({ eventId }: { eventId: string }) {
-  return <ExamDummyAnswerInput examEventId={eventId} />;
+async function DummyExamValues({ examEventId }: { examEventId: string }) {
+  return <ExamDummyAnswerInput examEventId={examEventId} />;
 }

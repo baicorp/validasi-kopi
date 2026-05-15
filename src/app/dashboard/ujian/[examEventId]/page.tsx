@@ -4,13 +4,13 @@ import { validateSessionServer } from "@/actions/validateSession";
 export default async function page({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ examEventId: string }>;
 }) {
   const session = await validateSessionServer();
   if (session.user.role !== "admin") {
     redirect(`/${session.user.username}`);
   }
 
-  const { id } = await params;
-  return <p>{id}</p>;
+  const { examEventId } = await params;
+  return <p>{examEventId}</p>;
 }

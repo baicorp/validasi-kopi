@@ -107,13 +107,13 @@ export default function UserAnswerList() {
 }
 
 function SubmissionList({ numberAttempt }: { numberAttempt: number }) {
-  const { id } = useParams<{ id: string }>();
+  const { examEventId } = useParams<{ examEventId: string }>();
   const {
     data: submission,
     isLoading,
     error,
-  } = useSWR([id, numberAttempt], () =>
-    getSubmissionSummary(id, numberAttempt),
+  } = useSWR([examEventId, numberAttempt], () =>
+    getSubmissionSummary(examEventId, numberAttempt),
   );
 
   if (isLoading) {
