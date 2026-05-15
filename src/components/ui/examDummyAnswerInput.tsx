@@ -13,7 +13,7 @@ import { useState } from "react";
 import { Button } from "./button";
 import { LoaderCircle, TriangleAlert, X } from "lucide-react";
 
-type Answer = { value: string; lock: boolean };
+type Answer = { id: string; value: string; lock: boolean };
 
 export default function ExamDummyAnswerInput({
   examName,
@@ -52,8 +52,16 @@ export default function ExamDummyAnswerInput({
   const answers =
     !isLoading && !("error" in dummyAnswers) && !("error" in realAnswers)
       ? [
-          ...realAnswers.map((value) => ({ value, lock: true })),
-          ...dummyAnswers.map((value) => ({ value, lock: false })),
+          ...realAnswers.map((data) => ({
+            id: data.id,
+            value: data.value,
+            lock: true,
+          })),
+          ...dummyAnswers.map((data) => ({
+            id: data.id,
+            value: data.value,
+            lock: false,
+          })),
         ]
       : [];
 
@@ -64,11 +72,14 @@ export default function ExamDummyAnswerInput({
         examEventId={examEventId}
         allAnswers={answers}
         isListLoading={isLoading}
-        onAdded={(value) => {
-          mutateDummy((prev) => {
-            if (!prev || "error" in prev) return prev;
-            return [...prev, value];
-          }, false);
+        onAdded={(id, value) => {
+          mutateDummy(
+            (prev) => {
+              if (!prev || "error" in prev) return prev;
+              return [...prev, { id, value }];
+            },
+            { revalidate: true },
+          );
         }}
       />
       <div className="flex flex-wrap gap-2 mt-2">
@@ -81,16 +92,17 @@ export default function ExamDummyAnswerInput({
             ))
           : answers.map((answer) => (
               <DummyItem
-                key={answer.value}
-                examEventId={examEventId}
-                examName={examName}
-                onRemoved={(existingDummy) => {
-                  mutateDummy((prev) => {
-                    if (!prev || "error" in prev) return prev;
-                    return prev.filter((value) => value !== existingDummy);
-                  }, false);
-                }}
+                key={answer.id}
                 data={answer}
+                onRemoved={(dummyId) => {
+                  mutateDummy(
+                    (prev) => {
+                      if (!prev || "error" in prev) return prev;
+                      return prev.filter((data) => data.id !== dummyId);
+                    },
+                    { revalidate: true },
+                  );
+                }}
               />
             ))}
       </div>
@@ -109,7 +121,7 @@ function AddDummyForm({
   examEventId: string;
   allAnswers: Answer[];
   isListLoading: boolean;
-  onAdded: (newDummy: string) => void;
+  onAdded: (id: string, newDummy: string) => void;
 }) {
   const [dummyAnswer, setDummyAnswer] = useState("");
   const [addIsLoad, setAddIsLoad] = useState(false);
@@ -130,7 +142,9 @@ function AddDummyForm({
     }
 
     setAddIsLoad(true);
+    const id = crypto.randomUUID();
     const result = await addSampleExamAnswer(
+      id,
       examEventId,
       trimmedDummyAnswer,
       examName,
@@ -138,7 +152,7 @@ function AddDummyForm({
     if ("error" in result) {
       toast.error(result.error);
     } else if (result.rowsAffected > 0) {
-      onAdded(trimmedDummyAnswer);
+      onAdded(id, trimmedDummyAnswer);
       setDummyAnswer("");
     }
     setAddIsLoad(false);
@@ -161,31 +175,23 @@ function AddDummyForm({
 
 function DummyItem({
   data,
-  examName,
-  examEventId,
   onRemoved,
 }: {
   data: Answer;
-  examName: string;
-  examEventId: string;
-  onRemoved: (existingDummy: string) => void;
+  onRemoved: (dummyId: string) => void;
 }) {
   const [deleteIsLoad, setDeleteIsLoad] = useState(false);
 
   const handleDelete = async () => {
     setDeleteIsLoad(true);
-    const result = await deleteSampleExamAnswer(
-      examEventId,
-      examName,
-      data.value,
-    );
+    const result = await deleteSampleExamAnswer(data.id);
     if ("error" in result) {
       toast.error(result.error);
       setDeleteIsLoad(false);
       return;
     }
     if (result.rowsAffected > 0) {
-      onRemoved(data.value);
+      onRemoved(data.id);
     }
     setDeleteIsLoad(false);
   };
