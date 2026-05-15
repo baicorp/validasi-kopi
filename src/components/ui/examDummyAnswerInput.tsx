@@ -4,154 +4,158 @@ import useSWR from "swr";
 import {
   addSampleExamAnswer,
   deleteSampleExamAnswer,
-  getExamThatNeedDummyData,
   getExamValueFromExamEvent,
   getSampleExamAnswer,
 } from "@/actions/examEvents";
 import { toast } from "sonner";
 import { Input } from "./input";
-import ErrorComp from "./error";
+import { useState } from "react";
 import { Button } from "./button";
-import Loading from "../skeleton/loading";
-import { LoaderCircle, X } from "lucide-react";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { LoaderCircle, TriangleAlert, X } from "lucide-react";
+
+type Answer = { value: string; lock: boolean };
 
 export default function ExamDummyAnswerInput({
-  examEventId,
-}: {
-  examEventId: string;
-}) {
-  const { data, isLoading, error } = useSWR(examEventId.toString(), () =>
-    getExamThatNeedDummyData(examEventId),
-  );
-
-  if (isLoading) {
-    return <Loading />;
-  }
-
-  if (!data || "error" in data || error) {
-    return <ErrorComp error={error} />;
-  }
-
-  return (
-    <div
-      className={`grid ${data.length === 1 ? "grid-cols-1" : "grid-cols-2"} gap-8`}
-    >
-      {data.map((exam) => (
-        <FormDummy
-          key={exam.examName}
-          examEventId={examEventId}
-          examName={exam.examName}
-        />
-      ))}
-    </div>
-  );
-}
-
-function FormDummy({
   examName,
   examEventId,
 }: {
   examEventId: string;
   examName: string;
 }) {
-  const { data: dummyFromDB } = useSWR(examName, () =>
-    getSampleExamAnswer(examEventId, examName),
+  const { data: realAnswers, error: realAnswersError } = useSWR(
+    `examValue-${examName}-${examEventId}`,
+    () => getExamValueFromExamEvent(examName, examEventId),
+    { revalidateOnFocus: false },
+  );
+  const {
+    data: dummyAnswers,
+    mutate: mutateDummy,
+    error: dummyError,
+  } = useSWR(
+    `sampleAnswer-${examName}-${examEventId}`,
+    () => getSampleExamAnswer(examEventId, examName),
+    { revalidateOnFocus: false },
   );
 
-  const { data: realAnswers } = useSWR([examName, examEventId], () =>
-    getExamValueFromExamEvent(examName, examEventId),
-  );
+  const isLoading = !dummyAnswers || !realAnswers;
+  const hasError = dummyError || realAnswersError;
 
-  const [listDummyData, setListDummyData] = useState<
-    { value: string; lock: boolean }[]
-  >([]);
-  const [dummy, setDummy] = useState("");
-  const [addIsLoad, setAddIsLoad] = useState(false);
+  if (hasError) {
+    return (
+      <div className="flex items-center gap-2 text-destructive mt-2">
+        <TriangleAlert className="w-4 h-4 shrink-0" />
+        <p className="text-sm">Gagal mendapatkan data jawaban.</p>
+      </div>
+    );
+  }
 
-  useEffect(() => {
-    if (dummyFromDB && !("error" in dummyFromDB)) {
-      setListDummyData(
-        dummyFromDB.map((data) => ({ value: data, lock: false })),
-      );
-    }
-  }, [dummyFromDB]);
-
-  // combine realAnswers and dummyData
-  const allAnswers = [
-    ...(realAnswers && !("error" in realAnswers)
-      ? realAnswers.map((data) => ({ value: data, lock: true }))
-      : []),
-    ...listDummyData,
-  ];
+  const answers =
+    !isLoading && !("error" in dummyAnswers) && !("error" in realAnswers)
+      ? [
+          ...realAnswers.map((value) => ({ value, lock: true })),
+          ...dummyAnswers.map((value) => ({ value, lock: false })),
+        ]
+      : [];
 
   return (
     <div>
-      <p className="font-medium">
-        DAFTAR JAWABAN UJIAN {examName.toUpperCase()}
-      </p>
-
-      <div className="flex gap-2 items-center mt-2">
-        <Input
-          placeholder={`Masukkan daftar jawaban ujian ${examName}`}
-          value={dummy}
-          onChange={(e) => setDummy(e.currentTarget.value)}
-        />
-
-        <Button
-          disabled={addIsLoad}
-          onClick={async () => {
-            const trimmed = dummy.trim();
-            if (!trimmed) return;
-
-            // check for duplication
-            if (
-              allAnswers.some(
-                (answer) =>
-                  answer.value.toLowerCase() === trimmed.toLowerCase(),
-              )
-            ) {
-              toast.error(`${trimmed} sudah ada di daftar jawaban.`);
-              return;
-            }
-
-            setAddIsLoad(true);
-            const result = await addSampleExamAnswer(
-              examEventId,
-              trimmed,
-              examName,
-            );
-
-            if ("error" in result) {
-              toast.error(result.error);
-            } else if (result.rowsAffected > 0) {
-              setListDummyData((prev) => [
-                ...prev,
-                { value: trimmed, lock: false },
-              ]);
-            }
-
-            setAddIsLoad(false);
-            setDummy("");
-          }}
-        >
-          Tambah
-          {addIsLoad && <LoaderCircle className="animate-spin mr-2" />}
-        </Button>
-      </div>
-
+      <AddDummyForm
+        examName={examName}
+        examEventId={examEventId}
+        allAnswers={answers}
+        isListLoading={isLoading}
+        onAdded={(value) => {
+          mutateDummy((prev) => {
+            if (!prev || "error" in prev) return prev;
+            return [...prev, value];
+          }, false);
+        }}
+      />
       <div className="flex flex-wrap gap-2 mt-2">
-        {allAnswers.map((data, index) => (
-          <DummyItem
-            key={index}
-            examEventId={examEventId}
-            examName={examName}
-            setList={setListDummyData}
-            data={data}
-          />
-        ))}
+        {isLoading
+          ? [1, 2, 3, 4, 5].map((numb) => (
+              <div
+                key={numb}
+                className="w-28 h-10 bg-secondary border shadow rounded-md animate-pulse"
+              />
+            ))
+          : answers.map((answer) => (
+              <DummyItem
+                key={answer.value}
+                examEventId={examEventId}
+                examName={examName}
+                onRemoved={(existingDummy) => {
+                  mutateDummy((prev) => {
+                    if (!prev || "error" in prev) return prev;
+                    return prev.filter((value) => value !== existingDummy);
+                  }, false);
+                }}
+                data={answer}
+              />
+            ))}
       </div>
     </div>
+  );
+}
+
+function AddDummyForm({
+  examName,
+  examEventId,
+  allAnswers,
+  isListLoading,
+  onAdded,
+}: {
+  examName: string;
+  examEventId: string;
+  allAnswers: Answer[];
+  isListLoading: boolean;
+  onAdded: (newDummy: string) => void;
+}) {
+  const [dummyAnswer, setDummyAnswer] = useState("");
+  const [addIsLoad, setAddIsLoad] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmedDummyAnswer = dummyAnswer.trim();
+    if (!trimmedDummyAnswer || isListLoading) return;
+
+    if (
+      allAnswers.some(
+        (answer) =>
+          answer.value.toLowerCase() === trimmedDummyAnswer.toLowerCase(),
+      )
+    ) {
+      toast.error(`${trimmedDummyAnswer} sudah ada di daftar jawaban.`);
+      return;
+    }
+
+    setAddIsLoad(true);
+    const result = await addSampleExamAnswer(
+      examEventId,
+      trimmedDummyAnswer,
+      examName,
+    );
+    if ("error" in result) {
+      toast.error(result.error);
+    } else if (result.rowsAffected > 0) {
+      onAdded(trimmedDummyAnswer);
+      setDummyAnswer("");
+    }
+    setAddIsLoad(false);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="flex gap-2 items-center mt-2">
+      <Input
+        placeholder={`Masukkan daftar jawaban ujian ${examName}`}
+        value={dummyAnswer}
+        onChange={(e) => setDummyAnswer(e.currentTarget.value)}
+      />
+      <Button type="submit" disabled={addIsLoad || isListLoading}>
+        <span>Tambah</span>
+        {addIsLoad && <LoaderCircle className="animate-spin" />}
+      </Button>
+    </form>
   );
 }
 
@@ -159,14 +163,32 @@ function DummyItem({
   data,
   examName,
   examEventId,
-  setList,
+  onRemoved,
 }: {
-  data: { value: string; lock: boolean };
+  data: Answer;
   examName: string;
   examEventId: string;
-  setList: Dispatch<SetStateAction<{ value: string; lock: boolean }[]>>;
+  onRemoved: (existingDummy: string) => void;
 }) {
   const [deleteIsLoad, setDeleteIsLoad] = useState(false);
+
+  const handleDelete = async () => {
+    setDeleteIsLoad(true);
+    const result = await deleteSampleExamAnswer(
+      examEventId,
+      examName,
+      data.value,
+    );
+    if ("error" in result) {
+      toast.error(result.error);
+      setDeleteIsLoad(false);
+      return;
+    }
+    if (result.rowsAffected > 0) {
+      onRemoved(data.value);
+    }
+    setDeleteIsLoad(false);
+  };
 
   return (
     <div
@@ -174,26 +196,7 @@ function DummyItem({
     >
       <span>{data.value}</span>
       {!data.lock && (
-        <Button
-          variant="ghost"
-          onClick={async () => {
-            setDeleteIsLoad(true);
-            const result = await deleteSampleExamAnswer(
-              examEventId,
-              examName,
-              data.value,
-            );
-            if ("error" in result) {
-              toast.error(result.error);
-              setDeleteIsLoad(false);
-              return;
-            }
-            if (result.rowsAffected > 0) {
-              setList((prev) => prev.filter((p) => p.value !== data.value));
-            }
-            setDeleteIsLoad(false);
-          }}
-        >
+        <Button variant="ghost" onClick={handleDelete} disabled={deleteIsLoad}>
           {deleteIsLoad ? (
             <LoaderCircle className="animate-spin" />
           ) : (
