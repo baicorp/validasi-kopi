@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import ErrorComp from "@/components/ui/error";
 import Loading from "@/components/skeleton/loading";
 import ExamParticipants from "@/components/ui/examParticipants";
+import { getExamThatNeedDummyData } from "@/actions/examEvents";
 import { validateSessionServer } from "@/actions/validateSession";
 import { getAllRegisteredUser } from "@/actions/examRegistrations";
 import ExamDummyAnswerInput from "@/components/ui/examDummyAnswerInput";
@@ -43,5 +44,28 @@ async function Participants({ examEventId }: { examEventId: string }) {
 }
 
 async function DummyExamValues({ examEventId }: { examEventId: string }) {
-  return <ExamDummyAnswerInput examEventId={examEventId} />;
+  const examListValues = await getExamThatNeedDummyData(examEventId);
+
+  if ("error" in examListValues)
+    return <ErrorComp error={examListValues.error} />;
+
+  return (
+    <section
+      className={`grid gap-4 xl:gap-8 ${examListValues.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}
+    >
+      {examListValues.map((data) => {
+        return (
+          <div key={data.examName} className="flex-1">
+            <p className="font-medium">
+              DAFTAR JAWABAN UJIAN {data.examName.toUpperCase()}
+            </p>
+            <ExamDummyAnswerInput
+              examEventId={examEventId}
+              examName={data.examName}
+            />
+          </div>
+        );
+      })}
+    </section>
+  );
 }
