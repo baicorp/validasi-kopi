@@ -23,15 +23,15 @@ import ExportSummary from "@/components/ui/exportSummary";
 export default async function page({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ examEventId: string }>;
 }) {
   const session = await validateSessionServer();
   if (session.user.role !== "admin") {
     redirect(`/${session.user.username}`);
   }
 
-  const { id } = await params;
-  const results = await getSubmissionAttemptSummary(id);
+  const { examEventId } = await params;
+  const results = await getSubmissionAttemptSummary(examEventId);
 
   if ("error" in results) {
     return <ErrorComp error={results.error} />;

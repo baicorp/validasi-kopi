@@ -14,8 +14,11 @@ import ExamEventPeriode from "@/components/ui/examEventPeriode";
 export default async function Layout({
   children,
   params,
-}: Readonly<{ children: React.ReactNode; params: Promise<{ id: string }> }>) {
-  const { id } = await params;
+}: Readonly<{
+  children: React.ReactNode;
+  params: Promise<{ examEventId: string }>;
+}>) {
+  const { examEventId } = await params;
   return (
     <>
       <section>
@@ -31,7 +34,7 @@ export default async function Layout({
       </section>
       <section>
         <Suspense fallback={<Loading />}>
-          <ExamEventDetails examEventId={id} />
+          <ExamEventDetails examEventId={examEventId} />
         </Suspense>
       </section>
       {children}
