@@ -73,12 +73,7 @@ export async function getCodeGroupsForExam() {
           eq(examEvents.codeGroupRetakeId, codeGroups.id),
         ),
       )
-      .where(
-        or(
-          isNull(examEvents.codeGroupRegulerId),
-          isNull(examEvents.codeGroupRetakeId),
-        ),
-      )
+      .where(isNull(examEvents.id))
       .orderBy(desc(codeGroups.createdAt));
 
     return rows;
