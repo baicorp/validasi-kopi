@@ -15,42 +15,27 @@ export async function addProduct(formData: FormData) {
     return { error: "Nama dan kategori produk harus di isi" };
   }
 
+  const isValid = await isValidRole("admin");
+  if (!isValid) {
+    return { error: "401 : Anda tidak memiliki izin." };
+  }
+
   try {
-    const isValid = await isValidRole("admin");
-    if (!isValid) {
-      return { error: "401 : Anda tidak memiliki izin." };
-    }
-
-    const result = await db.transaction(async (tx) => {
-      const rows = await tx
-        .select()
-        .from(products)
-        .where(
-          and(
-            eq(sql`lower(${products.productName})`, productName.toLowerCase()),
-            eq(products.productCategoryId, productCategoryId),
-          ),
-        );
-
-      if (rows.length !== 0) {
-        return {
-          error: `Gagal menambahkan produk. Produk ${toTitleCase(productName)} sudah ada.`,
-        };
-      }
-
-      const productValue = {
-        productName: productName,
-        productCategoryId: productCategoryId,
-      };
-
-      const [result] = await tx.insert(products).values(productValue);
-
-      return { id: result.insertId, ...result };
+    await db.insert(products).values({
+      productName: toTitleCase(productName),
+      productCategoryId,
     });
 
     revalidatePath("/dashboard/produk");
-    return result;
+    return { success: true };
   } catch (error) {
+    const isDuplicate =
+      error instanceof Error && error.message.toLowerCase().includes("unique");
+    if (isDuplicate) {
+      return {
+        error: `Gagal menambahkan produk. Produk ${toTitleCase(productName)} sudah ada.`,
+      };
+    }
     console.error(error);
     return { error: "Gagal menambahkan produk. Database bermasalah." };
   }
