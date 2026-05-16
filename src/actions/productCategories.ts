@@ -11,7 +11,12 @@ export async function getAllProductCategories() {
     if (!isValid) {
       return { error: "401 : Anda tidak memiliki izin." };
     }
-    return await db.select().from(productCategories);
+    return await db
+      .select({
+        id: productCategories.id,
+        categoryName: productCategories.categoryName,
+      })
+      .from(productCategories);
   } catch (error) {
     console.error(error);
     return {

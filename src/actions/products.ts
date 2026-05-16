@@ -116,7 +116,7 @@ export async function getProductsByCategory(productId: string) {
     }
 
     return await db
-      .select()
+      .select({ id: products.id, productName: products.productName })
       .from(products)
       .where(eq(products.productCategoryId, productId));
   } catch (error) {

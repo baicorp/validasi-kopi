@@ -189,7 +189,9 @@ export async function deleteEmployee(id: string) {
 
 export async function getPlantAreas() {
   try {
-    return await db.select().from(plantAreas);
+    return await db
+      .select({ id: plantAreas.id, areaName: plantAreas.areaName })
+      .from(plantAreas);
   } catch (error) {
     console.error(error);
     return { error: "Gagal mendapatkan area pabrik." };
@@ -198,7 +200,12 @@ export async function getPlantAreas() {
 
 export async function getDepartments() {
   try {
-    return await db.select().from(departments);
+    return await db
+      .select({
+        id: departments.id,
+        departmentName: departments.departmentName,
+      })
+      .from(departments);
   } catch (error) {
     console.error(error);
     return { error: "Gagal mendapatkan data departemen." };
