@@ -77,14 +77,14 @@ export async function getAllEmployees(page: number = 1, search?: string) {
       return { error: "401 : Anda tidak memiliki izin." };
     }
 
-    const [{ count }] = await db
+    const getTotal = db
       .select({ count: sql<number>`count(*)` })
       .from(user)
       .leftJoin(departments, eq(user.departmentId, departments.id))
       .leftJoin(plantAreas, eq(user.plantAreaId, plantAreas.id))
       .where(conditions.length ? and(...conditions) : undefined);
 
-    const data = await db
+    const getData = db
       .select({
         id: user.id,
         username: user.username,
@@ -102,6 +102,8 @@ export async function getAllEmployees(page: number = 1, search?: string) {
       .orderBy(desc(user.createdAt))
       .limit(limit)
       .offset(offset);
+
+    const [[{ count }], data] = await Promise.all([getTotal, getData]);
 
     return {
       data,

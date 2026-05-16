@@ -72,12 +72,12 @@ export async function getAllProduct(
       return { error: "401 : Anda tidak memiliki izin." };
     }
 
-    const [{ count }] = await db
+    const getTotal = db
       .select({ count: sql<number>`count(*)` })
       .from(products)
       .where(conditions.length ? and(...conditions) : undefined);
 
-    const data = await db
+    const getProducts = db
       .select({
         id: products.id,
         productName: products.productName,
@@ -94,6 +94,8 @@ export async function getAllProduct(
       .orderBy(desc(products.createdAt))
       .limit(limit)
       .offset(offset);
+
+    const [[{ count }], data] = await Promise.all([getTotal, getProducts]);
 
     return {
       data,

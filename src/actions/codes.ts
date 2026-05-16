@@ -22,7 +22,7 @@ export async function addGeneratedCodes(data: ExamDataDetails) {
     }
 
     const result = await db.transaction(async (tx) => {
-      const rowCodeGroups = await tx
+      const getRowCodeGroups = tx
         .insert(codeGroups)
         .values({
           groupName: data.groupName,
@@ -32,9 +32,14 @@ export async function addGeneratedCodes(data: ExamDataDetails) {
         .returning();
 
       // get id and examName from exams table (use for getting exam id based on examName)
-      const rowExams = await tx
+      const getRowExams = tx
         .select({ id: exams.id, examName: exams.examName })
         .from(exams);
+
+      const [rowCodeGroups, rowExams] = await Promise.all([
+        getRowCodeGroups,
+        getRowExams,
+      ]);
 
       if (rowExams.length === 0 || rowCodeGroups.length === 0) {
         return { error: "Gagal menyimpan soal." };
