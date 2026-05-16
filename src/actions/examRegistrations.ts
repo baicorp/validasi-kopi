@@ -24,7 +24,7 @@ export async function getAllRegisteredUser(examEventId: string) {
       })
       .from(examRegistrations)
       .innerJoin(user, eq(examRegistrations.userId, user.id))
-      .leftJoin(departments, eq(user.departmentId, departments.id))
+      .innerJoin(departments, eq(user.departmentId, departments.id))
       .where(eq(examRegistrations.examEventId, examEventId));
 
     return rows;
