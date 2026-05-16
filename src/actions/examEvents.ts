@@ -521,7 +521,6 @@ export async function getExamValueFromExamEvent(
 
 export async function getExamThatNeedDummyData(examEventId: string) {
   try {
-    // TODO: get the examValue
     const [row] = await db
       .selectDistinct({
         selectedExams: codeGroups.selectedExam,
