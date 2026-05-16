@@ -12,6 +12,7 @@ import { Answer } from "@/lib/types";
 import { getAllExams } from "./exams";
 import { getExamsId } from "@/lib/utils";
 import { evaluateAnswers } from "@/lib/evaluateAnswer";
+import { hasNoDuplicates } from "@/lib/submissionValidation";
 import { isValidRole, validateSessionServer } from "./validateSession";
 import { and, between, eq, InferInsertModel, or, sql } from "drizzle-orm";
 import { codeGroups, codes, departments, exams, user } from "@/db/schema";
@@ -671,32 +672,4 @@ function normalizeExamSubmissions(
   const results = Array.from(normalizedDataMap.values());
 
   return results;
-}
-
-function hasNoDuplicates(answers: Answer[]) {
-  if (answers.length === 0) {
-    throw Error("Semua input form harus diisi.");
-  }
-  const uniqueCode = new Set<string>();
-  const uniqueProductName = new Set<string>();
-  let totalCodeCount = 0;
-  let totalProductNameCount = 0;
-
-  for (const obj of answers) {
-    const isIdentifikasi = obj.examName === "identifikasi";
-
-    if (isIdentifikasi && obj.value) {
-      uniqueProductName.add(obj.value);
-      totalProductNameCount++;
-    }
-    if (obj.code) {
-      uniqueCode.add(obj.code);
-      totalCodeCount++;
-    }
-  }
-
-  return (
-    uniqueCode.size === totalCodeCount &&
-    uniqueProductName.size === totalProductNameCount
-  );
 }
