@@ -291,13 +291,13 @@ export async function getAllExamEvents(page: number = 1, search?: string) {
       return { error: "401 : Anda tidak memiliki izin." };
     }
 
-    const [{ count }] = await db
+    const getTotal = db
       .select({ count: sql<number>`count(*)` })
       .from(examEvents)
       .innerJoin(codeGroups, eq(examEvents.codeGroupRegulerId, codeGroups.id))
       .where(conditions.length ? and(...conditions) : undefined);
 
-    const data = await db
+    const getData = db
       .select({
         id: examEvents.id,
         examEventName: examEvents.examEventName,
@@ -317,6 +317,8 @@ export async function getAllExamEvents(page: number = 1, search?: string) {
       .limit(limit)
       .offset(offset);
 
+    const [[{ count }], data] = await Promise.all([getTotal, getData]);
+
     return {
       data,
       page,
@@ -334,65 +336,56 @@ export async function getListValuesFromExamName(
   examEventId: string,
 ) {
   try {
-    const transactionResult = await db.transaction(async (tx) => {
-      const getExamId = tx
-        .select({ id: exams.id })
-        .from(exams)
-        .where(eq(exams.examName, examName));
+    const getSampleValue = db
+      .selectDistinct({ value: sampleExamAnswer.value })
+      .from(sampleExamAnswer)
+      .where(
+        and(
+          eq(sampleExamAnswer.examEventId, examEventId),
+          eq(sampleExamAnswer.examName, examName),
+        ),
+      );
 
-      const getCodeGroupReguler = tx
-        .select({ id: examEvents.codeGroupRegulerId })
-        .from(examEvents)
-        .where(eq(examEvents.id, examEventId));
+    const getExamId = db
+      .select({ id: exams.id })
+      .from(exams)
+      .where(eq(exams.examName, examName));
 
-      const [examId, codeGroupReguler] = await Promise.all([
-        getExamId,
-        getCodeGroupReguler,
-      ]);
+    const getCodeGroupReguler = db
+      .select({ id: examEvents.codeGroupRegulerId })
+      .from(examEvents)
+      .where(eq(examEvents.id, examEventId));
 
-      if (!examId[0]?.id)
-        return { error: `Ujian ${examName} tidak ditemukan.` };
-      if (!codeGroupReguler[0]?.id)
-        return {
-          error: `Tidak ditemukan bank soal untuk ujian dengan id ${examEventId}.`,
-        };
+    const [examId, codeGroupReguler, sample] = await Promise.all([
+      getExamId,
+      getCodeGroupReguler,
+      getSampleValue,
+    ]);
 
-      const getCorrectValue = await tx
-        .selectDistinct({
-          value: examName.includes("2 out of 5")
-            ? codes.additionalValue
-            : codes.value,
-        })
-        .from(codes)
-        .where(
-          and(
-            eq(codes.codeGroupId, codeGroupReguler[0].id),
-            eq(codes.examId, examId[0].id),
-          ),
-        );
+    if (!examId[0]?.id) return { error: `Ujian ${examName} tidak ditemukan.` };
+    if (!codeGroupReguler[0]?.id)
+      return {
+        error: `Tidak ditemukan bank soal untuk ujian dengan id ${examEventId}.`,
+      };
 
-      const getSampleValue = tx
-        .selectDistinct({ value: sampleExamAnswer.value })
-        .from(sampleExamAnswer)
-        .where(
-          and(
-            eq(sampleExamAnswer.examEventId, examEventId),
-            eq(sampleExamAnswer.examName, examName),
-          ),
-        );
+    const correct = await db
+      .selectDistinct({
+        value: examName.includes("2 out of 5")
+          ? codes.additionalValue
+          : codes.value,
+      })
+      .from(codes)
+      .where(
+        and(
+          eq(codes.codeGroupId, codeGroupReguler[0].id),
+          eq(codes.examId, examId[0].id),
+        ),
+      );
 
-      const [correct, sample] = await Promise.all([
-        getCorrectValue,
-        getSampleValue,
-      ]);
+    const correctArr = correct.map((data) => data.value);
+    const sampleArr = sample.map((data) => data.value);
 
-      const correctArr = correct.map((data) => data.value);
-      const sampleArr = sample.map((data) => data.value);
-
-      return shuffle([...correctArr, ...sampleArr]);
-    });
-
-    return transactionResult;
+    return shuffle([...correctArr, ...sampleArr]);
   } catch (error) {
     console.error(error);
     return { error: "Gagal mendapatkan data." };
@@ -403,81 +396,68 @@ export async function getExamInputFormBasedOnSelectedExamForm(
   examEventId: string,
 ) {
   try {
-    // 1. get userId
     const session = await validateSessionServer();
     const userId = session.user.id;
 
-    const validExams = await getExamEventById(examEventId);
+    const getLatestAttempt = db
+      .select({
+        latestAttempt: sql<number>`max(${submissionAttempts.numberAttempt})`,
+      })
+      .from(submissionAttempts)
+      .where(
+        and(
+          eq(submissionAttempts.examEventId, examEventId),
+          eq(submissionAttempts.userId, userId),
+        ),
+      );
+    const [[{ latestAttempt }], validExams] = await Promise.all([
+      getLatestAttempt,
+      getExamEventById(examEventId),
+    ]);
+
     if ("error" in validExams) {
       return { error: validExams.error };
     }
+    if (new Date() > new Date(validExams.examEnd)) {
+      return { error: "Ujian ini telah berakhir." };
+    }
+    const currentAttempt = (latestAttempt ?? 0) + 1;
+    if (currentAttempt > 4) {
+      throw new Error("Kesempatan perbaikan ujian anda sudah habis.");
+    }
 
-    const transactionResult = await db.transaction(async (tx) => {
-      // 2. get latestAttempt number
-      const [{ latestAttempt }] = await tx
+    if (currentAttempt === 1) {
+      // first exam
+      const [{ selectedExamForFirstTimeExam }] = await db
         .select({
-          latestAttempt: sql<number>`max(${submissionAttempts.numberAttempt})`,
+          selectedExamForFirstTimeExam: codeGroups.selectedExam,
         })
-        .from(submissionAttempts)
+        .from(examEvents)
+        .leftJoin(codeGroups, eq(examEvents.codeGroupRegulerId, codeGroups.id))
+        .leftJoin(
+          examRegistrations,
+          eq(examRegistrations.examEventId, examEvents.id),
+        )
         .where(
           and(
-            eq(submissionAttempts.examEventId, examEventId),
-            eq(submissionAttempts.userId, userId),
+            eq(examEvents.id, examEventId),
+            eq(examRegistrations.userId, userId),
           ),
         );
-
-      // 3. get codeGroupId based on how many times user already take
-      const nextAttempt = (latestAttempt ?? 0) + 1;
-      if (nextAttempt > 4) {
-        throw new Error("Kesempatan perbaikan ujian anda sudah habis.");
-      }
-
-      // 4. get selectedExam based on user number of submission attempt
-      let selectedExam: string = "";
-
-      if (nextAttempt > 1) {
-        const rows = await tx
-          .select({ retakeExam: submissionAttempts.retakeExam })
-          .from(submissionAttempts)
-          .where(
-            and(
-              eq(submissionAttempts.numberAttempt, nextAttempt - 1),
-              eq(submissionAttempts.examEventId, examEventId),
-              eq(submissionAttempts.userId, userId),
-            ),
-          );
-        const selectedExamForRetakeExam = rows
-          .map((data) => data.retakeExam)
-          .filter((exam) => exam && exam.length > 0)
-          .toString();
-        selectedExam = selectedExamForRetakeExam;
-      } else {
-        const [{ selectedExamForFirstTimeExam }] = await tx
-          .select({
-            selectedExamForFirstTimeExam: codeGroups.selectedExam,
-          })
-          .from(examEvents)
-          .leftJoin(
-            codeGroups,
-            eq(examEvents.codeGroupRegulerId, codeGroups.id),
-          )
-          .leftJoin(
-            examRegistrations,
-            eq(examRegistrations.examEventId, examEvents.id),
-          )
-          .where(
-            and(
-              eq(examEvents.id, examEventId),
-              eq(examRegistrations.userId, userId),
-            ),
-          );
-        selectedExam = selectedExamForFirstTimeExam ?? "";
-      }
-
-      return selectedExam;
-    });
-
-    return { selectedExams: transactionResult };
+      return { selectedExams: selectedExamForFirstTimeExam ?? "" };
+    }
+    // retake exam
+    const rows = await db
+      .select({ retakeExam: submissionAttempts.retakeExam })
+      .from(submissionAttempts)
+      .where(
+        and(
+          eq(submissionAttempts.numberAttempt, currentAttempt - 1),
+          eq(submissionAttempts.examEventId, examEventId),
+          eq(submissionAttempts.userId, userId),
+        ),
+      );
+    return { selectedExams: rows.map((data) => data.retakeExam).toString() };
   } catch (error) {
     console.error(error);
     return { error: "Kesempatan ujian sudah habis." };

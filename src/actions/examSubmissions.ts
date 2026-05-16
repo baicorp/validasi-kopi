@@ -520,25 +520,20 @@ export async function getSubmissionSummary(
 
 export async function getSubmissionAttemptSummary(examEventId: string) {
   try {
-    // 1. check if the person is admin
     const isValid = await isValidRole("admin");
     if (!isValid) {
       return { error: "401 : Anda tidak memiliki izin." };
     }
 
     // get selectedExams data
-    const [{ selectedExams }] = await db
+    const getSelectedExams = db
       .select({ selectedExams: codeGroups.selectedExam })
       .from(examEvents)
       .leftJoin(codeGroups, eq(examEvents.codeGroupRegulerId, codeGroups.id))
       .where(eq(examEvents.id, examEventId));
 
-    if (!selectedExams) {
-      return { error: "Daftar ujian tidak ditemukan." };
-    }
-
     // get submission attempt summary
-    const rows = await db
+    const getSubmissionSummary = db
       .select({
         id: submissionAttempts.id,
         userId: user.id,
@@ -556,8 +551,18 @@ export async function getSubmissionAttemptSummary(examEventId: string) {
       .leftJoin(exams, eq(submissionAttempts.examId, exams.id))
       .where(eq(submissionAttempts.examEventId, examEventId));
 
+    const [[{ selectedExams }], submissionSummary] = await Promise.all([
+      getSelectedExams,
+      getSubmissionSummary,
+    ]);
+
+    if (!selectedExams) {
+      return { error: "Daftar ujian tidak ditemukan." };
+    }
     const groupName =
-      rows.length !== 0 ? normalizeExamSubmissions(rows, selectedExams) : [];
+      submissionSummary.length !== 0
+        ? normalizeExamSubmissions(submissionSummary, selectedExams)
+        : [];
 
     return { selectedExams, rowData: groupName };
   } catch (error) {

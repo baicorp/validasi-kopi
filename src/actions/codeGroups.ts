@@ -23,18 +23,20 @@ export async function getAllCodeGroups(page: number = 1, search?: string) {
       return { error: "401 : Anda tidak memiliki izin." };
     }
 
-    const [{ count }] = await db
+    const getTotal = db
       .select({ count: sql<number>`count(*)` })
       .from(codeGroups)
       .where(conditions.length ? or(...conditions) : undefined);
 
-    const data = await db
+    const getAllCodeGroup = db
       .select()
       .from(codeGroups)
       .where(conditions.length ? or(...conditions) : undefined)
       .orderBy(desc(codeGroups.createdAt))
       .limit(limit)
       .offset(offset);
+
+    const [[{ count }], data] = await Promise.all([getTotal, getAllCodeGroup]);
 
     return {
       data,

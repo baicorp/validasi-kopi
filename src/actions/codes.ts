@@ -22,23 +22,24 @@ export async function addGeneratedCodes(data: ExamDataDetails) {
     const result = await db.transaction(async (tx) => {
       // 1. insert intod codeGroups
       const codeGroupId = crypto.randomUUID();
-      const [groupResult] = await tx.insert(codeGroups).values({
+      const insertRowCodeGroups = tx.insert(codeGroups).values({
         id: codeGroupId,
         groupName: data.groupName,
         selectedExam: data.selectedExam,
         totalParticipants: data.totalParticipants,
       });
 
-      if (groupResult.affectedRows === 0) {
-        return { error: "Gagal menyimpan daftar kode." };
-      }
-
       // 2. Fetch exams to map names to IDs
-      const rowExams = await tx
+      const getRowExams = await tx
         .select({ id: exams.id, examName: exams.examName })
         .from(exams);
 
-      if (rowExams.length === 0) {
+      const [rowCodeGroups, rowExams] = await Promise.all([
+        insertRowCodeGroups,
+        getRowExams,
+      ]);
+
+      if (rowExams.length === 0 || rowCodeGroups[0].affectedRows === 0) {
         return { error: "Gagal menyimpan soal." };
       }
 
