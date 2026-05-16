@@ -15,7 +15,13 @@ export async function addEmployee(formData: FormData) {
   const department = formData.get("employee-department") as string;
   const plantArea = formData.get("employee-plant-area") as string;
 
-  if (!nik.trim() || !name.trim() || !position.trim()) {
+  if (
+    !nik.trim() ||
+    !name.trim() ||
+    !position.trim() ||
+    !department.trim() ||
+    !plantArea.trim()
+  ) {
     return { error: "Lengkapi semua data karyawan." };
   }
 
