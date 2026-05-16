@@ -592,7 +592,7 @@ export async function getSampleExamAnswer(
         ),
       );
 
-    return rows.map((row) => ({ id: row.id, value: row.value }));
+    return rows;
   } catch (error) {
     console.error(error);
     return { error: "Gagal mendapatkan data daftar ujian" };
