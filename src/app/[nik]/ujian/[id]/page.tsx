@@ -150,23 +150,9 @@ function InputForm({
 }) {
   const rowNumber = index + 1;
   switch (examName) {
-    case "2 out of 5 creamer":
-      return (
-        <TwoOutOfFive
-          index={rowNumber}
-          examEventId={examEventId}
-          examName={examName}
-        />
-      );
-    case "2 out of 5 coklat":
-      return (
-        <TwoOutOfFive
-          index={rowNumber}
-          examEventId={examEventId}
-          examName={examName}
-        />
-      );
     case "2 out of 5 pure":
+    case "2 out of 5 creamer":
+    case "2 out of 5 coklat":
       return (
         <TwoOutOfFive
           index={rowNumber}
@@ -185,11 +171,7 @@ function InputForm({
     case "triangle":
       return <TriangleForm index={rowNumber} />;
     default:
-      return (
-        <div className="bg-red-500 p-4 rounded-lg text-white grid place-items-center">
-          <p>Form Tidak Valid untuk {examName}</p>
-        </div>
-      );
+      return null;
   }
 }
 
