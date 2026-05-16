@@ -15,6 +15,7 @@ import { LoaderCircle } from "lucide-react";
 import { FormEvent, ReactNode, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { submitExam } from "@/actions/examSubmissions";
+import { hasNoDuplicates } from "@/lib/submissionValidation";
 
 export default function SubmitExamForm({ children }: { children: ReactNode }) {
   const [isLoad, setIsLoad] = useState(false);
@@ -30,6 +31,15 @@ export default function SubmitExamForm({ children }: { children: ReactNode }) {
     const formData = new FormData(e.currentTarget);
     const submitData = formatInputData(formData);
     // 2. evaluate all user input data
+    const allInputIsUnique = hasNoDuplicates(submitData);
+    if (!allInputIsUnique) {
+      toast.error(
+        "Kode atau nama produk yang dimasukkan tidak boleh ada duplikasi.",
+      );
+      setOpen(false);
+      setIsLoad(false);
+      return;
+    }
     const result = await submitExam(submitData, id);
     if ("error" in result) {
       toast.error(result.error);
