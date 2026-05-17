@@ -3,7 +3,6 @@
 import { db } from "@/db";
 import {
   examEvents,
-  examRegistrations,
   examSubmissionNotes,
   examSubmissions,
   submissionAttempts,
@@ -25,6 +24,9 @@ export async function submitExam(
     // 1. get user id;
     const session = await validateSessionServer();
     const userId = session.user.id;
+    if (!userId) {
+      return { error: "User tidak ditemukan" };
+    }
 
     // 2. ensure all codes and product names across exam sections are unique
     const allInputIsUnique = hasNoDuplicates(submittedExamData);
@@ -35,251 +37,227 @@ export async function submitExam(
       };
     }
 
-    // 3. get all exams data from db
-    const examsData = await getAllExams();
+    const getLatestAttempt = db
+      .select({
+        latestAttempt: sql<number>`max(${submissionAttempts.numberAttempt})`,
+      })
+      .from(submissionAttempts)
+      .where(
+        and(
+          eq(submissionAttempts.examEventId, examEventId),
+          eq(submissionAttempts.userId, userId),
+        ),
+      );
+    const getCodeGroup = db
+      .select({
+        regulerId: examEvents.codeGroupRegulerId,
+        retakeId: examEvents.codeGroupRetakeId,
+      })
+      .from(examEvents)
+      .where(eq(examEvents.id, examEventId));
+
+    // 3. get all exams data from db, user latest attempt and examEventCodeGroups
+    const [examsData, [{ latestAttempt }], codeGroup] = await Promise.all([
+      getAllExams(),
+      getLatestAttempt,
+      getCodeGroup,
+    ]);
+
     if (!examsData) {
       return { error: "Gagal mendapatkan daftar nama ujian" };
     }
+    const currentAttempt = (latestAttempt ?? 0) + 1;
+    if (currentAttempt > 4) {
+      throw new Error("Kesempatan perbaikan ujian anda sudah habis.");
+    }
+    if (codeGroup.length === 0) {
+      throw new Error(`Tidak ditemukan ujian dengan ID "${examEventId}".`);
+    }
 
-    const transactionResult = await db.transaction(async (tx) => {
-      // 4. check how many time user already submit exam
-      const [{ latestAttempt }] = await tx
+    // 4. if codeGroupReguler and codeGroupRetake is the same, only check submissionAttemptId
+    const isSameCodeGroup = codeGroup[0].regulerId === codeGroup[0].retakeId;
+    const whereClause = isSameCodeGroup
+      ? eq(submissionAttempts.examEventId, examEventId)
+      : and(
+          eq(submissionAttempts.examEventId, examEventId),
+          currentAttempt === 1 // attempt 1 uses codeGroupReguler, attempt > 1 uses codeGroupRetake
+            ? eq(submissionAttempts.numberAttempt, currentAttempt)
+            : between(submissionAttempts.numberAttempt, 2, currentAttempt),
+        );
+
+    // 5. verify that none of the code in this submission has been submitted before
+    const alreadySubmittedCodes = await db
+      .select({ code: examSubmissions.code })
+      .from(examSubmissions)
+      .innerJoin(
+        submissionAttempts,
+        eq(examSubmissions.submissionAttemptId, submissionAttempts.id),
+      )
+      .where(whereClause);
+
+    const newCodes = new Set(submittedExamData.map((d) => d.code));
+    const hasOverlappingCodes = alreadySubmittedCodes.some((d) =>
+      newCodes.has(d.code),
+    );
+
+    if (hasOverlappingCodes) {
+      throw new Error(
+        `Gagal mengumpulkan jawaban, terdapat kode yang sudah pernah dikumpulkan sebelumnya.`,
+      );
+    }
+
+    // 6. get selectedExam and codeGroupId based on user number of submission attempt
+    let selectedExam: string[] = [];
+    let selectedCodeGroupId: string = "";
+
+    if (currentAttempt === 1) {
+      const [{ selectedExamForFirstTimeExam }] = await db
         .select({
-          latestAttempt: sql<number>`max(${submissionAttempts.numberAttempt})`,
+          selectedExamForFirstTimeExam: codeGroups.selectedExam,
         })
+        .from(examEvents)
+        .innerJoin(codeGroups, eq(codeGroups.id, examEvents.codeGroupRegulerId))
+        .where(eq(examEvents.id, examEventId));
+      if (!selectedExamForFirstTimeExam) {
+        throw Error("Gagal mendapatkan daftar ujian");
+      }
+      selectedExam = selectedExamForFirstTimeExam.split(",") ?? [];
+      selectedCodeGroupId = codeGroup[0].regulerId ?? "";
+    } else {
+      const rows = await db
+        .select({ retakeExam: submissionAttempts.retakeExam })
         .from(submissionAttempts)
         .where(
           and(
+            eq(submissionAttempts.numberAttempt, currentAttempt - 1),
             eq(submissionAttempts.examEventId, examEventId),
             eq(submissionAttempts.userId, userId),
           ),
         );
+      const selectedExamForRetakeExam = rows
+        .map((data) => data.retakeExam)
+        .filter((exam) => exam && exam.length > 0)
+        .toString();
+      selectedExam = selectedExamForRetakeExam.split(",") || [];
+      selectedCodeGroupId = codeGroup[0].retakeId ?? "";
+    }
 
-      const nextAttempt = (latestAttempt ?? 0) + 1;
-      if (nextAttempt > 4) {
-        throw new Error("Kesempatan perbaikan ujian anda sudah habis.");
-      }
-
-      // 5. verify that none of the code in this submission has been submitted before
-      const codeGroup = await tx
-        .select({
-          RegulerId: examEvents.codeGroupRegulerId,
-          RetakeId: examEvents.codeGroupRetakeId,
-        })
-        .from(examEvents)
-        .where(eq(examEvents.id, examEventId));
-
-      if (codeGroup.length === 0) {
-        throw new Error(`Tidak ditemukan ujian dengan ID "${examEventId}".`);
-      }
-
-      // if codeGroupReguler and codeGroupRetake is the same, only check submissionAttemptId
-      const isSameCodeGroup = codeGroup[0].RegulerId === codeGroup[0].RetakeId;
-      const whereClause = isSameCodeGroup
-        ? eq(submissionAttempts.examEventId, examEventId)
-        : and(
-            eq(submissionAttempts.examEventId, examEventId),
-            nextAttempt === 1
-              ? eq(submissionAttempts.numberAttempt, nextAttempt)
-              : between(submissionAttempts.numberAttempt, 2, nextAttempt),
-          );
-
-      const alreadySubmittedCodes = await tx
-        .select({ code: examSubmissions.code })
-        .from(examSubmissions)
-        .innerJoin(
-          submissionAttempts,
-          eq(examSubmissions.submissionAttemptId, submissionAttempts.id),
-        )
-        .where(whereClause);
-
-      const newCodes = new Set(submittedExamData.map((d) => d.code));
-      const hasOverlappingCodes = alreadySubmittedCodes.some((d) =>
-        newCodes.has(d.code),
+    // 7. filter input data to only get current selected exam
+    submittedExamData = submittedExamData.filter((data) =>
+      selectedExam.some((exam) => exam.includes(data.examName)),
+    );
+    submittedExamData = submittedExamData.map((data) => ({
+      ...data,
+      code: data.code ? data.code : "",
+      value: data.value ? data.value : "",
+      attemptNumber: currentAttempt,
+      note: data.note ? data.note : "",
+    }));
+    const orConditions = submittedExamData.map((pair) =>
+      and(
+        eq(exams.examName, pair.examName.toLowerCase()),
+        eq(codes.code, pair.code),
+      ),
+    );
+    // 8. get dbAnswerList based on submittedExamData and selectedCodeGroupId
+    const dbAnswerList = await db
+      .select({
+        examName: exams.examName,
+        code: codes.code,
+        value: codes.value,
+        additionalValue: codes.additionalValue,
+      })
+      .from(codes)
+      .leftJoin(exams, eq(codes.examId, exams.id))
+      .where(
+        and(eq(codes.codeGroupId, selectedCodeGroupId), or(...orConditions)),
       );
 
-      if (hasOverlappingCodes) {
-        throw new Error(
-          `Gagal mengumpulkan jawaban, terdapat kode yang sudah pernah dikumpulkan sebelumnya.`,
-        );
-      }
+    // 9. evaluate answer list by comparing userAnswerList and dbAnswerList.
+    // then give result either "correct" | "partial" | "wrong"
+    // @ts-expect-error correct answer actually work (null and undefined)
+    const results = evaluateAnswers(submittedExamData, dbAnswerList);
 
-      // 6. get codeGroupId based on how many times user already take
-      const targetGroupColumn =
-        nextAttempt > 1
-          ? examEvents.codeGroupRetakeId
-          : examEvents.codeGroupRegulerId;
-
-      const [{ codeGroupId, selectedExamForFirstTimeExam }] = await tx
-        .select({
-          codeGroupId: codeGroups.id,
-          selectedExamForFirstTimeExam: codeGroups.selectedExam,
-        })
-        .from(examEvents)
-        .leftJoin(codeGroups, eq(targetGroupColumn, codeGroups.id))
-        .leftJoin(
-          examRegistrations,
-          eq(examRegistrations.examEventId, examEvents.id),
-        )
-        .where(
-          and(
-            eq(examEvents.id, examEventId),
-            eq(examRegistrations.userId, userId),
-          ),
-        );
-
-      if (!codeGroupId || !selectedExamForFirstTimeExam) {
-        throw Error("Gagal mendapatkan codeGroupId dan daftar ujian");
-      }
-
-      // 7. get selectedExam based on user number of submission attempt
-      let selectedExam: string = "";
-
-      if (nextAttempt > 1) {
-        const rows = await tx
-          .select({ retakeExam: submissionAttempts.retakeExam })
-          .from(submissionAttempts)
-          .where(
-            and(
-              eq(submissionAttempts.numberAttempt, nextAttempt - 1),
-              eq(submissionAttempts.examEventId, examEventId),
-              eq(submissionAttempts.userId, userId),
-            ),
-          );
-        const selectedExamForRetakeExam = rows
-          .map((data) => data.retakeExam)
-          .filter((exam) => exam && exam.length > 0)
-          .toString();
-        selectedExam = selectedExamForRetakeExam;
-      } else {
-        selectedExam = selectedExamForFirstTimeExam ?? "";
-      }
-
-      // 8. filter input data to only get current selected exam
-      submittedExamData = submittedExamData.filter((data) =>
-        selectedExam?.split(",")?.some((exam) => exam.includes(data.examName)),
-      );
-      submittedExamData = submittedExamData.map((data) => ({
-        ...data,
-        code: data.code ? data.code : "",
-        value: data.value ? data.value : "",
-        attemptNumber: nextAttempt,
-        note: data.note ? data.note : "",
-      }));
-
-      const orConditions = submittedExamData.map((pair) =>
-        and(
-          eq(sql`lower(${exams.examName})`, pair.examName),
-          eq(sql`lower(${codes.code})`, pair.code),
-        ),
-      );
-
-      const dbAnswerList = await tx
-        .select({
-          examName: exams.examName,
-          code: codes.code,
-          value: codes.value,
-          additionalValue: codes.additionalValue,
-        })
-        .from(codes)
-        .leftJoin(exams, eq(codes.examId, exams.id))
-        .where(and(eq(codes.codeGroupId, codeGroupId), or(...orConditions)));
-
-      // 9. evaluate answer list by comparing userAnswerList and dbAnswerList.
-      // then give result either "correct" | "partial" | "wrong"
-      // @ts-expect-error correct answer actually work (null and undefined)
-      const results = evaluateAnswers(submittedExamData, dbAnswerList);
-
-      // 10. insert submissionAttempts data and submissionNote if available;
-      const submissionNoteData: InferInsertModel<typeof examSubmissionNotes>[] =
-        [];
-
-      // 11. find final treshold (tmx + tsg (skor + rasa)) final grade avarege
+    let finalTresholdGrade = 0;
+    if (selectedExam.some((exam) => exam.toLowerCase().includes("treshold"))) {
+      // 10. find final treshold (tmx + tsg (skor + rasa)) final grade avarege
       const findTreshold = results.filter((data) =>
         data.examName.toLowerCase().includes("treshold"),
       );
-      let finalTresholdGrade = findTreshold.reduce((acc, curr) => {
+      finalTresholdGrade = findTreshold.reduce((acc, curr) => {
         const additionalGrade = curr.additionalGrade ? curr.additionalGrade : 0;
         return acc + curr.grade + additionalGrade;
       }, 0);
       // NB : this calculation follow combineTresholdData();
       finalTresholdGrade = finalTresholdGrade / 3; // tresholdSingle (rasa + skor) + tresholdMix
+    }
 
-      const submissionAttemptsInsertValues: InferInsertModel<
-        typeof submissionAttempts
-      >[] = results.map((data) => {
-        const examId = getExamsId(data.examName, examsData);
-        if (!examId) {
-          throw Error("ID ujian tidak ditemukan.");
-        }
-        const submissionAttemptId = crypto.randomUUID();
+    // 11. build submissionAttempts data and if available, build submissionNote data for skoring/triangle exam
+    const submissionNoteData: InferInsertModel<typeof examSubmissionNotes>[] =
+      [];
+    const submissionAttemptsInsertValues: InferInsertModel<
+      typeof submissionAttempts
+    >[] = results.map((data) => {
+      const examId = getExamsId(data.examName, examsData);
+      if (!examId) {
+        throw Error("ID ujian tidak ditemukan.");
+      }
 
-        if (data.note) {
-          // this data for insert examSubmissionNotes
-          submissionNoteData.push({
-            submissionAttemptId,
-            note: data.note.trim(),
-          });
-        }
+      const submissionAttemptId = crypto.randomUUID();
+      if (data.note) {
+        // this data for insert examSubmissionNotes for skoring/triangle exam
+        submissionNoteData.push({
+          submissionAttemptId,
+          note: data.note.trim(),
+        });
+      }
 
-        // if final trehsold (tmx + tsg (skor + rasa)) avarege grade < 70,
-        // all treshold (tmx + tsg (skor + rasa)) must be retaken
-        const isThresholdFail =
-          data.examName.toLowerCase().includes("treshold") &&
-          finalTresholdGrade < 70;
-        const isGradeFail = data.grade < 70;
+      // if final trehsold (tmx + tsg (skor + rasa)) avarege grade < 70,
+      // all treshold (tmx + tsg (skor + rasa)) must be retaken
+      const isThresholdFail =
+        data.examName.toLowerCase().includes("treshold") &&
+        finalTresholdGrade < 70;
+      const isGradeFail = data.grade < 70;
 
-        const isRetake = isThresholdFail || isGradeFail ? data.examName : "";
+      const isRetake = isThresholdFail || isGradeFail ? data.examName : "";
 
-        return {
-          id: submissionAttemptId,
-          numberAttempt: nextAttempt,
-          examEventId,
-          userId,
-          examId,
-          grade: data.grade,
-          additionalGrade: data?.additionalGrade,
-          retakeExam: isRetake,
-        };
-      });
+      return {
+        id: submissionAttemptId,
+        numberAttempt: currentAttempt,
+        examEventId,
+        userId,
+        examId,
+        grade: data.grade,
+        additionalGrade: data?.additionalGrade,
+        retakeExam: isRetake,
+      };
+    });
+
+    const transactionResult = await db.transaction(async (tx) => {
+      // 12. insert submissionAttempts data
       await tx
         .insert(submissionAttempts)
         .values(submissionAttemptsInsertValues);
 
-      // 12. insert notes only if relevant exams (skoring/triangle) are selected and notes exist.
+      // 13. insert submissionNote only if relevant exams (skoring/triangle) are selected and notes exist.
       const isNoteExam = ["skoring", "triangle"].some((exam) =>
         selectedExam.includes(exam),
       );
-      if (isNoteExam && submissionNoteData.length > 0) {
+      if (isNoteExam && submissionNoteData.length !== 0) {
         await tx.insert(examSubmissionNotes).values(submissionNoteData);
       }
 
-      // 13. get submissionAttempts inserted rows data
-      const insertedRows = await tx
-        .select({
-          id: submissionAttempts.id,
-          examId: submissionAttempts.examId,
-        })
-        .from(submissionAttempts)
-        .where(
-          and(
-            eq(submissionAttempts.examEventId, examEventId),
-            eq(submissionAttempts.numberAttempt, nextAttempt),
-          ),
-        );
-
-      // 14. insert examSubmissions data
+      // 14. build examSubmissions data
       const attemptMap = new Map<string, string>();
-      for (const row of insertedRows) {
-        attemptMap.set(row.examId, row.id);
+      for (const row of submissionAttemptsInsertValues) {
+        attemptMap.set(row.examId, row.id!);
       }
-
       const examSubmissionsInsertValues: InferInsertModel<
         typeof examSubmissions
       >[] = results.flatMap((data) => {
         const examId = getExamsId(data.examName, examsData);
         if (!examId) {
-          throw Error(`ID ujian ${data.examName} tidak ditemukan.`);
+          throw new Error(`ID ujian ${data.examName} tidak ditemukan.`);
         }
         const submissionAttemptId = attemptMap.get(examId);
 
@@ -298,11 +276,12 @@ export async function submitExam(
           additionalResult: result.additionalResult,
         }));
       });
-      await tx.insert(examSubmissions).values(examSubmissionsInsertValues);
 
+      // 15. insert examSubmissions data
+      await tx.insert(examSubmissions).values(examSubmissionsInsertValues);
       return {
         examEventId,
-        submissionAttempt: nextAttempt,
+        submissionAttempt: currentAttempt,
         examSummary: results,
       };
     });
