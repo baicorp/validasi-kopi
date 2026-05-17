@@ -21,7 +21,7 @@ export default function ExamParticipants({
 }: {
   listParticipant: Participants[];
 }) {
-  const { id } = useParams<{ id: string }>();
+  const { examEventId } = useParams<{ examEventId: string }>();
   const [input, setInput] = useState("");
   const [isLoad, setIsload] = useState(false);
   const searchInput = useDebounce(input);
@@ -60,7 +60,7 @@ export default function ExamParticipants({
 
   async function handleSaveParticipant() {
     setIsload(true);
-    const result = await assignUser(participants, id);
+    const result = await assignUser(participants, examEventId);
     if ("error" in result) {
       toast.error(result.error);
       setIsload(false);
