@@ -16,6 +16,10 @@ import { isValidRole, validateSessionServer } from "./validateSession";
 import { and, between, eq, InferInsertModel, or, sql } from "drizzle-orm";
 import { codeGroups, codes, departments, exams, user } from "@/db/schema";
 
+type NewSubmissionAttempt = InferInsertModel<typeof submissionAttempts>;
+type NewExamSubmission = InferInsertModel<typeof examSubmissions>;
+type NewExamSubmissionNote = InferInsertModel<typeof examSubmissionNotes>;
+
 export async function submitExam(
   submittedExamData: Answer[],
   examEventId: string,
@@ -192,25 +196,19 @@ export async function submitExam(
       finalTresholdGrade = finalTresholdGrade / 3; // tresholdSingle (rasa + skor) + tresholdMix
     }
 
-    // 11. build submissionAttempts data and if available, build submissionNote data for skoring/triangle exam
-    const submissionNoteData: InferInsertModel<typeof examSubmissionNotes>[] =
-      [];
-    const submissionAttemptsInsertValues: InferInsertModel<
-      typeof submissionAttempts
-    >[] = results.map((data) => {
+    // 10. build values submissionAttempts, examSubmissions, and submissionNote values
+    // a. build submissionAttempts values
+    // b. build examSubmissions values
+    // c. build examSubmissionNotes values for skoring/triangle exam
+    const submissionAttemptsValues: NewSubmissionAttempt[] = [];
+    const examSubmissionsValues: NewExamSubmission[] = [];
+    const examSubmissionNotesValues: NewExamSubmissionNote[] = [];
+    for (const data of results) {
       const examId = getExamsId(data.examName, examsData);
       if (!examId) {
         throw Error("ID ujian tidak ditemukan.");
       }
-
       const submissionAttemptId = crypto.randomUUID();
-      if (data.note) {
-        // this data for insert examSubmissionNotes for skoring/triangle exam
-        submissionNoteData.push({
-          submissionAttemptId,
-          note: data.note.trim(),
-        });
-      }
 
       // if final trehsold (tmx + tsg (skor + rasa)) avarege grade < 70,
       // all treshold (tmx + tsg (skor + rasa)) must be retaken
@@ -218,10 +216,9 @@ export async function submitExam(
         data.examName.toLowerCase().includes("treshold") &&
         finalTresholdGrade < 70;
       const isGradeFail = data.grade < 70;
-
       const isRetake = isThresholdFail || isGradeFail ? data.examName : "";
 
-      return {
+      submissionAttemptsValues.push({
         id: submissionAttemptId,
         numberAttempt: currentAttempt,
         examEventId,
@@ -230,55 +227,39 @@ export async function submitExam(
         grade: data.grade,
         additionalGrade: data?.additionalGrade,
         retakeExam: isRetake,
-      };
-    });
-
-    const transactionResult = await db.transaction(async (tx) => {
-      // 12. insert submissionAttempts data
-      await tx
-        .insert(submissionAttempts)
-        .values(submissionAttemptsInsertValues);
-
-      // 13. insert submissionNote only if relevant exams (skoring/triangle) are selected and notes exist.
-      const isNoteExam = ["skoring", "triangle"].some((exam) =>
-        selectedExam.includes(exam),
-      );
-      if (isNoteExam && submissionNoteData.length !== 0) {
-        await tx.insert(examSubmissionNotes).values(submissionNoteData);
-      }
-
-      // 14. build examSubmissions data
-      const attemptMap = new Map<string, string>();
-      for (const row of submissionAttemptsInsertValues) {
-        attemptMap.set(row.examId, row.id!);
-      }
-      const examSubmissionsInsertValues: InferInsertModel<
-        typeof examSubmissions
-      >[] = results.flatMap((data) => {
-        const examId = getExamsId(data.examName, examsData);
-        if (!examId) {
-          throw new Error(`ID ujian ${data.examName} tidak ditemukan.`);
-        }
-        const submissionAttemptId = attemptMap.get(examId);
-
-        if (!submissionAttemptId) {
-          throw new Error(
-            `Gagal menemukan submissionAttemptId untuk exam "${data.examName}"`,
-          );
-        }
-
-        return data.answerResults.map((result) => ({
+      });
+      examSubmissionsValues.push(
+        ...data.answerResults.map((result) => ({
           submissionAttemptId,
           code: result.code,
           value: result.value,
           additionalValue: result.additionalValue,
           result: result.result,
           additionalResult: result.additionalResult,
-        }));
-      });
+        })),
+      );
+      if (data.note) {
+        // this data for insert examSubmissionNotes for skoring/triangle exam
+        examSubmissionNotesValues.push({
+          submissionAttemptId,
+          note: data.note.trim(),
+        });
+      }
+    }
 
-      // 15. insert examSubmissions data
-      await tx.insert(examSubmissions).values(examSubmissionsInsertValues);
+    const transactionResult = await db.transaction(async (tx) => {
+      // 10. insert submissionAttempts data
+      await tx.insert(submissionAttempts).values(submissionAttemptsValues);
+      // 11. insert examSubmissions data
+      await tx.insert(examSubmissions).values(examSubmissionsValues);
+      // 12. insert submissionNote only if relevant exams (skoring/triangle) are selected and notes exist.
+      const isNoteExam = ["skoring", "triangle"].some((exam) =>
+        selectedExam.includes(exam),
+      );
+      if (isNoteExam && examSubmissionNotesValues.length !== 0) {
+        await tx.insert(examSubmissionNotes).values(examSubmissionNotesValues);
+      }
+
       return {
         examEventId,
         submissionAttempt: currentAttempt,
