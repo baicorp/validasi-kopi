@@ -43,7 +43,7 @@ export default function AddExamEventBtn() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild className="ml-auto">
-        <Button className="flex items-center gap-2 font-normal">
+        <Button className="flex items-center gap-2 font-medium">
           <Plus className="w-4 h-4" />
           Buat Ujian Baru
         </Button>
