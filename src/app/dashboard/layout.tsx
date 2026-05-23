@@ -136,7 +136,7 @@ function ActiveMenuItem({
     <SidebarMenuItem>
       <SidebarMenuButton
         asChild
-        className={`${
+        className={`font-medium ${
           isActive
             ? "bg-primary text-primary-foreground shadow-xs hover:bg-primary hover:text-primary-foreground"
             : "hover:bg-primary/10 hover:text-accent-foreground"
@@ -144,7 +144,7 @@ function ActiveMenuItem({
       >
         <Link
           href={href}
-          className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm transition-colors"
+          className="flex items-center gap-2 px-2 py-2 text-sm transition-colors"
         >
           <Icon className="w-5 h-5" />
           <span>{label}</span>
@@ -166,7 +166,10 @@ function CollapsibleMenu({ Icon, menu, subMenu }: CollapsibleMenuData) {
 
   return (
     <>
-      <SidebarMenuButton onClick={() => setIsCollapse((prev) => !prev)}>
+      <SidebarMenuButton
+        onClick={() => setIsCollapse((prev) => !prev)}
+        className="font-medium"
+      >
         <Icon />
         <span>{menu}</span>
         <ChevronRight
@@ -182,16 +185,13 @@ function CollapsibleMenu({ Icon, menu, subMenu }: CollapsibleMenuData) {
               <SidebarMenuItem key={child.menu}>
                 <SidebarMenuButton
                   asChild
-                  className={`${
+                  className={`font-medium ${
                     isActive
                       ? "bg-primary text-primary-foreground shadow-xs hover:bg-primary hover:text-primary-foreground"
                       : "hover:bg-primary/10 hover:text-accent-foreground"
                   }`}
                 >
-                  <Link
-                    href={child.url}
-                    className="block text-sm rounded-lg px-2 py-2"
-                  >
+                  <Link href={child.url} className="block text-sm px-2 py-2">
                     {child.menu}
                   </Link>
                 </SidebarMenuButton>
