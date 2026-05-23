@@ -29,21 +29,13 @@ export default function SelectProductName({
     getListValuesFromExamName(examName, examEventId),
   );
 
-  if (isLoading) {
+  if (isLoading || error || !codeValues || "error" in codeValues) {
     return (
       <Select name={inputName} disabled>
         <SelectTrigger className="w-full">
-          <SelectValue placeholder="Loading..." />
-        </SelectTrigger>
-      </Select>
-    );
-  }
-
-  if (error || !codeValues || "error" in codeValues) {
-    return (
-      <Select name={inputName} disabled>
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Gagal mendapatkan data" />
+          <SelectValue
+            placeholder={`${isLoading ? "Loading..." : "Gagal mendapatkan data"}`}
+          />
         </SelectTrigger>
       </Select>
     );

@@ -23,21 +23,13 @@ export default function SelectProductCategories({
     error,
   } = useSWR("productCategories", () => getAllProductCategories());
 
-  if (isLoading) {
+  if (isLoading || error || !categories || "error" in categories) {
     return (
       <Select name="product-category" disabled>
         <SelectTrigger className="w-full">
-          <SelectValue placeholder="Loading..." />
-        </SelectTrigger>
-      </Select>
-    );
-  }
-
-  if (error || !categories || "error" in categories) {
-    return (
-      <Select name="product-category" disabled>
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Gagal mendapatkan data" />
+          <SelectValue
+            placeholder={`${isLoading ? "Loading..." : "Gagal mendapatkan data"}`}
+          />
         </SelectTrigger>
       </Select>
     );
