@@ -23,21 +23,13 @@ export default function SelectDepartment({
     error,
   } = useSWR("departments", () => getDepartments());
 
-  if (isLoading) {
+  if (isLoading || error || !departmentData || "error" in departmentData) {
     return (
       <Select name="employee-department" disabled>
         <SelectTrigger className="w-full">
-          <SelectValue placeholder="Loading..." />
-        </SelectTrigger>
-      </Select>
-    );
-  }
-
-  if (error || !departmentData || "error" in departmentData) {
-    return (
-      <Select name="employee-department" disabled>
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Gagal mendapatkan data" />
+          <SelectValue
+            placeholder={`${isLoading ? "Loading..." : "Gagal mendapatkan data"}`}
+          />
         </SelectTrigger>
       </Select>
     );

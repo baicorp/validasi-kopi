@@ -23,21 +23,13 @@ export default function SelectPlantArea({
     error,
   } = useSWR("plant-area", () => getPlantAreas());
 
-  if (isLoading) {
+  if (isLoading || error || !plantAreas || "error" in plantAreas) {
     return (
       <Select name="employee-plant-area" disabled>
         <SelectTrigger className="w-full">
-          <SelectValue placeholder="Loading..." />
-        </SelectTrigger>
-      </Select>
-    );
-  }
-
-  if (error || !plantAreas || "error" in plantAreas) {
-    return (
-      <Select name="employee-plant-area" disabled>
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Gagal mendapatkan data" />
+          <SelectValue
+            placeholder={`${isLoading ? "Loading..." : "Gagal mendapatkan data"}`}
+          />
         </SelectTrigger>
       </Select>
     );

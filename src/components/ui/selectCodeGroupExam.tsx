@@ -19,21 +19,13 @@ export default function SelectCodeGroupExam() {
     error,
   } = useSWR("codeGroups", () => getCodeGroupsForExam());
 
-  if (isLoading) {
+  if (isLoading || error || !codeGroupsExams || "error" in codeGroupsExams) {
     return (
       <Select name="code-group-exam" disabled>
         <SelectTrigger className="w-full">
-          <SelectValue placeholder="Loading..." />
-        </SelectTrigger>
-      </Select>
-    );
-  }
-
-  if (error || !codeGroupsExams || "error" in codeGroupsExams) {
-    return (
-      <Select name="code-group-exam" disabled>
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Gagal mendapatkan data" />
+          <SelectValue
+            placeholder={`${isLoading ? "Loading..." : "Gagal mendapatkan data"}`}
+          />
         </SelectTrigger>
       </Select>
     );
