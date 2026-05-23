@@ -36,7 +36,12 @@ export default function SelectPlantArea({
   }
 
   return (
-    <Select name="employee-plant-area" defaultValue={defaultValue} required>
+    <Select
+      key={defaultValue}
+      name="employee-plant-area"
+      defaultValue={defaultValue}
+      required
+    >
       <SelectTrigger className="w-full">
         <SelectValue placeholder="Pilih area pabrik" />
       </SelectTrigger>

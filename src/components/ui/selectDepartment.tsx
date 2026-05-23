@@ -36,7 +36,12 @@ export default function SelectDepartment({
   }
 
   return (
-    <Select name="employee-department" defaultValue={defaultValue} required>
+    <Select
+      key={defaultValue}
+      name="employee-department"
+      defaultValue={defaultValue}
+      required
+    >
       <SelectTrigger className="w-full">
         <SelectValue placeholder="Pilih departemen" />
       </SelectTrigger>

@@ -36,7 +36,12 @@ export default function SelectProductCategories({
   }
 
   return (
-    <Select name="product-category" defaultValue={defaultValue} required>
+    <Select
+      key={defaultValue}
+      name="product-category"
+      defaultValue={defaultValue}
+      required
+    >
       <SelectTrigger className="w-full">
         <SelectValue placeholder="Pilih kategori produk" />
       </SelectTrigger>
