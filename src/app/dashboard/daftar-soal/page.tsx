@@ -140,7 +140,7 @@ function CodeGroupItem({
         <DeleteDialog
           dialogTitle="Soal"
           deleteFnAction={deleteGeneratedCode}
-          id={id.toString()}
+          id={id}
           data={groupName}
         />
       </div>

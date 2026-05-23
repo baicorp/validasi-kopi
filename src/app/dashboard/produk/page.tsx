@@ -112,18 +112,16 @@ async function TableProductsData({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <EditDialogProduct
-                productId={product.id.toString()}
+                productId={product.id}
                 productName={product.productName}
-                productCategoryId={
-                  product.productCategoryId?.toString() as string
-                }
+                productCategoryId={product.productCategoryId || undefined}
               />
               <DropdownMenuSeparator />
               <DeleteDialog
                 dialogTitle="produk"
                 variant="dropDown"
                 deleteFnAction={deleteProduct}
-                id={product.id.toString()}
+                id={product.id}
                 data={product.productName}
               />
             </DropdownMenuContent>

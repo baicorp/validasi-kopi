@@ -160,7 +160,7 @@ function ProductCategories({
               productCategories?.map((category, index) => (
                 <SelectItem
                   key={index}
-                  value={`${category.id.toString()}+${category.categoryName}`}
+                  value={`${category.id}+${category.categoryName}`}
                 >
                   {category.categoryName}
                 </SelectItem>

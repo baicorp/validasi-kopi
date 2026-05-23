@@ -112,8 +112,8 @@ async function TableEmployeesData({
                 username={employee.username}
                 name={employee.name}
                 position={employee.position}
-                departmentId={employee.departmentId?.toString()}
-                plantAreaId={employee.plantAreaId?.toString()}
+                departmentId={employee.departmentId || undefined}
+                plantAreaId={employee.plantAreaId || undefined}
               />
               <DropdownMenuSeparator />
               <DeleteDialog
