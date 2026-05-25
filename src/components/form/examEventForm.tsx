@@ -8,6 +8,7 @@ import { Label } from "../ui/label";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { toTitleCase } from "@/lib/utils";
+import { utcToWIB } from "@/lib/datetimeFormat";
 import DateTimePicker from "../ui/dateTimePicker";
 import { getCodeGroupById } from "@/actions/codeGroups";
 import { Calendar, LoaderCircle, User } from "lucide-react";
@@ -126,7 +127,7 @@ function SelectedCodeGroupCard({ codeGroupId }: { codeGroupId: string }) {
       <div className="flex gap-4">
         <div className="flex gap-2 items-center">
           <Calendar className="w-3 h-3" />
-          <p>{new Date(codeGroup.createdAt || new Date()).toLocaleString()}</p>
+          <p>{utcToWIB(codeGroup.createdAt.toISOString() || "")}</p>
         </div>
         <div className="flex gap-2 items-center">
           <User className="w-3 h-3" />

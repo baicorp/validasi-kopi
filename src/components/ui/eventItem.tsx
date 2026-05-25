@@ -5,8 +5,8 @@ import { Separator } from "./separator";
 import DeleteDialogExamEvent from "./deleteExamEvent";
 import EditDialogExamEvent from "./editDialogExamEvent";
 import { getAllExamEvents } from "@/actions/examEvents";
-import { formatJakartaTime } from "@/lib/datetimeFormat";
 import { Clock, ExternalLink, MoreVertical } from "lucide-react";
+import { formatJakartaTime, utcToWIB } from "@/lib/datetimeFormat";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -109,7 +109,7 @@ export default function EventItem({
         <Separator />
         <div className="p-4 bg-muted">
           <p className="text-xs text-muted-foreground">
-            Diperbarui : {formatJakartaTime(updatedAt.toString() || "")}
+            Diperbarui : {utcToWIB(updatedAt.toISOString() || "")}
           </p>
         </div>
       </div>
