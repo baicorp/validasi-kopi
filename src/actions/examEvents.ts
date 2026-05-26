@@ -183,6 +183,8 @@ export async function getActiveExamEvent() {
         ),
       );
 
+    if (rows.length === 0) return [];
+
     // 3. find latest attempt of each founded exam
     const listExamEventId = rows.map((row) => row.examEventId);
     const latestAttempts = db
@@ -219,15 +221,23 @@ export async function getActiveExamEvent() {
       );
 
     // 4. add numberAttempt and retakeExam filed to the active exam event data
-    // NB: improve performance
+    const attemptMap = new Map<string, typeof latestAttemptRows>();
+    for (const attempt of latestAttemptRows) {
+      const existing = attemptMap.get(attempt.examEventId) ?? [];
+      existing.push(attempt);
+      attemptMap.set(attempt.examEventId, existing);
+    }
+
     const completeData = rows.map((row) => {
-      const foundAttempt = latestAttemptRows.find(
-        (attempt) => attempt.examEventId === row.examEventId,
-      );
+      const attempts = attemptMap.get(row.examEventId) ?? [];
+      const latest = attempts[0];
       return {
         ...row,
-        numberAttempt: foundAttempt ? foundAttempt.numberAttempt : 0,
-        retakeExam: foundAttempt?.retakeExam ?? "",
+        numberAttempt: latest?.numberAttempt ?? 0,
+        retakeExam: attempts
+          .filter((a) => a.retakeExam)
+          .map((a) => a.retakeExam)
+          .join(","),
       };
     });
 
