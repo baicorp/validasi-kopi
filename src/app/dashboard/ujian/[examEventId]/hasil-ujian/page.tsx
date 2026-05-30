@@ -113,36 +113,47 @@ function ProductExamTable({
       </TableHeader>
 
       <TableBody>
-        {cleanProductExamData.map((row, index) => {
-          const keys = Object.keys(row).slice(4);
-          return (
-            <TableRow
-              key={row.userId}
-              className="border border-neutral-400 border-collapse"
+        {cleanProductExamData.length === 0 ? (
+          <TableRow>
+            <TableCell
+              className="text-muted-foreground text-center text-sm"
+              colSpan={16}
             >
-              <TableCell className="border border-neutral-400 border-collapse">
-                {index + 1}
-              </TableCell>
-              <TableCell className="border border-neutral-400 border-collapse">
-                {row.name}
-              </TableCell>
-              {keys.map((data) => {
-                return (
-                  <TableCell
-                    key={data}
-                    className={`font-mono border border-neutral-400 border-collapse text-center ${typeof row[data] === "number" && row[data] < 70 && "text-red-500"}`}
-                  >
-                    {data === "averageGrade" || data === "result"
-                      ? row[data] === null
-                        ? "belum lengkap"
-                        : row[data]
-                      : row[data]}
-                  </TableCell>
-                );
-              })}
-            </TableRow>
-          );
-        })}
+              Belum ada data.
+            </TableCell>
+          </TableRow>
+        ) : (
+          cleanProductExamData.map((row, index) => {
+            const keys = Object.keys(row).slice(4);
+            return (
+              <TableRow
+                key={row.userId}
+                className="border border-neutral-400 border-collapse"
+              >
+                <TableCell className="border border-neutral-400 border-collapse">
+                  {index + 1}
+                </TableCell>
+                <TableCell className="border border-neutral-400 border-collapse">
+                  {row.name}
+                </TableCell>
+                {keys.map((data) => {
+                  return (
+                    <TableCell
+                      key={data}
+                      className={`font-mono border border-neutral-400 border-collapse text-center ${typeof row[data] === "number" && row[data] < 70 && "text-red-500"}`}
+                    >
+                      {data === "averageGrade" || data === "result"
+                        ? row[data] === null
+                          ? "belum lengkap"
+                          : row[data]
+                        : row[data]}
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+            );
+          })
+        )}
       </TableBody>
     </Table>
   );
@@ -237,32 +248,43 @@ function ThresholdTable({
       </TableHeader>
 
       <TableBody>
-        {cleanTresholdExamData.map((row, index) => {
-          const keys = Object.keys(row).slice(1);
-          return (
-            <TableRow
-              key={index}
-              className="border border-neutral-400 border-collapse"
+        {cleanTresholdExamData.length === 0 ? (
+          <TableRow>
+            <TableCell
+              className="text-muted-foreground text-center text-sm"
+              colSpan={14}
             >
-              <TableCell className="border border-neutral-400 border-collapse">
-                {index + 1}
-              </TableCell>
-              <TableCell className="border border-neutral-400 border-collapse">
-                {row.name}
-              </TableCell>
-              {keys.map((key) => {
-                return (
-                  <TableCell
-                    key={key}
-                    className={`tracking-tighter font-mono border border-neutral-400 border-collapse text-center ${typeof row[key] === "number" && row[key] < 70 && "text-red-500"}`}
-                  >
-                    {row[key]}
-                  </TableCell>
-                );
-              })}
-            </TableRow>
-          );
-        })}
+              Belum ada data.
+            </TableCell>
+          </TableRow>
+        ) : (
+          cleanTresholdExamData.map((row, index) => {
+            const keys = Object.keys(row).slice(1);
+            return (
+              <TableRow
+                key={index}
+                className="border border-neutral-400 border-collapse"
+              >
+                <TableCell className="border border-neutral-400 border-collapse">
+                  {index + 1}
+                </TableCell>
+                <TableCell className="border border-neutral-400 border-collapse">
+                  {row.name}
+                </TableCell>
+                {keys.map((key) => {
+                  return (
+                    <TableCell
+                      key={key}
+                      className={`tracking-tighter font-mono border border-neutral-400 border-collapse text-center ${typeof row[key] === "number" && row[key] < 70 && "text-red-500"}`}
+                    >
+                      {row[key]}
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+            );
+          })
+        )}
       </TableBody>
     </Table>
   );
@@ -274,7 +296,7 @@ function BasicExamTable({
   data: { selectedExams: string; rowData: NormalizedExamData[] };
 }) {
   const tresholdFinalScore = combineTresholdData(data.rowData);
-  const calculateFinal =
+  const cleanBasicExamData =
     calculateExamResultsWithCompletionCheck(tresholdFinalScore);
 
   return (
@@ -333,36 +355,47 @@ function BasicExamTable({
       </TableHeader>
 
       <TableBody>
-        {calculateFinal.map((row, index) => {
-          const keys = Object.keys(row).slice(4);
-          return (
-            <TableRow
-              key={row.userId}
-              className="border border-neutral-400 border-collapse"
+        {cleanBasicExamData.length === 0 ? (
+          <TableRow>
+            <TableCell
+              className="text-muted-foreground text-center text-sm"
+              colSpan={16}
             >
-              <TableCell className="border border-neutral-400 border-collapse">
-                {index + 1}
-              </TableCell>
-              <TableCell className="border border-neutral-400 border-collapse">
-                {row.name}
-              </TableCell>
-              {keys.map((data) => {
-                return (
-                  <TableCell
-                    key={data}
-                    className={`font-mono tracking-tighter border border-neutral-400 border-collapse text-center ${typeof row[data] === "number" && row[data] < 70 && "text-red-500"}`}
-                  >
-                    {data === "averageGrade" || data === "result"
-                      ? row[data] === null
-                        ? "belum lengkap"
-                        : row[data]
-                      : row[data]}
-                  </TableCell>
-                );
-              })}
-            </TableRow>
-          );
-        })}
+              Belum ada data.
+            </TableCell>
+          </TableRow>
+        ) : (
+          cleanBasicExamData.map((row, index) => {
+            const keys = Object.keys(row).slice(4);
+            return (
+              <TableRow
+                key={row.userId}
+                className="border border-neutral-400 border-collapse"
+              >
+                <TableCell className="border border-neutral-400 border-collapse">
+                  {index + 1}
+                </TableCell>
+                <TableCell className="border border-neutral-400 border-collapse">
+                  {row.name}
+                </TableCell>
+                {keys.map((data) => {
+                  return (
+                    <TableCell
+                      key={data}
+                      className={`font-mono tracking-tighter border border-neutral-400 border-collapse text-center ${typeof row[data] === "number" && row[data] < 70 && "text-red-500"}`}
+                    >
+                      {data === "averageGrade" || data === "result"
+                        ? row[data] === null
+                          ? "belum lengkap"
+                          : row[data]
+                        : row[data]}
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+            );
+          })
+        )}
       </TableBody>
     </Table>
   );
