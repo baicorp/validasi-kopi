@@ -17,8 +17,7 @@ export default async function Page({ searchParams }: SearchParams) {
     redirect(`/${session.user.username}`);
   }
 
-  const currentPage = ((await searchParams).page as string) ?? "1";
-  const search = (await searchParams).q as string;
+  const { q, page = "1" } = await searchParams;
 
   return (
     <section className="py-3 space-y-4">
@@ -31,8 +30,11 @@ export default async function Page({ searchParams }: SearchParams) {
         </div>
         <AddExamEventBtn />
       </div>
-      <Suspense key={search + currentPage} fallback={<ExamEventCardSkeleton />}>
-        <ExamEventList currentPage={Number(currentPage)} search={search} />
+      <Suspense key={(q as string) + page} fallback={<ExamEventCardSkeleton />}>
+        <ExamEventList
+          currentPage={Number(page as string)}
+          search={q as string}
+        />
       </Suspense>
     </section>
   );

@@ -28,14 +28,12 @@ import EditDialogEmployee from "@/components/ui/editDialogEmployee";
 import TableEmployeesDataSkeleton from "@/components/skeleton/tableEmployeesDataSkeleton";
 
 export default async function Page({ searchParams }: SearchParams) {
-  const currentPage = ((await searchParams).page as string) ?? "1";
-  const search = (await searchParams).q as string;
-
   const session = await validateSessionServer();
-
   if (session.user.role !== "admin") {
     redirect(`/${session.user.username}`);
   }
+
+  const { q, page = "1" } = await searchParams;
 
   return (
     <section className="py-3 space-y-4">
@@ -49,10 +47,13 @@ export default async function Page({ searchParams }: SearchParams) {
         <AddEmployeeBtn />
       </div>
       <Suspense
-        key={search + currentPage}
+        key={((q as string) + page) as string}
         fallback={<TableEmployeesDataSkeleton />}
       >
-        <TableEmployeesData currentPage={Number(currentPage)} search={search} />
+        <TableEmployeesData
+          currentPage={Number(page as string)}
+          search={q as string}
+        />
       </Suspense>
     </section>
   );
