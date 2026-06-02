@@ -21,8 +21,7 @@ export default async function Page({ searchParams }: SearchParams) {
     redirect(`/${session.user.username}`);
   }
 
-  const search = (await searchParams).q as string;
-  const currentPage = ((await searchParams).page as string) ?? "1";
+  const { q, page = "1" } = await searchParams;
 
   return (
     <section className="py-3 space-y-4">
@@ -34,8 +33,8 @@ export default async function Page({ searchParams }: SearchParams) {
           <SearchData placeholder="Cari nama / ujian soal tersimpan" />
         </div>
       </div>
-      <Suspense key={search} fallback={<CodeGroupsSkeleton />}>
-        <CodeGroups page={currentPage} search={search} />
+      <Suspense key={q as string} fallback={<CodeGroupsSkeleton />}>
+        <CodeGroups page={page as string} search={q as string} />
       </Suspense>
     </section>
   );

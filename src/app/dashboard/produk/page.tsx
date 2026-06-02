@@ -28,14 +28,11 @@ import TableProductsDataSkeleton from "@/components/skeleton/tableProductsDataSk
 
 export default async function Page({ searchParams }: SearchParams) {
   const session = await validateSessionServer();
-
   if (session.user.role !== "admin") {
     redirect(`/${session.user.username}`);
   }
 
-  const currentPage = ((await searchParams).page as string) ?? "1";
-  const search = (await searchParams).q as string;
-  const categoryId = (await searchParams).categoryId as string;
+  const { q, page = "1", categoryId } = await searchParams;
 
   return (
     <section className="space-y-4 py-3">
@@ -52,13 +49,13 @@ export default async function Page({ searchParams }: SearchParams) {
         <AddProductBtn />
       </div>
       <Suspense
-        key={search + currentPage}
+        key={(q as string) + page}
         fallback={<TableProductsDataSkeleton />}
       >
         <TableProductsData
-          currentPage={Number(currentPage)}
-          search={search}
-          categoryId={categoryId}
+          currentPage={Number(page as string)}
+          search={q as string}
+          categoryId={categoryId as string}
         />
       </Suspense>
     </section>
