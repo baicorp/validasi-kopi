@@ -1,17 +1,24 @@
 import Link from "next/link";
 import { Home } from "lucide-react";
+import { redirect } from "next/navigation";
 import { cn, toTitleCase } from "@/lib/utils";
 import Callout from "@/components/ui/callout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { getUserLatestExamResult } from "@/actions/examSubmissions";
+import { validateSessionServer } from "@/actions/validateSession";
 
 export default async function Page({
   params,
 }: {
   params: Promise<{ id: string; nik: string }>;
 }) {
+  const session = await validateSessionServer();
+  if (session.user.role !== "user") {
+    redirect("/dashboard/ujian");
+  }
+
   const { id, nik } = await params;
   const data = await getUserLatestExamResult(id);
 

@@ -17,13 +17,12 @@ export default async function Page({
 }: {
   params: Promise<{ nik: string }>;
 }) {
-  const { nik } = await params;
   const session = await validateSessionServer();
-
   if (session.user.role !== "user") {
     redirect("/dashboard/ujian");
   }
 
+  const { nik } = await params;
   if (session.user.username !== nik) {
     return <UserNotMatch username={session.user.username} />;
   }
