@@ -132,9 +132,7 @@ function ProductCategories({
   return (
     <div className="flex flex-col gap-2">
       <div>
-        <Label className="font-medium">
-          Pilih kategori produk (Identifikasi)
-        </Label>
+        <Label className="font-medium">Pilih kategori produk</Label>
       </div>
       <Select
         name="kategori-produk"
