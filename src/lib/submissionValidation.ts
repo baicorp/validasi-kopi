@@ -2,7 +2,7 @@ import { Answer } from "./types";
 
 export function hasNoDuplicates(answers: Answer[]) {
   if (answers.length === 0) {
-    throw Error("Semua input form harus diisi.");
+    throw new Error("Semua input form harus diisi.");
   }
   const uniqueCode = new Set<string>();
   const uniqueProductName = new Set<string>();

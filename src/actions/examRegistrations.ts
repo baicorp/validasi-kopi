@@ -74,7 +74,7 @@ export async function assignUser(
       const [result] = await tx.insert(examRegistrations).values(values);
 
       if (result.affectedRows === 0) {
-        throw Error("Gagal menambahkan peserta");
+        throw new Error("Gagal menambahkan peserta");
       }
 
       return { affectedRows: result.affectedRows };
