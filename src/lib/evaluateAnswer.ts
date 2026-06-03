@@ -424,7 +424,7 @@ function evaluateTresholdMix(
 
 function calculateFinalGrade(grade: number, attemptNumber: number | undefined) {
   if (!attemptNumber) {
-    throw Error("Jawaban yang dikumpulkan tidak memiliki attempt number");
+    throw new Error("Jawaban yang dikumpulkan tidak memiliki attempt number");
   }
   let minusPoint = 0;
   switch (attemptNumber) {

@@ -123,7 +123,7 @@ export async function submitExam(
         .innerJoin(codeGroups, eq(codeGroups.id, examEvents.codeGroupRegulerId))
         .where(eq(examEvents.id, examEventId));
       if (!selectedExamForFirstTimeExam) {
-        throw Error("Gagal mendapatkan daftar ujian");
+        throw new Error("Gagal mendapatkan daftar ujian");
       }
       selectedExam = selectedExamForFirstTimeExam.split(",") ?? [];
       selectedCodeGroupId = codeGroup[0].regulerId ?? "";
@@ -206,7 +206,7 @@ export async function submitExam(
     for (const data of results) {
       const examId = getExamsId(data.examName, examsData);
       if (!examId) {
-        throw Error("ID ujian tidak ditemukan.");
+        throw new Error("ID ujian tidak ditemukan.");
       }
       const submissionAttemptId = crypto.randomUUID();
 
@@ -585,12 +585,12 @@ function normalizeExamSubmissions(
       name === null ||
       examName === null
     ) {
-      throw Error(`Terdapat data null yang seharusnya tidak ada.`);
+      throw new Error(`Terdapat data null yang seharusnya tidak ada.`);
     }
 
     // Ensure the examName is one of the expected types for the event
     if (!examTypes.includes(examName)) {
-      throw Error(`${examName} tidak ada dalam list (${examTypes})`);
+      throw new Error(`${examName} tidak ada dalam list (${examTypes})`);
     }
 
     // Initialize the user's data entry if it doesn't exist
@@ -629,7 +629,7 @@ function normalizeExamSubmissions(
         userData[additionalKey] = additionalGrade;
       }
     } else {
-      throw Error("Terdapat user dengan number attempt < 1 && > 4 ");
+      throw new Error("Terdapat user dengan number attempt < 1 && > 4 ");
     }
   }
 

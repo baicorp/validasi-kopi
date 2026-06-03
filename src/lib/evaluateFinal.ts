@@ -25,7 +25,7 @@ export function calculateExamResultsWithCompletionCheck(
 
       const grade = item[key];
       if (typeof grade === "string") {
-        throw Error("Tipe data `Nilai` tidak seharusnya string");
+        throw new Error("Tipe data `Nilai` tidak seharusnya string");
       }
 
       if (!gradeGroupByExamName[examKey]) {
