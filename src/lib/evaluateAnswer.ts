@@ -242,7 +242,8 @@ function evaluateTwoOutOfFive(
     );
 
     const totalCorrectCode = variantResults.filter(
-      (data) => data.result === "correct" && data.value === "sama",
+      (data) =>
+        data.result === "correct" && data.value.toLowerCase() === "sama",
     ).length;
     const grade = totalCorrectCode === 2 ? 100 : 0;
 
