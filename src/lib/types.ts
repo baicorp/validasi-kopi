@@ -1,3 +1,4 @@
+import { exams } from "./constant";
 import { formatRawExamsData } from "./utils";
 import { InferInsertModel } from "drizzle-orm";
 import { codeGroups, codes } from "@/db/schema";
@@ -10,7 +11,7 @@ export type RawExamsData = {
   id?: string;
   examCategoryName?: string;
   groupName: string;
-  selectedExam: string;
+  selectedExam: ExamName[];
   totalParticipants: number;
   code: string;
   value: string;
@@ -51,3 +52,5 @@ export type AnswerWithResult = Answer & {
 };
 
 export type examEventPeriode = "akan datang" | "berlangsung" | "selesai";
+
+export type ExamName = (typeof exams)[number];

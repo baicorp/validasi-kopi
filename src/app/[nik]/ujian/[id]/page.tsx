@@ -51,7 +51,7 @@ export default async function Page({
           <ExamFormInfo examEventId={id} />
         </Suspense>
         <SubmitExamForm>
-          {examEvent.selectedExams.split(",").map((examName, index) => (
+          {examEvent.selectedExams.map((examName, index) => (
             <InputForm
               key={examName}
               index={index}

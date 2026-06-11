@@ -18,6 +18,7 @@ import {
   calculateExamResultsWithCompletionCheck,
   combineTresholdData,
 } from "@/lib/evaluateFinal";
+import { ExamName } from "@/lib/types";
 import ExportSummary from "@/components/ui/exportSummary";
 
 export default async function page({
@@ -42,7 +43,7 @@ export default async function page({
       <p className="text-center font-semibold text-lg">Rangkuman Hasil Ujian</p>
       <div className="flex justify-end">
         <ExportSummary
-          listExams={results.selectedExams.split(",")}
+          listExams={results.selectedExams}
           data={results.rowData}
         />
       </div>
@@ -61,7 +62,10 @@ export default async function page({
 function ProductExamTable({
   data,
 }: {
-  data: { selectedExams: string; rowData: NormalizedExamData[] };
+  data: {
+    selectedExams: ExamName[];
+    rowData: NormalizedExamData[];
+  };
 }) {
   const calculateFinal = calculateExamResultsWithCompletionCheck(data.rowData);
   // remove all object with key containing "additional",
@@ -88,7 +92,7 @@ function ProductExamTable({
           >
             Nama
           </TableHead>
-          {data.selectedExams.split(",").map((exam) => (
+          {data.selectedExams.map((exam) => (
             <HeaderTableExamName key={exam} examName={exam} />
           ))}
           <TableHead
@@ -106,7 +110,7 @@ function ProductExamTable({
         </TableRow>
 
         <TableRow className="border border-neutral-400 border-collapse">
-          {data.selectedExams.split(",").map((exam) => (
+          {data.selectedExams.map((exam) => (
             <HeaderTableAttemptNumber key={exam} />
           ))}
         </TableRow>
@@ -162,7 +166,10 @@ function ProductExamTable({
 function ThresholdTable({
   data,
 }: {
-  data: { selectedExams: string; rowData: NormalizedExamData[] };
+  data: {
+    selectedExams: ExamName[];
+    rowData: NormalizedExamData[];
+  };
 }) {
   // only include keys with "treshold" for this table
   const cleanTresholdExamData = data.rowData.map((item) => {
@@ -293,7 +300,10 @@ function ThresholdTable({
 function BasicExamTable({
   data,
 }: {
-  data: { selectedExams: string; rowData: NormalizedExamData[] };
+  data: {
+    selectedExams: ExamName[];
+    rowData: NormalizedExamData[];
+  };
 }) {
   const tresholdFinalScore = combineTresholdData(data.rowData);
   const cleanBasicExamData =
@@ -315,13 +325,11 @@ function BasicExamTable({
           >
             Nama
           </TableHead>
-          {data.selectedExams
-            .split(",")
-            .map((exam) =>
-              exam.includes("treshold") ? null : (
-                <HeaderTableExamName key={exam} examName={exam} />
-              ),
-            )}
+          {data.selectedExams.map((exam) =>
+            exam.includes("treshold") ? null : (
+              <HeaderTableExamName key={exam} examName={exam} />
+            ),
+          )}
           <TableHead
             colSpan={4}
             className="border border-neutral-400 bg-neutral-100 border-collapse text-center"
@@ -343,13 +351,11 @@ function BasicExamTable({
         </TableRow>
 
         <TableRow className="border border-neutral-400 border-collapse">
-          {data.selectedExams
-            .split(",")
-            .map((exam) =>
-              exam.includes("treshold") ? null : (
-                <HeaderTableAttemptNumber key={exam} />
-              ),
-            )}
+          {data.selectedExams.map((exam) =>
+            exam.includes("treshold") ? null : (
+              <HeaderTableAttemptNumber key={exam} />
+            ),
+          )}
           <HeaderTableAttemptNumber />
         </TableRow>
       </TableHeader>

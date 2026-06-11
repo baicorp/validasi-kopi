@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/db";
+import { ExamName } from "@/lib/types";
 import { codeGroups } from "@/db/schema";
 import { isValidRole } from "./validateSession";
 import { examEvents } from "@/db/schema/examEvents";
@@ -39,7 +40,10 @@ export async function getAllCodeGroups(page: number = 1, search?: string) {
     const [[{ count }], data] = await Promise.all([getTotal, getAllCodeGroup]);
 
     return {
-      data,
+      data: data.map((data) => ({
+        ...data,
+        selectedExam: data.selectedExam.split(",") as ExamName[],
+      })),
       page,
       totalPages: Math.ceil(count / limit),
     };
@@ -76,7 +80,10 @@ export async function getCodeGroupsForExam() {
       .where(isNull(examEvents.id))
       .orderBy(desc(codeGroups.createdAt));
 
-    return rows;
+    return rows.map((row) => ({
+      ...row,
+      selectedExam: row.selectedExam.split(",") as ExamName[],
+    }));
   } catch (error) {
     console.error(error);
     return { error: "Gagal mendapat list soal. Database bermasalah." };
@@ -100,7 +107,10 @@ export async function getCodeGroupById(codeGroupId: string) {
       return { error: "Soal tidak ditemukan." };
     }
 
-    return rows[0];
+    return {
+      ...rows[0],
+      selectedExam: rows[0].selectedExam.split(",") as ExamName[],
+    };
   } catch (error) {
     console.error(error);
     return { error: "Gagal mendapat list soal. Database bermasalah." };

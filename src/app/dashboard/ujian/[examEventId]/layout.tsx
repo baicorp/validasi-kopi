@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Suspense } from "react";
+import { ExamName } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import ErrorComp from "@/components/ui/error";
 import { Label } from "@/components/ui/label";
@@ -127,7 +128,7 @@ function ExamEventDetailHeader({
 }: {
   examEventName: string;
   examEventId: string;
-  selectedExams: string;
+  selectedExams: ExamName[];
   variant: "akan datang" | "berlangsung" | "selesai";
 }) {
   return (
@@ -146,7 +147,7 @@ function ExamEventDetailHeader({
         ID : <span className="font-mono">{examEventId}</span>
       </p>
       <div className="flex flex-wrap gap-1.5">
-        {selectedExams?.split(",")?.map((exam) => (
+        {selectedExams?.map((exam) => (
           <Badge variant={"secondary"} key={exam}>
             {exam}
           </Badge>

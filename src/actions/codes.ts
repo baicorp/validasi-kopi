@@ -4,8 +4,8 @@ import { db } from "@/db";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { isValidRole } from "./validateSession";
-import { InsertCodes, ExamDataDetails } from "@/lib/types";
 import { formatRawExamsData, getExamsId } from "@/lib/utils";
+import { InsertCodes, ExamDataDetails, ExamName } from "@/lib/types";
 import { codes, codeGroups, examCategories, exams } from "@/db/schema";
 
 export async function addGeneratedCodes(data: ExamDataDetails) {
@@ -131,8 +131,16 @@ export async function getTableData(
       groupName: rows[0].groupName,
       selectedExam: rows[0].selectedExam,
       totalParticipants: rows[0].totalParticipants,
-      rowExamsData: rows,
-      formatedExamsData: formatRawExamsData(rows),
+      rowExamsData: rows.map((row) => ({
+        ...row,
+        selectedExam: row.selectedExam.split(",") as ExamName[],
+      })),
+      formatedExamsData: formatRawExamsData(
+        rows.map((row) => ({
+          ...row,
+          selectedExam: row.selectedExam.split(",") as ExamName[],
+        })),
+      ),
     };
   } catch (error) {
     console.error(error);

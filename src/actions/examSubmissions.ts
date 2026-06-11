@@ -7,9 +7,9 @@ import {
   examSubmissions,
   submissionAttempts,
 } from "@/db/schema/examEvents";
-import { Answer } from "@/lib/types";
 import { getAllExams } from "./exams";
 import { getExamsId } from "@/lib/utils";
+import { Answer, ExamName } from "@/lib/types";
 import { evaluateAnswers } from "@/lib/evaluateAnswer";
 import { hasNoDuplicates } from "@/lib/submissionValidation";
 import { isValidRole, validateSessionServer } from "./validateSession";
@@ -524,7 +524,10 @@ export async function getSubmissionAttemptSummary(examEventId: string) {
         ? normalizeExamSubmissions(submissionSummary, selectedExams)
         : [];
 
-    return { selectedExams, rowData: groupName };
+    return {
+      selectedExams: selectedExams.split(",") as ExamName[],
+      rowData: groupName,
+    };
   } catch (error) {
     if (error instanceof Error) {
       console.error(error.message);

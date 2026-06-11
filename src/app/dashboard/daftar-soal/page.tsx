@@ -2,11 +2,11 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { toTitleCase } from "@/lib/utils";
 import { redirect } from "next/navigation";
-import { SearchParams } from "@/lib/types";
 import ErrorComp from "@/components/ui/error";
 import { utcToWIB } from "@/lib/datetimeFormat";
 import Paginator from "@/components/ui/paginator";
 import SearchData from "@/components/ui/searchData";
+import { ExamName, SearchParams } from "@/lib/types";
 import { deleteGeneratedCode } from "@/actions/codes";
 import { getAllCodeGroups } from "@/actions/codeGroups";
 import DeleteDialog from "@/components/ui/deleteDialog";
@@ -99,7 +99,7 @@ function CodeGroupItem({
 }: {
   id: string;
   groupName: string;
-  selectedExam: string;
+  selectedExam: ExamName[];
   totalParticipants: number;
   createdAt: Date | null;
 }) {
@@ -132,7 +132,7 @@ function CodeGroupItem({
           </div>
         </div>
         <div className="hidden lg:flex flex-wrap gap-0.5 items-center mx-auto w-76">
-          <CodeGroupsLabel label={selectedExam.split(",")} />
+          <CodeGroupsLabel label={selectedExam} />
         </div>
       </Link>
       <div className="invisible group-hover:visible px-2.5 p-1.5">

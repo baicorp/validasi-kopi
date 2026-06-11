@@ -6,7 +6,6 @@ import { useState } from "react";
 import { toTitleCase } from "@/lib/utils";
 import { basicExam } from "@/lib/constant";
 import { useRouter } from "next/navigation";
-import { ExamDataDetails } from "@/lib/types";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -14,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import ExamDetail from "@/components/ui/examDetail";
 import ExamsTable from "@/components/table/examsTable";
 import { CheckedState } from "@radix-ui/react-checkbox";
+import { ExamDataDetails, ExamName } from "@/lib/types";
 import { generateExamCodes } from "@/lib/handleFormInput";
 import { validateSessionClient } from "@/app/sign-in/page";
 import OptionForTresholdMix from "@/components/ui/optioinForTM";
@@ -27,10 +27,10 @@ export default function Page() {
     router.replace(`/${session.data.user.username}`);
   }
 
-  const [selectedExam, setSelectedExam] = useState<string[]>([]);
+  const [selectedExam, setSelectedExam] = useState<ExamName[]>([]);
   const [examDataDetails, setExamDataDetails] = useState<ExamDataDetails>();
 
-  function handleSelectedExamChange(e: CheckedState, examName: string) {
+  function handleSelectedExamChange(e: CheckedState, examName: ExamName) {
     setExamDataDetails(undefined); // reset table data
     if (e && !selectedExam.includes(examName)) {
       setSelectedExam((prev) => [...prev, examName].sort());
@@ -50,7 +50,10 @@ export default function Page() {
       return;
     }
 
-    setExamDataDetails(examDataDetails);
+    setExamDataDetails({
+      ...examDataDetails,
+      selectedExam: examDataDetails.selectedExam.join(","),
+    });
   }
 
   return (
