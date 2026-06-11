@@ -33,8 +33,16 @@ const basicExam = [
   "2 out of 5 coklat",
   "treshold single",
   "treshold mix",
-];
+] as const;
 
-const productExam = ["identifikasi", "triangle", "skoring"];
+const productExam = ["identifikasi", "triangle", "skoring"] as const;
 
-export { listTresholdSingleValue, productCategories, basicExam, productExam };
+const exams = [...basicExam, ...productExam] as const;
+
+export {
+  listTresholdSingleValue,
+  productCategories,
+  basicExam,
+  productExam,
+  exams,
+};

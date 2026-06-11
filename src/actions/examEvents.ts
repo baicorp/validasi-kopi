@@ -8,6 +8,7 @@ import {
   submissionAttempts,
 } from "@/db/schema/examEvents";
 import { shuffle } from "@/lib/utils";
+import { ExamName } from "@/lib/types";
 import { revalidatePath } from "next/cache";
 import { codeGroups, codes, exams } from "@/db/schema";
 import { wibInputToUtcISOString } from "@/lib/datetimeFormat";
@@ -229,6 +230,7 @@ export async function getActiveExamEvent() {
       const latest = attempts[0];
       return {
         ...row,
+        selectedExam: row.selectedExam.split(",") as ExamName[],
         numberAttempt: latest?.numberAttempt ?? 0,
         retakeExam: attempts
           .filter((a) => a.retakeExam)
@@ -267,7 +269,10 @@ export async function getExamEventById(examEventId: string) {
       return { error: `Tidak ada ujian dengan id ${examEventId}` };
     }
 
-    return rows[0];
+    return {
+      ...rows[0],
+      selectedExams: rows[0].selectedExams.split(",") as ExamName[],
+    };
   } catch (error) {
     console.error(error);
     return { error: "Gagal mendapatkan data ujian aktif." };
@@ -316,7 +321,10 @@ export async function getAllExamEvents(page: number = 1, search?: string) {
     const [[{ count }], data] = await Promise.all([getTotal, getData]);
 
     return {
-      data,
+      data: data.map((data) => ({
+        ...data,
+        selectedExams: data.selectedExams.split(",") as ExamName[],
+      })),
       page,
       totalPages: Math.ceil(count / limit),
     };
@@ -440,7 +448,9 @@ export async function getExamInputFormBasedOnSelectedExamForm(
             eq(examRegistrations.userId, userId),
           ),
         );
-      return { selectedExams: selectedExamForFirstTimeExam ?? "" };
+      return {
+        selectedExams: selectedExamForFirstTimeExam?.split(",") as ExamName[],
+      };
     }
     // retake exam
     const rows = await db
@@ -453,7 +463,11 @@ export async function getExamInputFormBasedOnSelectedExamForm(
           eq(submissionAttempts.userId, userId),
         ),
       );
-    return { selectedExams: rows.map((data) => data.retakeExam).toString() };
+    return {
+      selectedExams: rows
+        .map((data) => data.retakeExam)
+        .filter(Boolean) as ExamName[],
+    };
   } catch (error) {
     console.error(error);
     return { error: "Kesempatan ujian sudah habis." };

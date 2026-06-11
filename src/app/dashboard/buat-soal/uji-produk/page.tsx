@@ -17,11 +17,11 @@ import {
 import { toTitleCase } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { productExam } from "@/lib/constant";
-import { ExamDataDetails } from "@/lib/types";
 import { Checkbox } from "@/components/ui/checkbox";
 import ExamDetails from "@/components/ui/examDetail";
 import ExamsTable from "@/components/table/examsTable";
 import { CheckedState } from "@radix-ui/react-checkbox";
+import { ExamDataDetails, ExamName } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { generateExamCodes } from "@/lib/handleFormInput";
 import { getProductsByCategory } from "@/actions/products";
@@ -41,10 +41,10 @@ export default function Page() {
     id: string;
     name: string;
   }>();
-  const [selectedExam, setSelectedExam] = useState<string[]>([]);
+  const [selectedExam, setSelectedExam] = useState<ExamName[]>([]);
   const [examDataDetails, setExamDataDetails] = useState<ExamDataDetails>();
 
-  function handleSelectedExamChange(e: CheckedState, examName: string) {
+  function handleSelectedExamChange(e: CheckedState, examName: ExamName) {
     setExamDataDetails(undefined); // reset table data
     setProductCategoryId(undefined); // reset ProductCategories
     if (e && !selectedExam.includes(examName)) {
@@ -69,7 +69,10 @@ export default function Page() {
       return;
     }
 
-    setExamDataDetails(examDataDetails);
+    setExamDataDetails({
+      ...examDataDetails,
+      selectedExam: examDataDetails.selectedExam.join(","),
+    });
   }
 
   return (

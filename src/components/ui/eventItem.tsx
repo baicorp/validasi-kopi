@@ -67,7 +67,7 @@ export default function EventItem({
         <div>
           <CardSectionTitle>DAFTAR UJIAN</CardSectionTitle>
           <div className="flex flex-wrap gap-1">
-            {selectedExams?.split(",")?.map((exam) => (
+            {selectedExams?.map((exam) => (
               <Badge key={exam} variant="secondary">
                 {exam}
               </Badge>

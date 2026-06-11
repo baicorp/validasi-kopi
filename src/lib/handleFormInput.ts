@@ -1,12 +1,23 @@
-import { basicExam } from "./constant";
-import { RawExamsData } from "./types";
 import { formatRawExamsData } from "./utils";
 import { ExamGenerator } from "./codeGenerator";
+import { ExamName, RawExamsData } from "./types";
 
-function getInputFromSelectedExam(formData: FormData, selectedExam: string[]) {
+function getInputFromSelectedExam(
+  formData: FormData,
+  selectedExam: ExamName[],
+) {
   // store values from user input
-  const labels: string[] = [];
-  const valuesStore: Record<string, string[]> = {};
+  const labels: ExamName[] = [];
+  const valuesStore: Record<ExamName, string[]> = {
+    identifikasi: [],
+    skoring: [],
+    triangle: [],
+    "2 out of 5 pure": [],
+    "2 out of 5 creamer": [],
+    "2 out of 5 coklat": [],
+    "treshold single": [],
+    "treshold mix": [],
+  };
 
   // get and validate total participants
   const participants = formData.get("total-participants");
@@ -17,45 +28,42 @@ function getInputFromSelectedExam(formData: FormData, selectedExam: string[]) {
 
   // get all exam data based on selectedExam
   for (const exam of selectedExam) {
-    const examLowerCase = exam.toLowerCase();
     // transform the examName from "2 out of 5 pure" to "2-out-of-5-pure"
     // and add "-values" at the end, this is important to get input form data
-    const examValues = formData.getAll(
-      `${examLowerCase.replaceAll(" ", "-")}-values`,
-    );
+    const examValues = formData.getAll(`${exam.replaceAll(" ", "-")}-values`);
 
-    if (examLowerCase.includes("2 out of 5")) {
+    if (exam.includes("2 out of 5")) {
       if (examValues.length !== 4) {
         return { error: "Nilai uji 2 out of 5 tidak lengkap." };
       }
-    } else if (examLowerCase === "treshold single") {
+    } else if (exam === "treshold single") {
       if (examValues.length !== 12) {
         return { error: "Nilai uji treshold single tidak lengkap." };
       }
-    } else if (examLowerCase === "treshold mix") {
+    } else if (exam === "treshold mix") {
       if (examValues.length !== 5) {
         return { error: "Nilai uji treshold mix tidak lengkap." };
       }
-    } else if (examLowerCase === "identifikasi") {
+    } else if (exam === "identifikasi") {
       if (examValues.length !== 5) {
         return { error: "Nilai uji identifikasi tidak lengkap." };
       }
     }
 
-    labels.push(examLowerCase);
-    valuesStore[examLowerCase] = examValues.map((value) => value.toString());
+    labels.push(exam);
+    valuesStore[exam] = examValues.map((value) => value.toString());
   }
 
   return {
     totalParticipants,
-    selectedExam: labels.join(","),
+    selectedExam: labels,
     exams: valuesStore,
   };
 }
 
 export function generateExamCodes(
   formData: FormData,
-  selectedExam: string[],
+  selectedExam: ExamName[],
   codeGroupName?: string,
 ) {
   // get exam input form data from selected exam
@@ -67,9 +75,13 @@ export function generateExamCodes(
   const examGen = new ExamGenerator(examsInput.totalParticipants);
   const results = examGen.generateExams(selectedExam, examsInput.exams);
 
-  const category = basicExam.includes(examsInput.selectedExam.split(",")[0])
-    ? "uji dasar"
-    : "uji produk";
+  const listExam = examsInput.selectedExam;
+  const category =
+    listExam.includes("identifikasi") ||
+    listExam.includes("skoring") ||
+    listExam.includes("triangle")
+      ? "uji produk"
+      : "uji dasar";
 
   // detail for generated data from selected exam
   const generatedDataHeader = {

@@ -114,7 +114,7 @@ function SelectedCodeGroupCard({ codeGroupId }: { codeGroupId: string }) {
         </p>
       </Link>
       <div className="flex flex-wrap gap-1.5 mt-1.5">
-        {codeGroup.selectedExam?.split(",")?.map((exam) => (
+        {codeGroup.selectedExam?.map((exam) => (
           <Badge
             key={exam}
             variant={"secondary"}

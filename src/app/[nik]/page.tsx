@@ -134,7 +134,7 @@ function UserExamEventItem({
         <div>
           <CardSectionTitle>DAFTAR UJIAN</CardSectionTitle>
           <div className="flex items-center flex-wrap gap-2">
-            {selectedExam?.split(",").map((exam) => (
+            {selectedExam?.map((exam) => (
               <Badge key={exam} variant="secondary">
                 {exam}
               </Badge>
