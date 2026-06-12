@@ -8,9 +8,9 @@ import {
   DialogTrigger,
 } from "./dialog";
 import { toast } from "sonner";
+import { useState } from "react";
 import { Button } from "./button";
 import { Plus } from "lucide-react";
-import { FormEvent, useState } from "react";
 import ProductForm from "../form/productForm";
 import { addProduct } from "@/actions/products";
 
@@ -18,7 +18,7 @@ export default function AddProductBtn() {
   const [isLoad, setIsLoad] = useState(false);
   const [open, setOpen] = useState(false);
 
-  async function handleAddProduct(e: FormEvent<HTMLFormElement>) {
+  async function handleAddProduct(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsLoad(true);
 

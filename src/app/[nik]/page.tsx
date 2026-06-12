@@ -98,7 +98,7 @@ function UserExamEventItem({
   return (
     <div
       key={examEventId}
-      className="rounded-lg overflow-hidden border shadow min-w-[270px] md:w-[270px] h-full py-3 flex flex-col gap-2 justify-between"
+      className="rounded-lg overflow-hidden border shadow min-w-67.5 md:w-67.5 h-full py-3 flex flex-col gap-2 justify-between"
     >
       <div className="border-b">
         <p className="font-medium px-5 pb-2">{examEventName}</p>

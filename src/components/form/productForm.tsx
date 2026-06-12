@@ -1,4 +1,3 @@
-import { FormEvent } from "react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { LoaderCircle } from "lucide-react";
@@ -17,7 +16,7 @@ export default function ProductForm({
   handleSubmit,
 }: ProductFormInputProps & {
   isLoad: boolean;
-  handleSubmit: (e: FormEvent<HTMLFormElement>) => Promise<void>;
+  handleSubmit: (e: React.SubmitEvent<HTMLFormElement>) => Promise<void>;
 }) {
   return (
     <form className="space-y-4" onSubmit={(e) => handleSubmit(e)}>

@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { exams } from "@/lib/constant";
 import { LoaderCircle } from "lucide-react";
-import { FormEvent, ReactNode, useState } from "react";
+import { ReactNode, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { submitExam } from "@/actions/examSubmissions";
 import { hasNoDuplicates } from "@/lib/submissionValidation";
@@ -30,7 +30,7 @@ export default function SubmitExamForm({ children }: { children: ReactNode }) {
   const { id, nik } = useParams<{ id: string; nik: string }>();
   const router = useRouter();
 
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
 
     setIsLoad(true);

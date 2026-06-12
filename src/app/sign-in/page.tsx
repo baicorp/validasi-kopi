@@ -2,7 +2,7 @@
 
 import useSWR from "swr";
 import { toast } from "sonner";
-import { FormEvent, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LoaderCircle } from "lucide-react";
 import { Label } from "@/components/ui/label";
@@ -27,7 +27,7 @@ export default function Page() {
     router.replace(redirectUrl);
   }
 
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsLoad(true);
 

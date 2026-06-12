@@ -9,9 +9,9 @@ import {
   DialogTrigger,
 } from "./dialog";
 import { toast } from "sonner";
+import { useState } from "react";
 import { Button } from "./button";
 import { toTitleCase } from "@/lib/utils";
-import { FormEvent, useState } from "react";
 import { LoaderCircle } from "lucide-react";
 import { DropdownMenuItem } from "./dropdown-menu";
 
@@ -38,7 +38,7 @@ export default function DeleteDialog({
   const [isLoad, setIsLoad] = useState(false);
   const [open, setOpen] = useState(false);
 
-  async function handleDelete(e: FormEvent<HTMLFormElement>) {
+  async function handleDelete(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsLoad(true);
 
