@@ -29,8 +29,10 @@ export function evaluateAnswers(
   );
   for (const key in userAnswerGroup) {
     const groupedUserAnswers = userAnswerGroup[key];
-    const groupedDBKeys = dbKeysGroup[key];
-    if (!groupedUserAnswers || !groupedDBKeys) continue;
+    const groupedDBKeys = dbKeysGroup[key] || [];
+    if (!groupedUserAnswers) {
+      throw new Error(`UserAnswer tidak ditemukan ${groupedUserAnswers}`);
+    }
     if (key === "identifikasi") {
       results.push(
         evaluateIdentification(groupedUserAnswers as Answer[], groupedDBKeys),
