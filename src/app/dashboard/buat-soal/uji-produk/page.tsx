@@ -54,7 +54,7 @@ export default function Page() {
     }
   }
 
-  function handleGenerateCode(e: React.FormEvent<HTMLFormElement>) {
+  function handleGenerateCode(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);

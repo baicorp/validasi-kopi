@@ -2,7 +2,6 @@
 
 import useSWR from "swr";
 import Link from "next/link";
-import { FormEvent } from "react";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Badge } from "../ui/badge";
@@ -37,7 +36,7 @@ export default function ExamEventForm({
   handleSubmit,
 }: ExamEventFormInputProps & {
   isLoad: boolean;
-  handleSubmit: (e: FormEvent<HTMLFormElement>) => Promise<void>;
+  handleSubmit: (e: React.SubmitEvent<HTMLFormElement>) => Promise<void>;
 }) {
   return (
     <form className="space-y-4" onSubmit={(e) => handleSubmit(e)}>

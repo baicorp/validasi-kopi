@@ -8,7 +8,7 @@ import {
   DialogTrigger,
 } from "./dialog";
 import { toast } from "sonner";
-import { FormEvent, useState } from "react";
+import { useState } from "react";
 import { updateProduct } from "@/actions/products";
 import { DropdownMenuItem } from "./dropdown-menu";
 import ProductForm, { ProductFormInputProps } from "../form/productForm";
@@ -23,7 +23,7 @@ export default function EditDialogProduct({
   const [isLoad, setIsLoad] = useState(false);
   const [open, setOpen] = useState(false);
 
-  async function handleEdit(e: FormEvent<HTMLFormElement>) {
+  async function handleEdit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsLoad(true);
 

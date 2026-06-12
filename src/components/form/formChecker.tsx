@@ -3,7 +3,7 @@
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { RawExamsData } from "@/lib/types";
-import { FormEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { codeCheck, formatRawExamsData, toTitleCase } from "@/lib/utils";
 
 type FormCheckerProps = {
@@ -19,7 +19,7 @@ export default function FormChecker({
   const [wrongCodes, setWrongCodes] = useState<string[]>([]);
   const [partiallyWrongCodes, setPartiallyWrongCodes] = useState<string[]>([]);
 
-  function handleCheck(e: FormEvent<HTMLFormElement>) {
+  function handleCheck(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);

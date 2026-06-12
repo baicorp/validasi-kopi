@@ -8,9 +8,9 @@ import {
   DialogTrigger,
 } from "./dialog";
 import { toast } from "sonner";
+import { useState } from "react";
 import { Button } from "./button";
 import { Plus } from "lucide-react";
-import { FormEvent, useState } from "react";
 import ExamEventForm from "../form/examEventForm";
 import { addExamEvent } from "@/actions/examEvents";
 
@@ -18,7 +18,7 @@ export default function AddExamEventBtn() {
   const [isLoad, setIsLoad] = useState(false);
   const [open, setOpen] = useState(false);
 
-  async function handleAddExamEvent(e: FormEvent<HTMLFormElement>) {
+  async function handleAddExamEvent(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsLoad(true);
 

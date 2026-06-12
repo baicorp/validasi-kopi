@@ -8,7 +8,7 @@ import {
   DialogTrigger,
 } from "./dialog";
 import { toast } from "sonner";
-import { FormEvent, useState } from "react";
+import { useState } from "react";
 import { DropdownMenuItem } from "./dropdown-menu";
 import { updateEmployee } from "@/actions/employees";
 import EmployeeForm, { EmployeeFormInputProps } from "../form/employeeForm";
@@ -26,7 +26,7 @@ export default function EditDialogEmployee({
   const [isLoad, setIsLoad] = useState(false);
   const [open, setOpen] = useState(false);
 
-  async function handleEdit(e: FormEvent<HTMLFormElement>) {
+  async function handleEdit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsLoad(true);
 

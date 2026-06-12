@@ -126,7 +126,7 @@ function AddDummyForm({
   const [dummyAnswer, setDummyAnswer] = useState("");
   const [addIsLoad, setAddIsLoad] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     const trimmedDummyAnswer = dummyAnswer.trim();
     if (!trimmedDummyAnswer || isListLoading) return;
