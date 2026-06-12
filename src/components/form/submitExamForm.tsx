@@ -9,13 +9,20 @@ import {
   DialogTrigger,
 } from "../ui/dialog";
 import { toast } from "sonner";
-import { Answer } from "@/lib/types";
 import { Button } from "../ui/button";
+import { exams } from "@/lib/constant";
 import { LoaderCircle } from "lucide-react";
 import { FormEvent, ReactNode, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { submitExam } from "@/actions/examSubmissions";
 import { hasNoDuplicates } from "@/lib/submissionValidation";
+import {
+  Answer,
+  ExamName,
+  AnswerWithNote,
+  AllTypeOfAnswer,
+  AnswerWithAdditionalValue,
+} from "@/lib/types";
 
 export default function SubmitExamForm({ children }: { children: ReactNode }) {
   const [isLoad, setIsLoad] = useState(false);
@@ -101,22 +108,39 @@ export default function SubmitExamForm({ children }: { children: ReactNode }) {
   );
 }
 
-function formatInputData(formData: FormData) {
-  const iden = getIdenInput(formData);
-  const skoring = getSkoringInput(formData);
-  const triangle = getTriangleInput(formData);
-  const twoOutOfFive = getTwoOutOfFiveInput(formData);
-  const tresholdSingle = getTresholdSingleInput(formData);
-  const tresholdMix = getTresholdMixInput(formData);
-
-  return [
-    ...iden,
-    ...skoring,
-    ...triangle,
-    ...twoOutOfFive,
-    ...tresholdSingle,
-    ...tresholdMix,
-  ];
+function formatInputData(formData: FormData): AllTypeOfAnswer[] {
+  const inputData: AllTypeOfAnswer[] = [];
+  const getInputFromExam: Record<
+    ExamName,
+    (formData: FormData, examName?: ExamName) => AllTypeOfAnswer[]
+  > = {
+    identifikasi: getIdenInput,
+    skoring: getSkoringInput,
+    triangle: getTriangleInput,
+    "2 out of 5 pure": getTwoOutOfFiveInput,
+    "2 out of 5 creamer": getTwoOutOfFiveInput,
+    "2 out of 5 coklat": getTwoOutOfFiveInput,
+    "treshold single": getTresholdSingleInput,
+    "treshold mix": getTresholdMixInput,
+  };
+  const arrKeys = [...formData.keys()];
+  for (const exam of exams) {
+    const isExamHaveFormData = arrKeys.some((key) => key.includes(exam));
+    if (!isExamHaveFormData) continue;
+    if (exam.includes("2 out of 5")) {
+      try {
+        inputData.push(...getInputFromExam[exam](formData, exam));
+      } catch (e) {
+        if (e instanceof Error) {
+          console.error(e.message);
+        }
+        console.error(e);
+      }
+      continue;
+    }
+    inputData.push(...getInputFromExam[exam](formData));
+  }
+  return inputData;
 }
 
 function getIdenInput(formData: FormData) {
@@ -127,7 +151,7 @@ function getIdenInput(formData: FormData) {
   numb.forEach((number) => {
     const code = formData.get(`${examName}-${number}-code`) as string;
     const value = formData.get(`${examName}-${number}-value`) as string;
-    userAnswer.push({ examName, code, value });
+    userAnswer.push({ examName, code, value, attemptNumber: 0 });
   });
 
   return userAnswer;
@@ -136,12 +160,12 @@ function getIdenInput(formData: FormData) {
 function getSkoringInput(formData: FormData) {
   const examName = "skoring";
   const inputValues = ["1.5", "2", "3", "4", "5"];
-  const userAnswer: Answer[] = [];
+  const userAnswer: AnswerWithNote[] = [];
   const note = formData.get(`${examName}-note`) as string;
 
   inputValues.forEach((value) => {
     const code = formData.get(`${examName}-${value}`) as string;
-    userAnswer.push({ examName, code, value, note });
+    userAnswer.push({ examName, code, value, note, attemptNumber: 0 });
   });
 
   return userAnswer;
@@ -150,30 +174,31 @@ function getSkoringInput(formData: FormData) {
 function getTriangleInput(formData: FormData) {
   const examName = "triangle";
   const inputValues = ["beda", "sama", "sama"];
-  const userAnswer: Answer[] = [];
+  const userAnswer: AnswerWithNote[] = [];
   const note = formData.get(`${examName}-note`) as string;
 
   inputValues.forEach((value, index) => {
     const code = formData.get(`${examName}-${value}-${index}-code`) as string;
-    userAnswer.push({ examName, code, value, note });
+    userAnswer.push({ examName, code, value, note, attemptNumber: 0 });
   });
 
   return userAnswer;
 }
 
-function getTwoOutOfFiveInput(formData: FormData) {
-  const twoOutOfFiveVariant = ["creamer", "pure", "coklat"];
+function getTwoOutOfFiveInput(formData: FormData, examName?: ExamName) {
+  if (!examName) {
+    throw new Error("Nama ujian 2 out 5 tidak ditemukan.");
+  }
   const inputValues = ["beda", "beda", "beda", "sama", "sama"];
 
-  const userAnswer: Answer[] = inputValues.flatMap((value, index) =>
-    twoOutOfFiveVariant.map((variant) => {
-      const examName = `2 out of 5 ${variant}`;
+  const userAnswer: AnswerWithAdditionalValue[] = inputValues.map(
+    (value, index) => {
       const code = formData.get(`${examName}-${value}-${index}-code`) as string;
       const additionalValue = formData.get(
         `${examName}-${value}-${index}-addValue`,
       ) as string;
-      return { examName, code, value, additionalValue };
-    }),
+      return { examName, code, value, additionalValue, attemptNumber: 0 };
+    },
   );
 
   return userAnswer;
@@ -182,7 +207,7 @@ function getTwoOutOfFiveInput(formData: FormData) {
 function getTresholdSingleInput(formData: FormData) {
   const examName = "treshold single";
   const numb = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-  const userAnswer: Answer[] = [];
+  const userAnswer: AnswerWithAdditionalValue[] = [];
 
   numb.forEach((number) => {
     const code = formData.get(`${examName}-${number}-code`) as string;
@@ -190,7 +215,13 @@ function getTresholdSingleInput(formData: FormData) {
     const additionalValue = formData.get(
       `${examName}-${number}-addValue`,
     ) as string;
-    userAnswer.push({ examName: examName, code, value, additionalValue });
+    userAnswer.push({
+      examName: examName,
+      code,
+      value,
+      additionalValue,
+      attemptNumber: 0,
+    });
   });
 
   return userAnswer;
@@ -199,7 +230,7 @@ function getTresholdSingleInput(formData: FormData) {
 function getTresholdMixInput(formData: FormData) {
   const examName = "treshold mix";
   const numb = [1, 2, 3, 4, 5];
-  const userAnswer: Answer[] = [];
+  const userAnswer: AnswerWithAdditionalValue[] = [];
 
   numb.forEach((number) => {
     const code = formData.get(`${examName}-${number}-code`) as string;
@@ -207,7 +238,13 @@ function getTresholdMixInput(formData: FormData) {
     const additionalValue = formData.get(
       `${examName}-${number}-addValue`,
     ) as string;
-    userAnswer.push({ examName: examName, code, value, additionalValue });
+    userAnswer.push({
+      examName: examName,
+      code,
+      value,
+      additionalValue,
+      attemptNumber: 0,
+    });
   });
 
   return userAnswer;
