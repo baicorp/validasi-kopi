@@ -9,9 +9,9 @@ import {
 } from "@/db/schema/examEvents";
 import { getAllExams } from "./exams";
 import { getExamsId } from "@/lib/utils";
-import { Answer, ExamName } from "@/lib/types";
 import { evaluateAnswers } from "@/lib/evaluateAnswer";
 import { hasNoDuplicates } from "@/lib/submissionValidation";
+import { AllTypeOfAnswer, AnswerKeys, ExamName } from "@/lib/types";
 import { isValidRole, validateSessionServer } from "./validateSession";
 import { and, between, eq, InferInsertModel, or, sql } from "drizzle-orm";
 import { codeGroups, codes, departments, exams, user } from "@/db/schema";
@@ -21,7 +21,7 @@ type NewExamSubmission = InferInsertModel<typeof examSubmissions>;
 type NewExamSubmissionNote = InferInsertModel<typeof examSubmissionNotes>;
 
 export async function submitExam(
-  submittedExamData: Answer[],
+  submittedExamData: AllTypeOfAnswer[],
   examEventId: string,
 ) {
   try {
@@ -179,8 +179,10 @@ export async function submitExam(
 
     // 9. evaluate answer list by comparing userAnswerList and dbAnswerList.
     // then give result either "correct" | "partial" | "wrong"
-    // @ts-expect-error correct answer actually work (null and undefined)
-    const results = evaluateAnswers(submittedExamData, dbAnswerList);
+    const results = evaluateAnswers(
+      submittedExamData,
+      dbAnswerList as AnswerKeys[],
+    );
 
     let finalTresholdGrade = 0;
     if (selectedExam.some((exam) => exam.toLowerCase().includes("treshold"))) {

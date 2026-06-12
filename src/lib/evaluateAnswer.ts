@@ -1,4 +1,11 @@
-import { Answer, AnswerWithResult } from "./types";
+import {
+  AllTypeOfAnswer,
+  Answer,
+  AnswerKeys,
+  AnswerWithAdditionalValue,
+  AnswerWithNote,
+  AnswerWithResult,
+} from "./types";
 
 type EvaluatedResult = {
   examName: string;
@@ -9,175 +16,187 @@ type EvaluatedResult = {
 };
 
 export function evaluateAnswers(
-  userAnswers: Answer[],
-  dbAnswer: Answer[],
+  userAnswers: AllTypeOfAnswer[],
+  dbAnswerKeys: AnswerKeys[],
 ): EvaluatedResult[] {
   if (userAnswers.length === 0) return [];
   const results: EvaluatedResult[] = [];
-
-  const identification = evaluateIdentification(userAnswers, dbAnswer);
-  results.push(identification);
-  const triangle = evaluateTriangle(userAnswers, dbAnswer);
-  results.push(triangle);
-  const skoring = evaluateSkoring(userAnswers, dbAnswer);
-  results.push(skoring);
-  const twoOutOfFive = evaluateTwoOutOfFive(userAnswers, dbAnswer);
-  results.push(...twoOutOfFive);
-  const tresholdSingle = evaluateTresholdSingle(userAnswers, dbAnswer);
-  results.push(tresholdSingle);
-  const tresholdMix = evaluateTresholdMix(userAnswers, dbAnswer);
-  results.push(tresholdMix);
-
-  // only return selected exam data
-  return results.filter((data) => data.answerResults.length !== 0);
+  const userAnswerGroup = Object.groupBy(userAnswers, (user) =>
+    user.examName.toLowerCase(),
+  );
+  const dbKeysGroup = Object.groupBy(dbAnswerKeys, (user) =>
+    user.examName.toLowerCase(),
+  );
+  for (const key in userAnswerGroup) {
+    const groupedUserAnswers = userAnswerGroup[key];
+    const groupedDBKeys = dbKeysGroup[key];
+    if (!groupedUserAnswers || !groupedDBKeys) continue;
+    if (key === "identifikasi") {
+      results.push(
+        evaluateIdentification(groupedUserAnswers as Answer[], groupedDBKeys),
+      );
+    } else if (key === "skoring") {
+      results.push(
+        evaluateSkoring(groupedUserAnswers as AnswerWithNote[], groupedDBKeys),
+      );
+    } else if (key === "triangle") {
+      results.push(
+        evaluateTriangle(groupedUserAnswers as AnswerWithNote[], groupedDBKeys),
+      );
+    } else if (key.includes("2 out of 5")) {
+      results.push(
+        ...evaluateTwoOutOfFive(
+          groupedUserAnswers as AnswerWithAdditionalValue[],
+          groupedDBKeys,
+        ),
+      );
+    } else if (key === "treshold single") {
+      results.push(
+        evaluateTresholdSingle(
+          groupedUserAnswers as AnswerWithAdditionalValue[],
+          groupedDBKeys,
+        ),
+      );
+    } else if (key === "treshold mix") {
+      results.push(
+        evaluateTresholdMix(
+          groupedUserAnswers as AnswerWithAdditionalValue[],
+          groupedDBKeys,
+        ),
+      );
+    }
+  }
+  return results;
 }
 
 function evaluateIdentification(
   userAnswers: Answer[],
-  dbAnswers: Answer[],
+  dbAnswerKeys: AnswerKeys[],
 ): EvaluatedResult {
-  const examNameTarget = "identifikasi";
-
-  const userIdentification = userAnswers.filter(
-    (answer) => answer.examName === examNameTarget,
-  );
-  const dbIdentification = dbAnswers.filter(
-    (answer) => answer.examName === examNameTarget,
-  );
-
-  const answerResults: AnswerWithResult[] = userIdentification.map((user) => {
+  let totalCorrect = 0;
+  const dbLookup = new Map(dbAnswerKeys.map((db) => [db.code, db]));
+  const answerResults: AnswerWithResult[] = userAnswers.map((answer) => {
+    const dbKey = dbLookup.get(answer.code);
+    if (!dbKey) {
+      return { ...answer, result: "wrong" };
+    }
     // correct if both code + value match
-    const isCorrect = dbIdentification.some((correct) => {
-      const nameMatch =
-        user.examName.toLowerCase() === correct.examName.toLowerCase();
-      const codeMatch = user.code === correct.code;
-      const valueMatch =
-        user.value.toLowerCase() === correct.value.toLowerCase();
-
-      return nameMatch && codeMatch && valueMatch;
-    });
-
+    const nameMatch =
+      answer.examName.toLowerCase() === dbKey.examName.toLowerCase();
+    const codeMatch = answer.code === dbKey.code;
+    const valueMatch = answer.value.toLowerCase() === dbKey.value.toLowerCase();
+    const isCorrect = nameMatch && codeMatch && valueMatch;
+    if (isCorrect) {
+      totalCorrect++;
+    }
     return {
-      ...user,
+      ...answer,
       result: isCorrect ? "correct" : "wrong",
     };
   });
-
   const attemptNumber = userAnswers[0].attemptNumber;
-  const codeScore = 20;
-  const totalCorrectCode = answerResults.filter(
-    (data) => data.result === "correct",
-  ).length;
-  const grade = totalCorrectCode * codeScore;
-
+  const correctScore = 20;
+  const grade = totalCorrect * correctScore;
   return {
-    examName: examNameTarget,
+    examName: "identifikasi",
     answerResults,
     grade: calculateFinalGrade(grade, attemptNumber),
   };
 }
 
 function evaluateTriangle(
-  userAnswers: Answer[],
-  dbAnswers: Answer[],
+  userAnswers: AnswerWithNote[],
+  dbAnswerKeys: AnswerKeys[],
 ): EvaluatedResult {
-  const examNameTarget = "triangle";
-
-  const userTriangle = userAnswers.filter(
-    (answer) => answer.examName === examNameTarget,
-  );
-  const dbTriangle = dbAnswers.filter(
-    (answer) => answer.examName === examNameTarget,
-  );
-
-  const answerResults: AnswerWithResult[] = userTriangle.map((user) => {
-    // correct if both code + value match
-    const isCorrect = dbTriangle.some((correct) => {
-      const nameMatch =
-        user.examName.toLowerCase() === correct.examName.toLowerCase();
-      const codeMatch = user.code === correct.code;
-      const valueMatch = user.value === correct.value;
-
-      return nameMatch && codeMatch && valueMatch;
-    });
-
+  const triangleNote = userAnswers[0].note;
+  if (!triangleNote) {
+    throw new Error("Catatan ujian Triangle tidak ditemukan.");
+  }
+  let totalCorrect = 0;
+  const dbLookup = new Map(dbAnswerKeys.map((db) => [db.code, db]));
+  const answerResults: AnswerWithResult[] = userAnswers.map((answer) => {
+    const dbKey = dbLookup.get(answer.code);
+    if (!dbKey) {
+      return { ...answer, result: "wrong" };
+    }
+    const nameMatch =
+      answer.examName.toLowerCase() === dbKey.examName.toLowerCase();
+    const codeMatch = answer.code === dbKey.code;
+    const valueMatch = answer.value.toLowerCase() === dbKey.value.toLowerCase();
+    const isCorrect = nameMatch && codeMatch && valueMatch;
+    if (isCorrect && answer.value.toLowerCase() === "beda") {
+      // track total correct only if isCorrect true and value is "beda"
+      totalCorrect++;
+    }
     return {
-      ...user,
+      ...answer,
       result: isCorrect ? "correct" : "wrong",
     };
   });
-
-  // prevent errors when triangle is not part of the submission”
-  const note = answerResults[0]?.note ?? "";
   const codeScore = 100;
   const attemptNumber = userAnswers[0].attemptNumber;
-  const grade =
-    answerResults.filter(
-      (data) => data.value === "beda" && data.result === "correct",
-    ).length * codeScore;
-
+  const grade = totalCorrect * codeScore;
   return {
-    examName: examNameTarget,
+    examName: "triangle",
     answerResults,
     grade: calculateFinalGrade(grade, attemptNumber),
-    note,
+    note: triangleNote,
   };
 }
 
 function evaluateSkoring(
-  userAnswers: Answer[],
-  dbAnswers: Answer[],
+  userAnswers: AnswerWithNote[],
+  dbAnswerKeys: AnswerKeys[],
 ): EvaluatedResult {
-  const examNameTarget = "skoring";
-
-  const userList = userAnswers.filter((a) => a.examName === examNameTarget);
-  const dbList = dbAnswers.filter((a) => a.examName === examNameTarget);
-
+  const skoringNote = userAnswers[0].note;
+  if (!skoringNote) {
+    throw new Error("Catatan ujian Skoring tidak ditemukan.");
+  }
   const valueOrder = ["1.5", "2", "3", "4", "5"];
+  if (userAnswers.length !== valueOrder.length) {
+    throw new Error("Harus terdapat 5 jawaban untuk ujian skoring.");
+  }
   // create 2D array.
   // [ '1.5', '1223' ],
   // [ '2', '1136' ],
   // [ '3', '8189' ],
   // [ '4', '7557' ],
   // [ '5', '9105' ]
+  const dbLookup = new Map(dbAnswerKeys.map((db) => [db.value, db]));
   const answerKeyAsc = valueOrder.map((value) => {
-    const found = dbList.find((data) => data.value == value);
-    return [value, (found && found.code) || ""];
+    const dbKey = dbLookup.get(value);
+    if (!dbKey) {
+      return [value, undefined];
+    }
+    return [value, dbKey.code];
   });
   const answerKeyDesc = answerKeyAsc.toReversed();
-
   const answerResultsAsc: AnswerWithResult[] = [];
   const answerResultsDesc: AnswerWithResult[] = [];
-
   let totalCorrectAsc = 0;
   let totalCorrectDesc = 0;
-
-  for (let i = 0; i < userList.length; i++) {
-    const code = userList[i].code;
-    if (code === "") {
-      answerResultsAsc.push({ ...userList[i], result: "wrong" });
-      answerResultsDesc.push({ ...userList[i], result: "wrong" });
+  for (let i = 0; i < userAnswers.length; i++) {
+    const code = userAnswers[i].code;
+    if (!code.trim()) {
+      answerResultsAsc.push({ ...userAnswers[i], result: "wrong" });
+      answerResultsDesc.push({ ...userAnswers[i], result: "wrong" });
       continue;
     }
-
     if (code === answerKeyAsc[i][1]) {
-      answerResultsAsc.push({ ...userList[i], result: "correct" });
+      answerResultsAsc.push({ ...userAnswers[i], result: "correct" });
       totalCorrectAsc++;
     } else {
-      answerResultsAsc.push({ ...userList[i], result: "wrong" });
+      answerResultsAsc.push({ ...userAnswers[i], result: "wrong" });
     }
-
     if (code === answerKeyDesc[i][1]) {
       totalCorrectDesc++;
-      answerResultsDesc.push({ ...userList[i], result: "correct" });
+      answerResultsDesc.push({ ...userAnswers[i], result: "correct" });
     } else {
-      answerResultsDesc.push({ ...userList[i], result: "wrong" });
+      answerResultsDesc.push({ ...userAnswers[i], result: "wrong" });
     }
   }
-
   let answerResults: AnswerWithResult[] = [];
   let totalCorrect = 0;
-
   if (totalCorrectAsc === totalCorrectDesc) {
     answerResults = answerResultsAsc;
     totalCorrect = totalCorrectAsc;
@@ -188,146 +207,107 @@ function evaluateSkoring(
     answerResults = answerResultsDesc;
     totalCorrect = totalCorrectDesc;
   }
-
-  // prevent errors when skoring is not part of the submission
-  const note = answerResults[0]?.note ?? "";
   const attemptNumber = userAnswers[0].attemptNumber;
-  const codeScore = 20;
-  const grade = totalCorrect * codeScore;
-
+  const correctScore = 20;
+  const grade = totalCorrect * correctScore;
   return {
-    examName: examNameTarget,
+    examName: "skoring",
     answerResults,
     grade: calculateFinalGrade(grade, attemptNumber),
-    note,
+    note: skoringNote,
   };
 }
 
 function evaluateTwoOutOfFive(
-  userAnswers: Answer[],
-  dbAnswers: Answer[],
+  userAnswers: AnswerWithAdditionalValue[],
+  dbAnswerKeys: AnswerKeys[],
 ): EvaluatedResult[] {
-  const examNameTarget = "2 out of 5";
-  const twoOutOfFiveVariant = ["creamer", "pure", "coklat"];
-  const userTwoOutOfFiveList = userAnswers.filter((answer) =>
-    answer.examName.includes(examNameTarget),
-  );
-  const dbTwoOutOfFiveList = dbAnswers.filter((answer) =>
-    answer.examName.includes(examNameTarget),
-  );
-
-  const answerResults: AnswerWithResult[] = userTwoOutOfFiveList.map((user) => {
-    // correct => code + value
-    const isCorrect = dbTwoOutOfFiveList.some((correct) => {
-      const nameMatch =
-        user.examName.toLowerCase() === correct.examName.toLowerCase();
-      const codeMatch = user.code === correct.code;
-      const valueMatch =
-        user.value.toLowerCase() === correct.value.toLowerCase();
-
-      return nameMatch && codeMatch && valueMatch;
-    });
-
+  const totalCorrect: Record<string, number> = {};
+  const dbLookup = new Map(dbAnswerKeys.map((db) => [db.code, db]));
+  const answerResults: AnswerWithResult[] = userAnswers.map((answer) => {
+    const dbKey = dbLookup.get(answer.code);
+    if (!dbKey) {
+      return { ...answer, result: "wrong" };
+    }
+    const nameMatch =
+      answer.examName.toLowerCase() === dbKey.examName.toLowerCase();
+    const codeMatch = answer.code === dbKey.code;
+    const valueMatch = answer.value.toLowerCase() === dbKey.value.toLowerCase();
+    const isCorrect = nameMatch && codeMatch && valueMatch;
+    if (isCorrect && answer.value.toLowerCase() === "sama") {
+      // grade is only from answer with value "sama"
+      const standardizedKey = answer.examName.toLowerCase();
+      if (!Object.hasOwn(totalCorrect, standardizedKey)) {
+        totalCorrect[standardizedKey] = 0;
+      }
+      totalCorrect[standardizedKey] += 1;
+    }
     return {
-      ...user,
+      ...answer,
       result: isCorrect ? "correct" : "wrong",
     };
   });
-
   const attemptNumber = userAnswers[0].attemptNumber;
-
-  return twoOutOfFiveVariant.map((variant) => {
-    const variantResults = answerResults.filter(
-      (data) => data.examName === `${examNameTarget} ${variant}`,
-    );
-
-    const totalCorrectCode = variantResults.filter(
-      (data) =>
-        data.result === "correct" && data.value.toLowerCase() === "sama",
-    ).length;
-    const grade = totalCorrectCode === 2 ? 100 : 0;
-
-    return {
-      examName: `${examNameTarget} ${variant}`,
-      answerResults: variantResults,
-      grade: calculateFinalGrade(grade, attemptNumber),
-    };
+  const results: EvaluatedResult[] = [];
+  const grade =
+    totalCorrect[userAnswers[0].examName.toLowerCase()] === 2 ? 100 : 0;
+  results.push({
+    examName: userAnswers[0].examName.toLowerCase(),
+    answerResults,
+    grade: calculateFinalGrade(grade, attemptNumber),
   });
+  return results;
 }
 
 function evaluateTresholdSingle(
-  userAnswers: Answer[],
-  dbAnswers: Answer[],
+  userAnswers: AnswerWithAdditionalValue[],
+  dbAnswerKeys: AnswerKeys[],
 ): EvaluatedResult {
-  const examNameTarget = "treshold single";
-  const userTresholdSingleList = userAnswers.filter(
-    (answer) => answer.examName === examNameTarget,
-  );
-  const dbTresholdSingleList = dbAnswers.filter(
-    (answer) => answer.examName === examNameTarget,
-  );
-
-  const dbLookup = new Map(dbTresholdSingleList.map((db) => [db.code, db]));
-
-  const answerResults: AnswerWithResult[] = userTresholdSingleList.map(
-    (user) => {
-      const matchAnswer = dbLookup.get(user.code);
-
-      if (!matchAnswer) {
-        return {
-          ...user,
-          result: "wrong",
-        };
-      }
-
-      const nameMatch =
-        user.examName.toLowerCase() === matchAnswer.examName.toLowerCase();
-      const codeMatch = user.code === matchAnswer.code;
-      const tasteMatch =
-        user.value.toLowerCase() === matchAnswer.value.toLowerCase();
-      const intensityMatch =
-        user.additionalValue === matchAnswer.additionalValue;
-
-      if (nameMatch && codeMatch && tasteMatch && intensityMatch) {
-        return {
-          ...user,
-          result: "correct",
-          additionalResult: "correct",
-        };
-      }
-
-      if (nameMatch && codeMatch && tasteMatch) {
-        return {
-          ...user,
-          result: "correct",
-          additionalResult: "wrong",
-        };
-      }
-
+  const dbLookup = new Map(dbAnswerKeys.map((db) => [db.code, db]));
+  const total = { correctTaste: 0, wrongIntent: 0 };
+  const answerResults: AnswerWithResult[] = userAnswers.map((answer) => {
+    const dbKey = dbLookup.get(answer.code);
+    if (!dbKey) {
+      return { ...answer, result: "wrong", additionalResult: "wrong" };
+    }
+    const nameMatch =
+      answer.examName.toLowerCase() === dbKey.examName.toLowerCase();
+    const codeMatch = answer.code === dbKey.code;
+    const tasteMatch = answer.value.toLowerCase() === dbKey.value.toLowerCase();
+    const intensityMatch =
+      answer.additionalValue?.toLowerCase() ===
+      dbKey.additionalValue?.toLowerCase();
+    if (nameMatch && codeMatch && tasteMatch && intensityMatch) {
+      total.correctTaste++;
       return {
-        ...user,
-        result: "wrong",
+        ...answer,
+        result: "correct",
+        additionalResult: "correct",
       };
-    },
-  );
-
+    } else if (nameMatch && codeMatch && tasteMatch) {
+      total.correctTaste++;
+      total.wrongIntent++;
+      return {
+        ...answer,
+        result: "correct",
+        additionalResult: "wrong",
+      };
+    } else {
+      return {
+        ...answer,
+        result: "wrong",
+        additionalResult: "wrong",
+      };
+    }
+  });
   const attemptNumber = userAnswers[0].attemptNumber;
-  const codeScore = 8.33;
-
-  const totalCorrectTaste = answerResults.filter(
-    (answer) => answer.result === "correct",
-  ).length;
-  let tasteGrade = totalCorrectTaste * codeScore;
-  tasteGrade = tasteGrade === 99.96000000000001 ? 100 : tasteGrade;
-
-  const totalCorrectIntensity = answerResults.filter(
-    (answer) => answer.additionalResult === "correct",
-  ).length;
-  let intensityGrade = totalCorrectIntensity * codeScore;
-  intensityGrade = intensityGrade === 99.96000000000001 ? 100 : intensityGrade;
-
+  const correctScore = 8.33;
+  let tasteGrade = total.correctTaste * correctScore;
+  tasteGrade = tasteGrade > 99.9 ? 100 : tasteGrade;
+  let intensityGrade = (total.correctTaste - total.wrongIntent) * correctScore;
+  intensityGrade = intensityGrade > 99.9 ? 100 : intensityGrade;
   return {
-    examName: examNameTarget,
+    examName: "treshold single",
     answerResults,
     grade: calculateFinalGrade(tasteGrade, attemptNumber),
     additionalGrade: calculateFinalGrade(intensityGrade, attemptNumber),
@@ -335,114 +315,63 @@ function evaluateTresholdSingle(
 }
 
 function evaluateTresholdMix(
-  userAnswers: Answer[],
-  dbAnswers: Answer[],
+  userAnswers: AnswerWithAdditionalValue[],
+  dbAnswerKeys: AnswerKeys[],
 ): EvaluatedResult {
-  const examNameTarget = "treshold mix";
-  const userTresholdMix = userAnswers.filter(
-    (answer) => answer.examName === examNameTarget,
-  );
-  const dbTresholdMixList = dbAnswers.filter(
-    (answer) => answer.examName === examNameTarget,
-  );
-
-  const answerResults: AnswerWithResult[] = userTresholdMix.map((user) => {
-    const matchAnswer = dbTresholdMixList.find(
-      (list) => list.examName === user.examName && list.code === user.code,
-    );
-
-    if (!matchAnswer) {
-      return {
-        ...user,
-        result: "wrong",
-      };
+  const total = { correct: 0, partial: 0 };
+  const dbLookup = new Map(dbAnswerKeys.map((db) => [db.code, db]));
+  const answerResults: AnswerWithResult[] = userAnswers.map((answer) => {
+    const dbKey = dbLookup.get(answer.code);
+    if (!dbKey) {
+      return { ...answer, result: "wrong" };
     }
-
-    const userTaste1 = user.value.split("+")[0].toLowerCase();
-    const userTaste2 = user.additionalValue?.split("+")[0].toLowerCase();
-    const correctTaste1 = matchAnswer.value.split("+")[0].toLowerCase();
-    const correctTaste2 = matchAnswer.additionalValue
-      ?.split("+")[0]
-      .toLowerCase();
-
     const nameMatch =
-      user.examName.toLowerCase() === matchAnswer.examName.toLowerCase();
-    const codeMatch = user.code === matchAnswer.code;
-
-    const taste1Match = userTaste1 === correctTaste1;
-    const taste2Match = userTaste2 === correctTaste2;
-    const taste1MatchReverse = userTaste1 === correctTaste2;
-    const taste2MatchReverse = userTaste2 === correctTaste1;
-
-    const isTasteMatch =
-      (taste1Match && taste2Match) ||
-      (taste1MatchReverse && taste2MatchReverse);
-
+      answer.examName.toLowerCase() === dbKey.examName.toLowerCase();
+    const codeMatch = answer.code === dbKey.code;
     if (!nameMatch || !codeMatch) {
-      return { ...user, result: "wrong" };
+      return { ...answer, result: "wrong" };
     }
-
+    const userTaste1 = answer.value.split("+")[0].toLowerCase();
+    const userTaste2 = answer.additionalValue.split("+")[0].toLowerCase();
+    const dbKeyTaste1 = dbKey.value.split("+")[0].toLowerCase();
+    const dbKeyTaste2 = dbKey.additionalValue?.split("+")[0].toLowerCase();
+    const tasteMatch = userTaste1 === dbKeyTaste1 && userTaste2 === dbKeyTaste2;
+    const tasteMatchReverse =
+      userTaste1 === dbKeyTaste2 && userTaste2 === dbKeyTaste1;
+    const isTasteMatch = tasteMatch || tasteMatchReverse; // only compare taste, ignore intensity
     if (isTasteMatch) {
+      total.correct++;
       return {
-        ...user,
+        ...answer,
         result: "correct",
-        additionalResult: "correct",
       };
     }
-
     const hasPartialTaste =
       (userTaste1 &&
-        (userTaste1 === correctTaste1 || userTaste1 === correctTaste2)) ||
+        (userTaste1 === dbKeyTaste1 || userTaste1 === dbKeyTaste2)) ||
       (userTaste2 &&
-        (userTaste2 === correctTaste1 || userTaste2 === correctTaste2));
-
+        (userTaste2 === dbKeyTaste1 || userTaste2 === dbKeyTaste2));
     if (hasPartialTaste) {
-      return { ...user, result: "partial" };
+      total.partial++;
+      return { ...answer, result: "partial" };
     }
-
-    return { ...user, result: "wrong" };
+    return { ...answer, result: "wrong" };
   });
-
   const attemptNumber = userAnswers[0].attemptNumber;
-  const correctCodeScore = 20;
-  const partialCodeScore = 10;
-  const totalCorrectCode = answerResults.filter(
-    (data) => data.result === "correct",
-  ).length;
-  const totalPartialCode = answerResults.filter(
-    (data) => data.result === "partial",
-  ).length;
-
-  let grade = totalCorrectCode * correctCodeScore;
-  grade += totalPartialCode * partialCodeScore;
-
+  const correctScore = 20;
+  const partialScore = 10;
+  const grade = total.correct * correctScore + total.partial * partialScore;
   return {
-    examName: examNameTarget,
+    examName: "treshold mix",
     answerResults,
     grade: calculateFinalGrade(grade, attemptNumber),
   };
 }
 
-function calculateFinalGrade(grade: number, attemptNumber: number | undefined) {
-  if (!attemptNumber) {
-    throw new Error("Jawaban yang dikumpulkan tidak memiliki attempt number");
+function calculateFinalGrade(grade: number, attemptNumber: number) {
+  if (attemptNumber < 1 || attemptNumber > 4) {
+    throw new Error("Kesempatan ujian anda tidak valid");
   }
-  let minusPoint = 0;
-  switch (attemptNumber) {
-    case 2: // retake 1
-      minusPoint = 10;
-      break;
-    case 3: // retake 2
-      minusPoint = 20;
-      break;
-    case 4: // retake 3
-      minusPoint = 30;
-      break;
-    default:
-      minusPoint = 0;
-      break;
-  }
-
-  const finalGrade = grade - minusPoint;
-  return finalGrade < 0 ? 0 : finalGrade;
+  const minusPoint = (attemptNumber - 1) * 10;
+  return Math.max(grade - minusPoint, 0);
 }

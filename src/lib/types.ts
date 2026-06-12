@@ -39,14 +39,21 @@ export type Answer = {
   examName: string;
   code: string;
   value: string;
-  additionalValue?: string;
-  attemptNumber?: number;
+  attemptNumber: number;
+};
+export type AnswerWithNote = Answer & { note: string };
+export type AnswerWithAdditionalValue = Answer & { additionalValue: string };
+export type AllTypeOfAnswer = Answer & {
   note?: string;
+  additionalValue?: string;
+};
+export type AnswerKeys = Omit<Answer, "attemptNumber"> & {
+  additionalValue?: string;
 };
 
 type EvaluationStatus = "correct" | "partial" | "wrong";
 
-export type AnswerWithResult = Answer & {
+export type AnswerWithResult = AllTypeOfAnswer & {
   result: EvaluationStatus;
   additionalResult?: EvaluationStatus;
 };
