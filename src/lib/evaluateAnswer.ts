@@ -5,6 +5,7 @@ import {
   AnswerWithAdditionalValue,
   AnswerWithNote,
   AnswerWithResult,
+  ExamName,
 } from "./types";
 
 type EvaluatedResult = {
@@ -21,15 +22,17 @@ export function evaluateAnswers(
 ): EvaluatedResult[] {
   if (userAnswers.length === 0) return [];
   const results: EvaluatedResult[] = [];
-  const userAnswerGroup = Object.groupBy(userAnswers, (user) =>
-    user.examName.toLowerCase(),
+  const userAnswerGroup = Object.groupBy(
+    userAnswers,
+    (user) => user.examName.toLowerCase() as ExamName,
   );
-  const dbKeysGroup = Object.groupBy(dbAnswerKeys, (user) =>
-    user.examName.toLowerCase(),
+  const dbKeysGroup = Object.groupBy(
+    dbAnswerKeys,
+    (user) => user.examName.toLowerCase() as ExamName,
   );
   for (const key in userAnswerGroup) {
-    const groupedUserAnswers = userAnswerGroup[key];
-    const groupedDBKeys = dbKeysGroup[key] || [];
+    const groupedUserAnswers = userAnswerGroup[key as ExamName];
+    const groupedDBKeys = dbKeysGroup[key as ExamName] || [];
     if (!groupedUserAnswers) {
       throw new Error(`UserAnswer tidak ditemukan ${groupedUserAnswers}`);
     }
