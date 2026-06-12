@@ -38,11 +38,20 @@ export default function SubmitExamForm({ children }: { children: ReactNode }) {
     const formData = new FormData(e.currentTarget);
     const submitData = formatInputData(formData);
     // 2. evaluate all user input data
-    const allInputIsUnique = hasNoDuplicates(submitData);
-    if (!allInputIsUnique) {
-      toast.error(
-        "Kode atau nama produk yang dimasukkan tidak boleh ada duplikasi.",
-      );
+    try {
+      if (!hasNoDuplicates(submitData)) {
+        toast.error(
+          "Kode atau nama produk yang dimasukkan tidak boleh ada duplikasi.",
+        );
+        setOpen(false);
+        setIsLoad(false);
+        return;
+      }
+    } catch (e) {
+      if (e instanceof Error) {
+        console.error(e.message);
+        toast.error(e.message);
+      }
       setOpen(false);
       setIsLoad(false);
       return;
