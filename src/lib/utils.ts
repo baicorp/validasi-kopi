@@ -46,7 +46,7 @@ export function formatRawExamsData(rows: RawExamsData[]) {
     },
   );
 
-  return formatedRows;
+  return formatedRows.sort((a, b) => a.examName.localeCompare(b.examName));
 }
 
 export function getExamsId(
