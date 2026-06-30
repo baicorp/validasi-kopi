@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Badge } from "./badge";
-import { Button } from "./button";
 import { Separator } from "./separator";
+import { buttonVariants } from "./button";
 import { utcToWIB } from "@/lib/datetimeFormat";
 import { CardSectionTitle } from "./cardSectionTitle";
 import { CardExamDateTime } from "./cardExamDateTime";
@@ -43,10 +43,10 @@ export default function EventItem({
           </p>
         </Link>
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon">
-              <MoreVertical className="h-5 w-5" />
-            </Button>
+          <DropdownMenuTrigger
+            className={buttonVariants({ variant: "outline", size: "icon" })}
+          >
+            <MoreVertical className="h-5 w-5" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <EditDialogExamEvent
