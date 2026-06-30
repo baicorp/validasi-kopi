@@ -168,7 +168,7 @@ function CollapsibleMenu({ Icon, menu, subMenu }: CollapsibleMenuData) {
     <>
       <SidebarMenuButton
         onClick={() => setIsCollapse((prev) => !prev)}
-        className="font-medium"
+        className="font-medium hover:bg-primary/10 mt-1"
       >
         <Icon />
         <span>{menu}</span>
