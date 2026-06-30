@@ -21,8 +21,8 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { toTitleCase } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import Paginator from "@/components/ui/paginator";
+import { buttonVariants } from "@/components/ui/button";
 import DeleteDialog from "@/components/ui/deleteDialog";
 import EditDialogEmployee from "@/components/ui/editDialogEmployee";
 import TableEmployeesDataSkeleton from "@/components/skeleton/tableEmployeesDataSkeleton";
@@ -102,10 +102,10 @@ async function TableEmployeesData({
         </TableCell>
         <TableCell className="text-right py-1">
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <MoreVertical className="h-5 w-5" />
-              </Button>
+            <DropdownMenuTrigger
+              className={buttonVariants({ variant: "ghost", size: "icon" })}
+            >
+              <MoreVertical className="h-5 w-5" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <EditDialogEmployee

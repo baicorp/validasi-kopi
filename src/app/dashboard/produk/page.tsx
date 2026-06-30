@@ -16,10 +16,10 @@ import { SearchParams } from "@/lib/types";
 import { redirect } from "next/navigation";
 import { ReactNode, Suspense } from "react";
 import { MoreVertical } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import Paginator from "@/components/ui/paginator";
 import SearchData from "@/components/ui/searchData";
 import AddProductBtn from "@/components/ui/addProduct";
+import { buttonVariants } from "@/components/ui/button";
 import DeleteDialog from "@/components/ui/deleteDialog";
 import EditDialogProduct from "@/components/ui/editDialogProduct";
 import { deleteProduct, getAllProduct } from "@/actions/products";
@@ -102,10 +102,10 @@ async function TableProductsData({
         <TableCell className="py-1">{product.categoryName}</TableCell>
         <TableCell className="text-right py-1">
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <MoreVertical className="h-5 w-5" />
-              </Button>
+            <DropdownMenuTrigger
+              className={buttonVariants({ variant: "ghost", size: "icon" })}
+            >
+              <MoreVertical className="h-5 w-5" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <EditDialogProduct
