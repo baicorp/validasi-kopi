@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "rm -f ./node_modules/@libsql/hrana-client/LICENSE && next build --turbopack",
+    "dev": "next dev",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "db:generate:dev": "drizzle-kit generate --config=drizzle-dev.config.ts",
