@@ -155,10 +155,8 @@ export async function deleteExamEvent(examEventId: string) {
 
 export async function getActiveExamEvent() {
   try {
-    // current jakarta datetime
-    const now = new Date(); // always current UTC-based time
-    const jakartaTime = new Date(now.getTime() + 7 * 60 * 60 * 1000);
-    const currentDateTime = jakartaTime.toISOString();
+    // current utc time
+    const currentDateTime = new Date().toISOString();
 
     // 1. get current user username (nik)
     const session = await validateSessionServer();
