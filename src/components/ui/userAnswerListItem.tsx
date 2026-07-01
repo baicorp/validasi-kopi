@@ -12,11 +12,11 @@ import {
 } from "./select";
 import useSWR from "swr";
 import ErrorComp from "./error";
+import { cn } from "@/lib/utils";
 import { Label } from "./label";
 import Loading from "../skeleton/loading";
 import { useParams } from "next/navigation";
 import { ChartColumnBig, NotebookText } from "lucide-react";
-import { cn, toTitleCase } from "@/lib/utils";
 import { getSubmissionSummary } from "@/actions/examSubmissions";
 
 const numberAttempts = [
@@ -66,8 +66,8 @@ export default function UserAnswerList() {
 
   return (
     <div>
-      <div className="flex border-b">
-        <div className="w-fit pr-10 border-r space-y-2 pb-4">
+      <div className="flex border-b mb-2">
+        <div className="w-fit pr-10 border-r space-y-2 pb-2.5">
           <Label htmlFor="attempt">Pilih Kesempatan ujian</Label>
           <Select
             name="attempt"
@@ -128,7 +128,7 @@ function SubmissionList({ numberAttempt }: { numberAttempt: number }) {
     return <ErrorComp error="Gagal mendapatkan daftar jawaban peserta." />;
   }
 
-  if (submission.length === 0) {
+  if (submission.size === 0) {
     return (
       <div className="flex justify-center py-10 text-muted-foreground">
         <p>Belum ada data.</p>
@@ -136,79 +136,93 @@ function SubmissionList({ numberAttempt }: { numberAttempt: number }) {
     );
   }
 
-  return submission?.map((submission, index) => {
-    return (
-      <div key={submission.examName} className="py-4 flex flex-col gap-2">
-        <div className="flex gap-2 items-center">
-          <div className="shrink-0 w-7 h-7 grid place-items-center rounded-full bg-black text-white font-bold">
-            {index + 1}
+  return (
+    <>
+      {[...submission.entries()].map(([participantName, value], index) => {
+        return (
+          <div key={index} className="rounded-md border mb-2">
+            <div className="flex items-center gap-2 bg-secondary px-3 py-2">
+              <span className="shrink-0 w-6 h-6 text-sm grid place-items-center rounded-full bg-black text-white font-bold">
+                {index + 1}
+              </span>
+              <p className="font-semibold">{participantName.split("&&")[0]}</p>
+              <p className="ml-auto font-medium text-sm text-muted-foreground">
+                {participantName.split("&&")[1]}
+              </p>
+            </div>
+            <div className="divide-y px-3">
+              {[...value.entries()]
+                .sort((a, b) => a[0].localeCompare(b[0]))
+                .map(([examName, answerList]) => {
+                  return (
+                    <UserAnswerListItem
+                      key={examName}
+                      examName={examName}
+                      listCodeValue={[...answerList].sort((a, b) =>
+                        (a.value + ` ${a.addValue}`).localeCompare(
+                          b.value + ` ${b.addValue}`,
+                        ),
+                      )}
+                    />
+                  );
+                })}
+            </div>
           </div>
-          <p className="text-lg tracking-wide font-medium">
-            {toTitleCase(submission.examName)}
-          </p>
-        </div>
-        {submission.submission.map((data) => {
-          return (
-            <UserAnswerListItem
-              key={data.participantName}
-              participantName={data.participantName}
-              listCodeValue={data.list}
-              note={data.note}
-            />
-          );
-        })}
-      </div>
-    );
-  });
+        );
+      })}
+    </>
+  );
 }
 
 function UserAnswerListItem({
-  participantName,
+  examName,
   listCodeValue,
-  note,
 }: {
-  participantName: string;
+  examName: string;
   listCodeValue: {
     code: string;
     value: string;
-    addValue: string | null;
     result: string;
     additionalResult: string | null;
+    addValue: string | null;
+    note: string | null;
   }[];
-  note: string | null;
 }) {
-  const numberOfPartial = listCodeValue.filter(
-    (data) =>
+  let totalCorrect = 0;
+  let totalPartial = 0;
+  let totalWrong = 0;
+  for (const data of listCodeValue) {
+    if (
       (data.result === "correct" && data.additionalResult === "wrong") ||
-      data.result === "partial",
-  ).length;
-  const numberOfWrong = listCodeValue.filter(
-    (data) => data.result === "wrong",
-  ).length;
-  const numberOfCorrect = listCodeValue.filter(
-    (data) => data.result === "correct" && data.additionalResult !== "wrong",
-  ).length;
-
+      data.result === "partial"
+    ) {
+      totalPartial++;
+    } else if (data.result === "wrong") {
+      totalWrong++;
+    } else if (data.result === "correct" && data.additionalResult !== "wrong") {
+      totalCorrect++;
+    }
+  }
   const stat = [
-    numberOfCorrect > 0 ? `${numberOfCorrect} benar` : null,
-    numberOfPartial > 0 ? `${numberOfPartial} salah sebagian` : null,
-    numberOfWrong > 0 ? `${numberOfWrong} salah` : null,
+    totalCorrect > 0 ? `${totalCorrect} benar` : null,
+    totalPartial > 0 ? `${totalPartial} salah sebagian` : null,
+    totalWrong > 0 ? `${totalWrong} salah` : null,
   ]
     .filter(Boolean)
     .join(" • ");
 
   return (
-    <div className="rounded-lg border overflow-hidden">
-      <div className="flex justify-between px-3 py-2 bg-secondary border-b">
+    <section className="pb-2">
+      <div className="flex justify-between px-3 py-0.5">
         <p className="wrap-break-words tracking-wider font-semibold text-sm line-clamp-2 text-ellipsis">
-          {participantName}
+          {examName}
         </p>
         <div className="flex items-center gap-1 tracking-wider font-semibold text-xs text-muted-foreground">
           <ChartColumnBig size={14} />
           <span>{stat}</span>
         </div>
       </div>
-      <div className="p-2 grid grid-cols-6 gap-2">
+      <div className="grid grid-cols-6 gap-2">
         {listCodeValue.map((item) => (
           <UserAnswerCodeValueItem
             key={item.code}
@@ -220,8 +234,8 @@ function UserAnswerListItem({
           />
         ))}
       </div>
-      {note && <UserExamNote note={note} />}
-    </div>
+      {listCodeValue[0].note && <UserExamNote note={listCodeValue[0].note} />}
+    </section>
   );
 }
 
@@ -260,9 +274,10 @@ function UserAnswerCodeValueItem({
   const style = resultStyle[variant];
 
   return (
-    <div className={`px-3 py-1.5 border rounded-md ${style.container}`}>
+    <div className={`px-3 py-1 border rounded-md ${style.container}`}>
       <p
-        className={`font-medium tracking-wider text-xs text-center ${style.title}`}
+        title={headerValue.trim()}
+        className={`line-clamp-1 text-ellipsis font-medium tracking-wider text-xs text-center ${style.title}`}
       >
         {headerValue.trim() ? headerValue : "tidak diisi"}
       </p>

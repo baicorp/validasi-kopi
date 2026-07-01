@@ -379,7 +379,6 @@ export async function getSubmissionSummary(
         id: examSubmissions.id,
         username: user.username,
         name: user.name,
-        departments: departments.departmentName,
         examName: exams.examName,
         code: examSubmissions.code,
         value: examSubmissions.value,
@@ -398,7 +397,6 @@ export async function getSubmissionSummary(
         eq(submissionAttempts.id, examSubmissionNotes.submissionAttemptId),
       )
       .leftJoin(user, eq(submissionAttempts.userId, user.id))
-      .leftJoin(departments, eq(user.departmentId, departments.id))
       .leftJoin(exams, eq(submissionAttempts.examId, exams.id))
       .where(
         and(
@@ -407,70 +405,45 @@ export async function getSubmissionSummary(
         ),
       );
 
-    const examMap = new Map<
-      string,
-      {
-        submission: Map<
-          string,
-          {
-            list: {
-              code: string;
-              value: string;
-              addValue: string | null;
-              result: string;
-              additionalResult: string | null;
-            }[];
-            note: string | null;
-          }
-        >;
-      }
+    const summary = new Map<
+      string, // participant name
+      Map<
+        string, //exam name
+        {
+          code: string;
+          value: string;
+          result: string;
+          additionalResult: string | null;
+          addValue: string | null;
+          note: string | null;
+        }[]
+      >
     >();
 
     for (const row of rows) {
       if (!row.examName) throw new Error("Exam name not found");
       if (!row.name) throw new Error("Participant name not found");
 
-      let examGroup = examMap.get(row.examName);
-
-      if (!examGroup) {
-        examGroup = {
-          submission: new Map(),
-        };
-        examMap.set(row.examName, examGroup);
+      const rootKey = `${row.name}&&${row.username}`;
+      if (!summary.has(rootKey)) {
+        summary.set(rootKey, new Map());
+      }
+      const examNameAnswers = summary.get(rootKey)!;
+      if (!examNameAnswers.has(row.examName)) {
+        examNameAnswers.set(row.examName, []);
       }
 
-      let participant = examGroup.submission.get(row.name);
-
-      if (!participant) {
-        participant = {
-          list: [],
-          note: row.note ?? null, // participant-level note
-        };
-        examGroup.submission.set(row.name, participant);
-      }
-
-      participant.list.push({
+      examNameAnswers.get(row.examName)?.push({
         code: row.code,
         value: row.value,
         addValue: row.addValue,
         result: row.result,
         additionalResult: row.additionalResult,
+        note: row.note,
       });
     }
 
-    const finalData = Array.from(examMap, ([examName, examGroup]) => ({
-      examName,
-      submission: Array.from(
-        examGroup.submission,
-        ([participantName, { list, note }]) => ({
-          participantName,
-          list,
-          note,
-        }),
-      ),
-    }));
-
-    return finalData;
+    return summary;
   } catch (error) {
     if (error instanceof Error) {
       console.error(error.message);
