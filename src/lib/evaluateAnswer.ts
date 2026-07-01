@@ -280,8 +280,11 @@ function evaluateTresholdSingle(
     const codeMatch = answer.code === dbKey.code;
     const tasteMatch = answer.value.toLowerCase() === dbKey.value.toLowerCase();
     const intensityMatch =
-      answer.additionalValue?.toLowerCase() ===
-      dbKey.additionalValue?.toLowerCase();
+      answer.value.toLowerCase() === "tidak berasa" &&
+      answer.additionalValue === ""
+        ? true
+        : answer.additionalValue?.toLowerCase() ===
+          dbKey.additionalValue?.toLowerCase();
     if (nameMatch && codeMatch && tasteMatch && intensityMatch) {
       total.correctTaste++;
       return {
