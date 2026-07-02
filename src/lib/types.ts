@@ -58,6 +58,6 @@ export type AnswerWithResult = AllTypeOfAnswer & {
   additionalResult?: EvaluationStatus;
 };
 
-export type examEventPeriode = "akan datang" | "berlangsung" | "selesai";
+export type ExamEventStatus = "akan datang" | "berlangsung" | "selesai";
 
 export type ExamName = (typeof exams)[number];
