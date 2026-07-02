@@ -15,7 +15,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "./dropdown-menu";
-import { examEventPeriode } from "@/lib/types";
+import { ExamEventStatus } from "@/lib/types";
 
 type GetAllExamEventsResult = Awaited<ReturnType<typeof getAllExamEvents>>;
 type ExamEventItem = NonNullable<GetAllExamEventsResult["data"]>[number];
@@ -36,7 +36,7 @@ export default function EventItem({
   const examDateEnd = new Date(examEnd);
   const examTimeEnd = to24Hour(examDateEnd);
 
-  let eventPeriodeStatus: examEventPeriode = "berlangsung";
+  let eventPeriodeStatus: ExamEventStatus = "berlangsung";
   const currentDate = new Date();
   if (currentDate > examDateEnd) {
     eventPeriodeStatus = "selesai";

@@ -1,5 +1,5 @@
 import { cn, toTitleCase } from "@/lib/utils";
-import { examEventPeriode } from "@/lib/types";
+import { ExamEventStatus } from "@/lib/types";
 
 export default function ExamEventPeriode({
   type = "default",
@@ -9,7 +9,7 @@ export default function ExamEventPeriode({
   ...props
 }: {
   type?: "small" | "default";
-  variant: examEventPeriode;
+  variant: ExamEventStatus;
 } & React.HTMLProps<HTMLDivElement>) {
   return (
     <div
