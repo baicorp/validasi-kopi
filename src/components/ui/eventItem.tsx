@@ -3,6 +3,7 @@ import { Badge } from "./badge";
 import { Separator } from "./separator";
 import { buttonVariants } from "./button";
 import { utcToWIB } from "@/lib/datetimeFormat";
+import ExamEventPeriode from "./examEventPeriode";
 import { CardSectionTitle } from "./cardSectionTitle";
 import { CardExamDateTime } from "./cardExamDateTime";
 import DeleteDialogExamEvent from "./deleteExamEvent";
@@ -14,6 +15,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "./dropdown-menu";
+import { examEventPeriode } from "@/lib/types";
 
 type GetAllExamEventsResult = Awaited<ReturnType<typeof getAllExamEvents>>;
 type ExamEventItem = NonNullable<GetAllExamEventsResult["data"]>[number];
@@ -33,6 +35,14 @@ export default function EventItem({
   const examTimeStart = to24Hour(examDateStart);
   const examDateEnd = new Date(examEnd);
   const examTimeEnd = to24Hour(examDateEnd);
+
+  let eventPeriodeStatus: examEventPeriode = "berlangsung";
+  const currentDate = new Date();
+  if (currentDate > examDateEnd) {
+    eventPeriodeStatus = "selesai";
+  } else if (currentDate < examDateStart) {
+    eventPeriodeStatus = "akan datang";
+  }
 
   return (
     <div className="rounded-lg overflow-hidden border shadow flex flex-col justify-between">
@@ -106,10 +116,13 @@ export default function EventItem({
         </div>
       </div>
       <div>
-        <div className="px-4 bg-muted py-2 border-t border-border">
+        <div className="flex justify-between items-center px-4 bg-muted py-2 border-t border-border">
           <p className="text-xs text-muted-foreground">
             Diperbarui : {utcToWIB(updatedAt.toISOString() || "")}
           </p>
+          <div className="shrink-0 basis-24">
+            <ExamEventPeriode variant={eventPeriodeStatus} type="small" />
+          </div>
         </div>
       </div>
     </div>
