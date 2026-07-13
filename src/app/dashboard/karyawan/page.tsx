@@ -32,30 +32,29 @@ export default async function Page({ searchParams }: SearchParams) {
   if (session.user.role !== "admin") {
     redirect(`/${session.user.username}`);
   }
-
   const { q, page = "1" } = await searchParams;
 
   return (
-    <section className="py-3 space-y-4">
-      <div>
-        <p className="text-lg font-semibold">Daftar Karyawan</p>
-      </div>
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 py-3">
+      <section>
+        <p className="text-lg font-semibold">Daftar Karyawan.</p>
+      </section>
+      <section className="flex justify-between items-center">
         <div className="basis-1/3">
-          <SearchData placeholder="Cari nama karyawan" />
+          <SearchData placeholder="Cari NIK / nama karyawan" />
         </div>
         <AddEmployeeBtn />
-      </div>
+      </section>
       <Suspense
-        key={((q as string) + page) as string}
+        key={(q as string) + page}
         fallback={<TableEmployeesDataSkeleton />}
       >
         <TableEmployeesData
-          currentPage={Number(page as string)}
-          search={q as string}
+          currentPage={Number(page)}
+          search={(q as string)}
         />
       </Suspense>
-    </section>
+    </div>
   );
 }
 
@@ -132,8 +131,8 @@ async function TableEmployeesData({
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="rounded-lg border overflow-hidden">
+    <>
+      <section className="rounded-lg border overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="bg-accent">
@@ -148,15 +147,15 @@ async function TableEmployeesData({
           </TableHeader>
           <TableBody>{tableRowData}</TableBody>
         </Table>
-      </div>
-      <div>
+      </section>
+      <section>
         {!("error" in employees) && employees.totalPages > 1 && (
           <Paginator
             currentPage={employees.page}
             totalPages={employees.totalPages}
           />
         )}
-      </div>
-    </div>
+      </section>
+    </>
   );
 }

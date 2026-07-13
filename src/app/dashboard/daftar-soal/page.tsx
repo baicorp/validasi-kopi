@@ -20,28 +20,27 @@ export default async function Page({ searchParams }: SearchParams) {
   if (session.user.role !== "admin") {
     redirect(`/${session.user.username}`);
   }
-
   const { q, page = "1" } = await searchParams;
 
   return (
-    <section className="py-3 space-y-4">
-      <div>
-        <p className="text-lg font-semibold">Soal yang tersimpan</p>
-      </div>
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 py-3">
+      <section>
+        <p className="text-lg font-semibold">Daftar Karyawan.</p>
+      </section>
+      <section className="flex justify-between items-center">
         <div className="basis-1/3">
-          <SearchData placeholder="Cari nama / ujian soal tersimpan" />
+          <SearchData placeholder="Cari id / nama soal" />
         </div>
-      </div>
+      </section>
       <Suspense key={q as string} fallback={<CodeGroupsSkeleton />}>
-        <CodeGroups page={page as string} search={q as string} />
+        <CodeGroups page={Number(page)} search={q as string} />
       </Suspense>
-    </section>
+    </div>
   );
 }
 
-async function CodeGroups({ page, search }: { page: string; search: string }) {
-  const codeGroups = await getAllCodeGroups(Number(page), search);
+async function CodeGroups({ page, search }: { page: number; search: string }) {
+  const codeGroups = await getAllCodeGroups(page, search);
 
   if ("error" in codeGroups) {
     return <ErrorComp error={codeGroups.error} />;
@@ -49,7 +48,7 @@ async function CodeGroups({ page, search }: { page: string; search: string }) {
 
   if (codeGroups.data.length === 0) {
     return (
-      <div className="h-80 text-muted-foreground flex justify-center items-center">
+      <section className="h-80 text-muted-foreground flex justify-center items-center">
         <div className="flex flex-col justify-center items-center gap-2">
           {search ? (
             <SearchX className="w-11 h-11" />
@@ -60,13 +59,13 @@ async function CodeGroups({ page, search }: { page: string; search: string }) {
             {search ? "Data tidak ditemukan" : "Belum ada soal yang dibuat."}
           </span>
         </div>
-      </div>
+      </section>
     );
   }
 
   return (
     <>
-      <div>
+      <section>
         {codeGroups.data.map((codeGroup) => (
           <CodeGroupItem
             key={codeGroup.id}
@@ -77,15 +76,15 @@ async function CodeGroups({ page, search }: { page: string; search: string }) {
             createdAt={codeGroup.createdAt}
           />
         ))}
-      </div>
-      <div>
+      </section>
+      <section>
         {!("error" in codeGroups) && codeGroups.totalPages > 1 && (
           <Paginator
             currentPage={codeGroups.page}
             totalPages={codeGroups.totalPages}
           />
         )}
-      </div>
+      </section>
     </>
   );
 }
