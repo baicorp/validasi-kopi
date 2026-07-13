@@ -16,27 +16,26 @@ export default async function Page({ searchParams }: SearchParams) {
   if (session.user.role !== "admin") {
     redirect(`/${session.user.username}`);
   }
-
   const { q, page = "1" } = await searchParams;
 
   return (
-    <section className="py-3 space-y-4">
-      <div>
-        <p className="text-lg font-semibold">Ujian</p>
-      </div>
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 py-3">
+      <section>
+        <p className="text-lg font-semibold">Daftar ujian.</p>
+      </section>
+      <section className="flex justify-between items-center">
         <div className="basis-1/3">
           <SearchData placeholder="Cari nama ujian" />
         </div>
         <AddExamEventBtn />
-      </div>
+      </section>
       <Suspense key={(q as string) + page} fallback={<ExamEventCardSkeleton />}>
         <ExamEventList
-          currentPage={Number(page as string)}
+          currentPage={Number(page)}
           search={q as string}
         />
       </Suspense>
-    </section>
+    </div>
   );
 }
 
@@ -55,7 +54,7 @@ async function ExamEventList({
 
   if (examEvents.data.length === 0) {
     return (
-      <div className="h-80 text-muted-foreground flex justify-center items-center">
+      <section className="h-80 text-muted-foreground flex justify-center items-center">
         <div className="flex flex-col justify-center items-center gap-2">
           {search ? (
             <SearchX className="w-11 h-11" />
@@ -66,25 +65,25 @@ async function ExamEventList({
             {search ? "Data tidak ditemukan" : "Belum ada ujian yang dibuat."}
           </span>
         </div>
-      </div>
+      </section>
     );
   }
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-[repeat(auto-fit,minmax(270px,1fr))] xl:grid-cols-4 gap-2.5">
+      <section className="grid grid-cols-1 md:grid-cols-[repeat(auto-fit,minmax(270px,1fr))] xl:grid-cols-4 gap-2.5">
         {examEvents.data.map((event) => (
           <EventItem key={event.id} {...event} />
         ))}
-      </div>
-      <div>
+      </section>
+      <section>
         {!("error" in examEvents) && examEvents.totalPages > 1 && (
           <Paginator
             currentPage={examEvents.page}
             totalPages={examEvents.totalPages}
           />
         )}
-      </div>
+      </section>
     </>
   );
 }

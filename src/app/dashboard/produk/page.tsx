@@ -31,47 +31,43 @@ export default async function Page({ searchParams }: SearchParams) {
   if (session.user.role !== "admin") {
     redirect(`/${session.user.username}`);
   }
-
-  const { q, page = "1", categoryId } = await searchParams;
+  const { q, page = "1", } = await searchParams;
 
   return (
-    <section className="space-y-4 py-3">
-      <div>
+    <div className="space-y-4 py-3">
+      <section>
         <p className="text-lg font-semibold">Daftar Produk.</p>
         <p className="text-muted-foreground">
           Daftar semua produk untuk uji identifikasi
         </p>
-      </div>
-      <div className="flex justify-between items-center">
+      </section>
+      <section className="flex justify-between items-center">
         <div className="basis-1/3">
           <SearchData placeholder="Cari nama produk" />
         </div>
         <AddProductBtn />
-      </div>
-      <Suspense
-        key={(q as string) + page}
-        fallback={<TableProductsDataSkeleton />}
-      >
-        <TableProductsData
-          currentPage={Number(page as string)}
-          search={q as string}
-          categoryId={categoryId as string}
-        />
-      </Suspense>
-    </section>
+      </section>
+        <Suspense
+          key={(q as string) + page}
+          fallback={<TableProductsDataSkeleton />}
+        >
+          <TableProductsData
+            currentPage={Number(page)}
+            search={q as string}
+          />
+        </Suspense>
+    </div>
   );
 }
 
 async function TableProductsData({
   currentPage,
-  search,
-  categoryId,
+  search
 }: {
   currentPage: number;
   search: string | undefined;
-  categoryId: string | undefined;
 }) {
-  const products = await getAllProduct(currentPage, search, categoryId);
+  const products = await getAllProduct(currentPage, search);
   let tableRowData: ReactNode | undefined;
 
   if ("error" in products) {
@@ -129,8 +125,8 @@ async function TableProductsData({
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="rounded-lg border overflow-hidden">
+    <>
+      <section className="rounded-lg border overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="bg-accent">
@@ -142,15 +138,15 @@ async function TableProductsData({
           </TableHeader>
           <TableBody>{tableRowData}</TableBody>
         </Table>
-      </div>
-      <div>
+      </section>
+      <section>
         {!("error" in products) && products.totalPages > 1 && (
           <Paginator
             currentPage={products.page}
             totalPages={products.totalPages}
           />
         )}
-      </div>
-    </div>
+      </section>
+    </>
   );
 }
