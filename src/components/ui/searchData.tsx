@@ -1,31 +1,33 @@
 "use client";
 
 import { Input } from "./input";
-import { useEffect } from "react";
-import { useQueryState } from "nuqs";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { parseAsString, useQueryStates } from "nuqs";
 
 export default function SearchData({ placeholder }: { placeholder: string }) {
-  const router = useRouter();
-  const [query, setQuery] = useQueryState("q", { defaultValue: "" });
-  const [_, setPage] = useQueryState("page", { defaultValue: "" });
+  const [{ q: query }, setParams] = useQueryStates(
+    {
+      q: parseAsString.withDefault(""),
+      page: parseAsString.withDefault(""),
+    },
+    { shallow: false, history: "replace" },
+  );
+  const [inputValue, setInputValue] = useState(query);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      router.refresh();
-    }, 100);
-
+      if (inputValue.trim() !== query) {
+        setParams({ q: inputValue.trim() || null, page: null }); // one atomic update
+      }
+    }, 300);
     return () => clearTimeout(timeout);
-  }, [query, router]);
+  }, [inputValue.trim()]);
 
   return (
     <Input
       type="search"
-      value={query}
-      onChange={(e) => {
-        setPage("");
-        setQuery(e.target.value || null);
-      }}
+      value={inputValue}
+      onChange={(e) => setInputValue(e.currentTarget.value)}
       placeholder={placeholder}
     />
   );
